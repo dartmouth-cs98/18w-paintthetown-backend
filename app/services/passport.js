@@ -14,7 +14,7 @@ const localOptions = { usernameField: 'email' };
 // we'll pass in the jwt in an `authorization` header
 // so passport can find it there
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+  jwtFromRequest: ExtractJwt.fromAuthHeader('authorization'),
   secretOrKey: config.secret,
 };
 
@@ -23,7 +23,6 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
   // Verify this email and password, call done with the user
   // if it is the correct email and password
   // otherwise, call done with false
-  console.log(email, password);
   User.findOne({ email }, (err, user) => {
     if (err) { return done(err); }
 
@@ -48,7 +47,6 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
 });
 
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
-  console.log(payload);
   // See if the user ID in the payload exists in our database
   // If it does, call 'done' with that other
   // otherwise, call done without a user object

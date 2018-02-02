@@ -8,11 +8,12 @@ import * as Teams from './controllers/team_controller';
 
 const router = Router();
 
-// router.route('/users/')
-//       .get(requireAuth, Users.getAllUsers());
-
 router.route('/users')
+      .get(requireAuth, Users.getUserData)
       .put(requireAuth, Users.addUserToTeam);
+
+router.route('/users/friends')
+      .post(requireAuth, Users.addFriend);
 
 router.route('/colors')
       .post(Colors.newColor);

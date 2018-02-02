@@ -16,7 +16,7 @@ export const createTeam = (req, res) => {
 
     team.save()
     .then(result => {
-      console.log(`POST: Added team ${team.name}.`);
+      console.log(`POST:\tAdded team ${team.name}.`);
 
       res.json({ id: result._id, name: result.name });
     })
