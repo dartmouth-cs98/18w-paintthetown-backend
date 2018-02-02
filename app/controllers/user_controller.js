@@ -1,7 +1,8 @@
-import User from '../models/user_model.js';
 import jwt from 'jwt-simple';
 import config from '../config';
+import mongoose from 'mongoose';
 
+import User from '../models/user_model.js';
 import { hasProps, hasProp } from '../utils';
 
 // encodes a new token for a user object
@@ -40,9 +41,9 @@ export const signUp = (req, res) => {
     .then(result => {
       const token = tokenForUser(result);
 
-      console.log(`POST: Added user ${name}.`);
+      console.log(`POST:\tAdded user ${name}.`);
 
-      res.json({ token, email: result.email });
+      res.json({ token, id: result._id });
     })
     .catch(error => {
       res.json({ error: error.message });
@@ -50,24 +51,12 @@ export const signUp = (req, res) => {
   }
 };
 
-export const findUser = (req, res) => {
-  if (!hasProp(req.body, ['email'])) {
-    res.json({
-      error: 'Query needs \'email\' field.',
-    });
-  } else {
-    const email = req.body.email;
+export const getUserData = (req, res) => {
+  const user = req.user;
 
-    User.findOne({ email })
-    .then(user => {
-      console.log(`GET: Found user ${user.name} ${user.lastName}.`);
+  console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
-      res.json({ user });
-    })
-    .catch(error => {
-      res.json({ error: error.message });
-    });
-  }
+  res.json(user);
 };
 
 export const addUserToTeam = (req, res) => {
@@ -76,20 +65,55 @@ export const addUserToTeam = (req, res) => {
       error: 'Query needs \'email\' field.',
     });
   } else {
-    // const email = req.body.email;
+    const user = req.user;
+    const _id = user._id;
+    const team = req.body.team;
 
-    console.log(req);
+    User.update({ _id }, { team })
+    .then(result => {
+      console.log(`PUT:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
 
-    res.json({ error: 'huh' });
+      res.json({ user: _id, team });
+    })
+    .catch(error => {
+      res.json({ error: error.message });
+    });
+  }
+};
 
-    // User.findOne({ email })
-    // .then(user => {
-    //   console.log(`GET: Found user ${user.name} ${user.lastName}.`);
-    //
-    //   res.json({ user });
-    // })
-    // .catch(error => {
-    //   res.json({ error: error.message });
-    // });
+export const addFriend = (req, res) => {
+  if (!hasProp(req.body, ['friend'])) {
+    res.json({
+      error: 'Query needs \'email\' field.',
+    });
+  } else {
+    const user = req.user;
+    const _id = user._id;
+    const friend = mongoose.Types.ObjectId(req.body.friend);
+    const friends = user.friends.concat(friend);
+
+    User.update({ _id }, { friends })
+    .then(result => (User.findById(friend)))
+    .then(otherUser => {
+      const otherFriends = otherUser.friends.concat(_id);
+
+      User.update({ _id: friend }, { friends: otherFriends })
+      .then(result => {
+        console.log(`POST:\tAdded ${user.name} ${user.lastName} and ${otherUser.name} ${otherUser.lastName} to each other's friend lists.`);
+
+        res.json({
+          user: _id,
+          friends,
+          otherUser: otherUser._id,
+          otherFriends,
+        });
+      })
+      .catch(error => {
+        res.json({ error: error.message });
+      });
+    })
+    .catch(error => {
+      res.json({ error: error.message });
+    });
   }
 };

@@ -17,7 +17,7 @@ export const newColor = (req, res) => {
 
     color.save()
     .then(result => {
-      console.log(`POST: Added color ${color.name}.`);
+      console.log(`POST:\tAdded color ${color.name}.`);
 
       res.json({ id: result._id });
     })
