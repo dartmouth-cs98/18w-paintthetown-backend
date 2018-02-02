@@ -1,0 +1,2 @@
+use paint-the-town;
+db.dropDatabase();
