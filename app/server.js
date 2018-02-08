@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
+apiRouter.route('/').get((req, res) => { res.json({ msg: 'Hello world!' }); });
 app.use('/api', apiRouter);
 
 // START THE SERVER
