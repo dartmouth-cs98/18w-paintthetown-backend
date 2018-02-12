@@ -14,15 +14,22 @@ const BuildingSchema = new Schema({
     default: null,
   },
   tags: {
-    type: [Tag],
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'Tag',
+    }],
     default: [],
   },
   centroid: {
-    type: Coordinate,
+    type: mongoose.Schema.ObjectId,
+    ref: 'Coordinate',
     required: true,
   },
   polyhedron: {
-    type: [Coordinate],
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'Coordinate',
+    }],
     required: true,
   },
   city: {
