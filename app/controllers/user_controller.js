@@ -15,15 +15,21 @@ function tokenForUser(user) {
 
 
 export const signUp = (req, res) => {
-  if (!hasProps(req.body, ['email', 'password', 'name', 'lastName'])) {
+  if (!hasProps(req.body, ['name', 'lastName'])) {
     res.json({
       error: 'Users need \'email\', \'password\', \'name\', and \'lastName\' fields',
     });
   } else {
     const user = new User();
 
-    user.email = req.body.email;
-    user.password = req.body.password;
+    if (hasProps(req.body, ['email', 'password'])) {
+      user.email = req.body.email;
+      user.password = req.body.password;
+      user.typeOfLogin = 'email';
+    } else {
+      res.json({ error: 'Unsupported signup method.' });
+    }
+
     user.name = req.body.name;
     user.lastName = req.body.lastName;
 

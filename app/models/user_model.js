@@ -17,23 +17,19 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  typeOfLogin: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
-    unique: true,
     lowercase: true,
-    required: true,
     validate: {
-      validator: (email) => {
-        console.log(email);
-        return emailValidator.test(email);
-      },
+      validator: (email) => (emailValidator.test(email)),
       message: '{VALUE} is not a valid email.',
     },
   },
-  password: {
-    type: String,
-    required: true,
-  },
+  password: String,
   friends: {
     type: [{
       type: mongoose.Schema.ObjectId,
