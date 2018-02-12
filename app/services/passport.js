@@ -31,17 +31,18 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
     console.log(user);
 
     // compare passwords - is `password` equal to user.password?
-    user.comparePassword(password, (err, isMatch) => {
+    return user.comparePassword(password, (err, isMatch) => {
       if (err) {
         console.log(err);
-        done(err);
-      } else if (!isMatch) {
-        done(null, false);
-      } else {
-        console.log('user');
-        console.log(user);
-        done(null, user);
+        return done(err);
       }
+
+      if (!isMatch) { return done(null, false); }
+
+      console.log('user');
+      console.log(user);
+
+      return done(null, user);
     });
   });
 });

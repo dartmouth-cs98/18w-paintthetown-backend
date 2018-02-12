@@ -51,6 +51,11 @@ export const signUp = (req, res) => {
   }
 };
 
+export const signIn = (req, res) => {
+  console.log('hello');
+  res.json('lol');
+};
+
 export const getUserData = (req, res) => {
   const user = req.user;
 
