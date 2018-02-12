@@ -1,6 +1,9 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
+
+const emailValidator = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
+
 const UserSchema = new Schema({
   name: {
     type: String,
@@ -19,6 +22,13 @@ const UserSchema = new Schema({
     unique: true,
     lowercase: true,
     required: true,
+    validate: {
+      validator: (email) => {
+        console.log(email);
+        return emailValidator.test(email);
+      },
+      message: '{VALUE} is not a valid email.',
+    },
   },
   password: {
     type: String,

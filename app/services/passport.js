@@ -28,8 +28,6 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
 
     if (!user) { return done(null, false); }
 
-    console.log(user);
-
     // compare passwords - is `password` equal to user.password?
     return user.comparePassword(password, (err, isMatch) => {
       if (err) {
@@ -38,9 +36,6 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
       }
 
       if (!isMatch) { return done(null, false); }
-
-      console.log('user');
-      console.log(user);
 
       return done(null, user);
     });

@@ -7,9 +7,12 @@ const CoordinateSchema = new Schema({
   value: {
     type: [Number],
     required: true,
-    validator: (coord) => (
-      checkLengthArray(coord, 2) || checkLengthArray(coord, 3)
-    ),
+    validate: {
+      validator: (coord) => (
+        checkLengthArray(coord, 2) || checkLengthArray(coord, 3)
+      ),
+      message: '{VALUE} is not a valid coordinate.',
+    },
   },
 }, {
   timestamp: true,

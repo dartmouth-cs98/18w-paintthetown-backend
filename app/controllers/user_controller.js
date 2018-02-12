@@ -52,8 +52,13 @@ export const signUp = (req, res) => {
 };
 
 export const signIn = (req, res) => {
-  console.log('hello');
-  res.json('lol');
+  const { user } = req;
+
+  console.log(`POST:\tUser signin: ${user.name} ${user.lastName}.`);
+
+  const token = tokenForUser(user);
+
+  res.json({ token });
 };
 
 export const getUserData = (req, res) => {
