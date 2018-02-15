@@ -1,5 +1,6 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
+import FacebookStrategy from 'passport-facebook';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import config from '../config';
 
@@ -9,6 +10,12 @@ import User from '../models/user_model';
 // options for local strategy, we'll use email AS the username
 // not have separate ones
 const localOptions = { usernameField: 'email' };
+const facebookOptions = {
+  clientID: config.facebookAppId,
+  clientSecret: config.facebookAppSecret,
+  callbackURL: 'http://localhost:9090/api/auth/facebook/callback',
+  profileFields: ['id', 'email', 'name'],
+};
 
 // options for jwt strategy
 // we'll pass in the jwt in an `authorization` header
@@ -19,10 +26,12 @@ const jwtOptions = {
 };
 
 // username + password authentication strategy
-const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
+const localLogin = new LocalStrategy(localOptions, (emailRaw, password, done) => {
   // Verify this email and password, call done with the user
   // if it is the correct email and password
   // otherwise, call done with false
+  const email = emailRaw.toLowerCase();
+
   User.findOne({ email }, (err, user) => {
     if (err) { return done(err); }
 
@@ -39,6 +48,32 @@ const localLogin = new LocalStrategy(localOptions, (email, password, done) => {
 
       return done(null, user);
     });
+  });
+});
+
+const facebookLogin = new FacebookStrategy(facebookOptions,
+(token, refreshToken, profile, done) => {
+  const data = profile._json;
+  const { email } = data;
+
+  User.findOne({ email }, (err, user) => {
+    console.log('hiiiiii');
+    if (err) { return done(err); }
+    if (user) { return done(null, user); }
+
+    const newUser = new User();
+
+    newUser.name = data.first_name;
+    newUser.lastName = data.last_name;
+    newUser.email = data.email;
+    newUser.typeOfLogin = 'facebook';
+
+    return newUser.save()
+    .then(result => {
+      console.log(`POST:\tFacebook user added ${newUser.name} ${newUser.lastName}.`);
+      return done(null, newUser);
+    })
+    .catch(err => (done(err)));
   });
 });
 
@@ -61,7 +96,11 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 
 passport.use(jwtLogin);
 passport.use(localLogin);
+passport.use(facebookLogin);
 
 
 export const requireAuth = passport.authenticate('jwt', { session: false });
+export const requireAuthFacebook = passport.authenticate('facebook', {
+  scope: ['public_profile', 'email'],
+});
 export const requireSignin = passport.authenticate('local', { session: false });
