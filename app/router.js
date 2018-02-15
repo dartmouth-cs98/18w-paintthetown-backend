@@ -1,6 +1,7 @@
 import { Router } from 'express';
+import passport from 'passport';
 
-import { requireAuth, requireSignin } from './services/passport';
+import { requireAuth, requireSignin, requireAuthFacebook } from './services/passport';
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
@@ -39,5 +40,7 @@ router.route('/tags')
 
 router.post('/signin', requireSignin, Users.signIn);
 router.post('/signup', Users.signUp);
+router.get('/auth/facebook', requireAuthFacebook);
+router.get('/auth/facebook/callback', Users.facebookCallback);
 
 export default router;

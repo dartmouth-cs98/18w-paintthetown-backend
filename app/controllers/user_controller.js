@@ -67,6 +67,18 @@ export const signIn = (req, res) => {
   res.json({ token });
 };
 
+export const facebookCallback = (req, res) => {
+  const { user } = req;
+
+  // console.log(JSON.stringify(req).indexOf('Mau'));
+
+  console.log(`POST:\tUser signin: ${user.name} ${user.lastName}.`);
+
+  const token = tokenForUser(user);
+
+  res.json({ token });
+};
+
 export const getUserData = (req, res) => {
   const user = req.user;
 
