@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
+import { facebookAuth, getUserData } from '../actions';
 import SignIn from './signin';
 import SignUp from './signup';
-import Facebook from './facebook-signup';
+import UserData from './user-data';
+
+const mapStateToProps = (state) => ({
+  users: state.users,
+});
 
 // example class based component (smart component)
 class App extends Component {
@@ -13,7 +19,7 @@ class App extends Component {
     this.state = {
       signInToggled: false,
       signUpToggled: false,
-      facebookToggled: false,
+      userDataToggled: false,
     };
   }
 
@@ -24,7 +30,7 @@ class App extends Component {
           this.setState({
             signInToggled: !this.state.signInToggled,
             signUpToggled: false,
-            facebookToggled: false,
+            userDataToggled: false,
           });
         }}>Sign In</div>
         <SignIn toggled={this.state.signInToggled} />
@@ -32,21 +38,24 @@ class App extends Component {
           this.setState({
             signInToggled: false,
             signUpToggled: !this.state.signUpToggled,
-            facebookToggled: false,
+            userDataToggled: false,
           });
         }}>Sign Up</div>
         <SignUp toggled={this.state.signUpToggled} />
+        <div className="tab" onClick={this.props.facebookAuth}>Facebook</div>
         <div className="tab" onClick={() => {
+          if (!this.state.userDataToggled) { this.props.getUserData(); }
+
           this.setState({
             signInToggled: false,
             signUpToggled: false,
-            facebookToggled: !this.state.facebookToggled,
+            userDataToggled: !this.state.userDataToggled,
           });
-        }}>Facebook</div>
-        <Facebook toggled={this.state.facebookToggled} />
+        }}>User Data</div>
+        <UserData toggled={this.state.userDataToggled} userData={this.props.users.data} />
       </div>
     );
   }
 }
 
-export default App;
+export default connect(mapStateToProps, { facebookAuth, getUserData })(App);

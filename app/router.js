@@ -1,7 +1,6 @@
 import { Router } from 'express';
-import passport from 'passport';
 
-import { requireAuth, requireSignin, requireAuthFacebook } from './services/passport';
+import { requireAuth, requireSignin, requireAuthFacebook, verifiedFacebook } from './services/passport';
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
@@ -22,25 +21,27 @@ router.route('/users/friends')
       .post(requireAuth, Users.addFriend);
 
 router.route('/colors')
-      .post(requireAuth,Colors.newColor);
+      .post(requireAuth, Colors.newColor);
 router.route('/teams')
-      .post(requireAuth,Teams.createTeam);
+      .post(requireAuth, Teams.createTeam);
 router.route('/buildings')
-      .post(requireAuth,Buildings.newBuilding);
+      .post(requireAuth, Buildings.newBuilding);
 router.route('/cities')
-      .post(requireAuth,Cities.newCity);
+      .post(requireAuth, Cities.newCity);
 router.route('/coordinates')
-      .post(requireAuth,Coordinates.newCoordinate);
+      .post(requireAuth, Coordinates.newCoordinate);
 router.route('/continents')
-      .post(requireAuth,Continents.newContinent);
+      .post(requireAuth, Continents.newContinent);
 router.route('/countries')
-      .post(requireAuth,Countries.newCountry);
+      .post(requireAuth, Countries.newCountry);
 router.route('/tags')
-      .post(requireAuth,Tags.newTag);
+      .post(requireAuth, Tags.newTag);
 
 router.post('/signin', requireSignin, Users.signIn);
 router.post('/signup', Users.signUp);
 router.get('/auth/facebook', requireAuthFacebook);
-router.get('/auth/facebook/callback', Users.facebookCallback);
+router.get('/auth/facebook/callback', (req, res, next) => {
+  verifiedFacebook(req, res, next, Users.facebookCallback);
+});
 
 export default router;

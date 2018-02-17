@@ -52,13 +52,25 @@ body {
       &#signup {
         height: 200px;
       }
+      &#user-data {
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: flex-start;
+
+        h1 {
+          font-size: 18px;
+        }
+      }
     }
 
     div.hidden {
       width: 0;
       height: 0;
 
-      form {
+      form, h1 {
+        font-size: 0px;
         height: 0px;
         width: 0px;
         border: none;
