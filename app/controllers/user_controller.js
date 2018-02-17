@@ -70,9 +70,7 @@ export const signIn = (req, res) => {
 export const facebookCallback = (req, res) => {
   const { user } = req;
 
-  // console.log(JSON.stringify(req).indexOf('Mau'));
-
-  console.log(`POST:\tUser signin: ${user.name} ${user.lastName}.`);
+  console.log(`POST:\tFacebook user signin: ${user.name} ${user.lastName}.`);
 
   const token = tokenForUser(user);
 

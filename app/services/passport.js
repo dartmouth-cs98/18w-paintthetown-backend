@@ -10,10 +10,14 @@ import User from '../models/user_model';
 // options for local strategy, we'll use email AS the username
 // not have separate ones
 const localOptions = { usernameField: 'email' };
+
+const callbackURL = 'https://paint-the-town.herokuapp.com/api/auth/facebook/callback';
+// const callbackURL = 'http://localhost:9090/api/auth/facebook/callback';
+
 const facebookOptions = {
   clientID: config.facebookAppId,
   clientSecret: config.facebookAppSecret,
-  callbackURL: 'http://localhost:9090/api/auth/facebook/callback',
+  callbackURL,
   profileFields: ['id', 'email', 'name'],
 };
 
@@ -57,7 +61,6 @@ const facebookLogin = new FacebookStrategy(facebookOptions,
   const { email } = data;
 
   User.findOne({ email }, (err, user) => {
-    console.log('hiiiiii');
     if (err) { return done(err); }
     if (user) { return done(null, user); }
 
@@ -103,4 +106,21 @@ export const requireAuth = passport.authenticate('jwt', { session: false });
 export const requireAuthFacebook = passport.authenticate('facebook', {
   scope: ['public_profile', 'email'],
 });
+
+export const verifiedFacebook = (req, res, next, callback) => {
+  passport.authenticate('facebook', (error, user, info) => {
+    if (error) {
+      res.json({ error });
+    } else {
+      callback(Object.assign({ user }, req), res);
+    }
+  })(req, res, next);
+};
+
+
+
+passport.authenticate('facebook', {
+  scope: ['public_profile', 'email'],
+});
+
 export const requireSignin = passport.authenticate('local', { session: false });

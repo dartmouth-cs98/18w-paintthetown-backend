@@ -1,14 +1,35 @@
 import axios from 'axios';
 
-// const ROOT_URL = 'https://paint-the-town.herokuapp.com/api';
-const ROOT_URL = 'http://localhost:9090/api';
+const ROOT_URL = 'https://paint-the-town.herokuapp.com/api';
+// const ROOT_URL = 'http://localhost:9090/api';
 
 export const ActionTypes = {
   AUTH_USER: 'AUTH_USER',
   DEAUTH_USER: 'DEAUTH_USER',
+  GET_USER_DATA: 'GET_USER_DATA',
 };
 
 // USER ACTIONS
+
+export const getUserData = () => (
+  (dispatch) => {
+    axios.get(`${ROOT_URL}/users`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      console.log(response);
+      if (response.data.error) {
+        dispatch(authError(`User Data Failed: ${response.data.error.errmsg}`));
+      } else {
+        dispatch({ data: response.data, type: ActionTypes.GET_USER_DATA });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`User Data Failed: ${error}`));
+    });
+  }
+);
+
 
 export function signupUser(user) {
   return (dispatch) => {
@@ -69,6 +90,27 @@ export function signoutUser(user) {
     }
 
     dispatch({ type: ActionTypes.DEAUTH_USER });
+  };
+}
+
+export function facebookAuth() {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/auth/facebook`)
+    .then(response => {
+      console.log(response);
+      if (response.data.error) {
+        dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
+      } else {
+        const token = response.data.token;
+
+        localStorage.setItem('token', token);
+        console.log(token);
+        dispatch({ type: ActionTypes.AUTH_USER });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`Facebook auth failed: ${error}`));
+    });
   };
 }
 
