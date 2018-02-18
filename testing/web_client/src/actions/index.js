@@ -34,7 +34,7 @@ export const exchangeCodeForToken = (code) => (
     axios.get(`${ROOT_URL}/facebook/tokenize`, { params: { code } })
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`Facebook Tokenization Failed: ${response.data.error.errmsg}`));
+        dispatch(authError(`Facebook Tokenization Failed: ${response.data.error.message}`));
       } else {
         dispatch({
           token: response.data.token,
@@ -92,15 +92,10 @@ export function signinUser(user) {
 }
 
 
-export function signoutUser(user) {
+export function signOut(user) {
   return (dispatch) => {
     if (localStorage.token) {
       localStorage.removeItem('token');
-      localStorage.removeItem('email');
-    }
-
-    if (localStorage.signup) {
-      localStorage.removeItem('signup');
     }
 
     dispatch({ type: ActionTypes.DEAUTH_USER });

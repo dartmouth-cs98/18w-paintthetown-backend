@@ -2,7 +2,12 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { browserHistory } from 'react-router';
 
-import { facebookAuth, getUserData, exchangeCodeForToken } from '../actions';
+import {
+  facebookAuth,
+  getUserData,
+  exchangeCodeForToken,
+  signOut,
+} from '../actions';
 import SignIn from './signin';
 import SignUp from './signup';
 import UserData from './user-data';
@@ -83,6 +88,16 @@ class App extends Component {
           });
         }}>User Data</div>
         <UserData toggled={this.state.userDataToggled} userData={this.props.users.data} />
+        <div className="tab" onClick={() => {
+          this.setState({
+            signInToggled: false,
+            signUpToggled: false,
+            facebookAuthToggled: false,
+            userDataToggled: false,
+          });
+
+          this.props.signOut();
+        }}>Sign Out</div>
       </div>
     );
   }
@@ -92,4 +107,5 @@ export default connect(mapStateToProps, {
   facebookAuth,
   getUserData,
   exchangeCodeForToken,
+  signOut,
 })(App);

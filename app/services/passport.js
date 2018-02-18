@@ -114,7 +114,8 @@ export const requireAuth = (req, res, next) => {
 
 export const requireAuthFacebook = (req, res, next, callback) => {
   passport.authenticate('facebook', (err, user) => {
-    callback(Object.assign({ user }, req), res);
+    if (err) { return res.json({ error: err }); }
+    return callback(Object.assign({ user }, req), res);
   })(req, res, next);
 };
 
