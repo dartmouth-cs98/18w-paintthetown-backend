@@ -1,12 +1,12 @@
 import axios from 'axios';
 
-const ROOT_URL = 'https://paint-the-town.herokuapp.com/api';
-// const ROOT_URL = 'http://localhost:9090/api';
+import { ROOT_URL } from '../';
 
 export const ActionTypes = {
   AUTH_USER: 'AUTH_USER',
   DEAUTH_USER: 'DEAUTH_USER',
   GET_USER_DATA: 'GET_USER_DATA',
+  TOKENIZE_FACEBOOK_CODE: 'TOKENIZE_FACEBOOK_CODE',
 };
 
 // USER ACTIONS
@@ -25,6 +25,25 @@ export const getUserData = () => (
     })
     .catch(error => {
       dispatch(authError(`User Data Failed: ${error}`));
+    });
+  }
+);
+
+export const exchangeCodeForToken = (code) => (
+  dispatch => {
+    axios.get(`${ROOT_URL}/facebook/tokenize`, { params: { code } })
+    .then(response => {
+      if (response.data.error) {
+        dispatch(authError(`Facebook Tokenization Failed: ${response.data.error.errmsg}`));
+      } else {
+        dispatch({
+          token: response.data.token,
+          type: ActionTypes.TOKENIZE_FACEBOOK_CODE,
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`Facebook Tokenization Failed: ${error}`));
     });
   }
 );
@@ -90,7 +109,10 @@ export function signoutUser(user) {
 
 export function facebookAuth() {
   return (dispatch) => {
-    axios.get(`${ROOT_URL}/auth/facebook`)
+    axios.get(`${ROOT_URL}/auth/facebook`, { headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    } })
     .then(response => {
       if (response.data.error) {
         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));

@@ -11,15 +11,22 @@ import User from '../models/user_model';
 // not have separate ones
 const localOptions = { usernameField: 'email' };
 
-const callbackURL = 'https://paint-the-town.herokuapp.com/api/auth/facebook/callback';
-// const callbackURL = 'http://localhost:9090/api/auth/facebook/callback';
+// const callbackURL = 'https://paint-the-town.herokuapp.com/api/auth/facebook/callback';
+const callbackURLs = {
+  webBrowser: 'http://localhost:8080/',
+  // webBrowser: 'http://localhost:8080/',
+};
 
 const facebookOptions = {
   clientID: config.facebookAppId,
   clientSecret: config.facebookAppSecret,
-  callbackURL,
   profileFields: ['id', 'email', 'name'],
+  passReqToCallback: true,
 };
+
+const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
+  callbackURL: callbackURLs.webBrowser,
+}, facebookOptions));
 
 // options for jwt strategy
 // we'll pass in the jwt in an `authorization` header
@@ -55,30 +62,31 @@ const localLogin = new LocalStrategy(localOptions, (emailRaw, password, done) =>
   });
 });
 
-const facebookLogin = new FacebookStrategy(facebookOptions,
-(token, refreshToken, profile, done) => {
-  const data = profile._json;
-  const { email } = data;
+function newFacebookLogin(opts) {
+  return new FacebookStrategy(opts, (req, token, refreshToken, profile, done) => {
+    const data = profile._json;
+    const { email } = data;
 
-  User.findOne({ email }, (err, user) => {
-    if (err) { return done(err); }
-    if (user) { return done(null, user); }
+    User.findOne({ email }, (err, user) => {
+      if (err) { return done(err); }
+      if (user) { return done(null, user); }
 
-    const newUser = new User();
+      const newUser = new User();
 
-    newUser.name = data.first_name;
-    newUser.lastName = data.last_name;
-    newUser.email = data.email;
-    newUser.typeOfLogin = 'facebook';
+      newUser.name = data.first_name;
+      newUser.lastName = data.last_name;
+      newUser.email = data.email;
+      newUser.typeOfLogin = 'facebook';
 
-    return newUser.save()
-    .then(result => {
-      console.log(`POST:\tFacebook user added ${newUser.name} ${newUser.lastName}.`);
-      return done(null, newUser);
-    })
-    .catch(err => (done(err)));
+      return newUser.save()
+      .then(result => {
+        console.log(`POST:\tFacebook user added ${newUser.name} ${newUser.lastName}.`);
+        return done(null, newUser);
+      })
+      .catch(err => (done(err)));
+    });
   });
-});
+}
 
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
   // See if the user ID in the payload exists in our database
@@ -96,31 +104,49 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 });
 
 // Tell passport to use this strategy
-
 passport.use(jwtLogin);
 passport.use(localLogin);
-passport.use(facebookLogin);
+passport.use(DEFAULT_FACEBOOK_LOGIN);
 
+export const requireAuth = (req, res, next) => {
+  passport.authenticate('jwt', { session: false })(req, res, next);
+};
 
-export const requireAuth = passport.authenticate('jwt', { session: false });
-export const requireAuthFacebook = passport.authenticate('facebook', {
-  scope: ['public_profile', 'email'],
-});
-
-export const verifiedFacebook = (req, res, next, callback) => {
-  passport.authenticate('facebook', (error, user, info) => {
-    if (error) {
-      res.json({ error });
-    } else {
-      callback(Object.assign({ user }, req), res);
-    }
+export const requireAuthFacebook = (req, res, next, callback) => {
+  passport.authenticate('facebook', (err, user) => {
+    callback(Object.assign({ user }, req), res);
   })(req, res, next);
 };
 
+export const requireLoginFacebook = (req, res, next) => {
+  const userAgent = req.headers['user-agent'];
 
+  if (!userAgent) {
+    return res.json({ error: 'Unknown user agent' });
+  }
 
-passport.authenticate('facebook', {
-  scope: ['public_profile', 'email'],
-});
+  let requesterType = null;
+
+  if (userAgent.indexOf('Mozilla') > -1 || userAgent.indexOf('Chrome') > -1 ||
+      userAgent.indexOf('Safari') > -1) {
+    requesterType = 'webBrowser';
+  }
+
+  if (requesterType === null) {
+    return res.json({ error: 'Unknown user agent' });
+  }
+
+  const callbackURL = callbackURLs[requesterType];
+
+  const facebookLogin = newFacebookLogin(
+    Object.assign({ callbackURL }, facebookOptions),
+  );
+
+  passport.use(facebookLogin);
+
+  return passport.authenticate('facebook', {
+    scope: ['public_profile', 'email'],
+  })(req, res, next);
+};
 
 export const requireSignin = passport.authenticate('local', { session: false });

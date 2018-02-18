@@ -1,6 +1,11 @@
 import { Router } from 'express';
 
-import { requireAuth, requireSignin, requireAuthFacebook, verifiedFacebook } from './services/passport';
+import {
+  requireAuth,
+  requireSignin,
+  requireAuthFacebook,
+  requireLoginFacebook,
+} from './services/passport';
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
@@ -39,9 +44,11 @@ router.route('/tags')
 
 router.post('/signin', requireSignin, Users.signIn);
 router.post('/signup', Users.signUp);
-router.get('/auth/facebook', requireAuthFacebook);
-router.get('/auth/facebook/callback', (req, res, next) => {
-  verifiedFacebook(req, res, next, Users.facebookCallback);
+
+// facebook
+router.get('/auth/facebook', requireLoginFacebook);
+router.get('/facebook/tokenize', (req, res, next) => {
+  requireAuthFacebook(req, res, next, Users.signIn);
 });
 
 export default router;
