@@ -12,7 +12,7 @@ import User from '../models/user_model';
 const localOptions = { usernameField: 'email' };
 
 const CALLBACK_URLS = {
-  webBrowser: 'paint-the-town.surge.sh/',
+  webBrowser: 'https://paint-the-town.surge.sh/',
   // webBrowser: 'http://localhost:8080/',
 };
 
