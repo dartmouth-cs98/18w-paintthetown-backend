@@ -6,22 +6,3 @@ deploy:
   app: paint-the-town
   api_key:
     secure: 5ed8adb7-bdeb-4390-8ee3-e67e2d8cdb99
-env:
-  global:
-    - secure: 5ed8adb7-bdeb-4390-8ee3-e67e2d8cdb99
-after_script:
-  # Install the Heroku gem (or the Heroku toolbelt)
-  - gem install heroku
-  # Add your Heroku git repo:
-  - git remote add heroku git@heroku.com:paint-the-town.git
-  # Turn off warnings about SSH keys:
-  - echo "Host heroku.com" >> ~/.ssh/config
-  - echo "   StrictHostKeyChecking no" >> ~/.ssh/config
-  - echo "   CheckHostIP no" >> ~/.ssh/config
-  - echo "   UserKnownHostsFile=/dev/null" >> ~/.ssh/config
-  # Clear your current Heroku SSH keys:
-  - heroku keys:clear
-  # Add a new SSH key to Heroku
-  - yes | heroku keys:add
-  # Push to Heroku!
-  - yes | git push heroku master
