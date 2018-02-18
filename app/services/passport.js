@@ -11,9 +11,8 @@ import User from '../models/user_model';
 // not have separate ones
 const localOptions = { usernameField: 'email' };
 
-// const callbackURL = 'https://paint-the-town.herokuapp.com/api/auth/facebook/callback';
-const callbackURLs = {
-  webBrowser: 'http://localhost:8080/',
+const CALLBACK_URLS = {
+  webBrowser: 'paint-the-town.surge.sh/',
   // webBrowser: 'http://localhost:8080/',
 };
 
@@ -25,7 +24,7 @@ const facebookOptions = {
 };
 
 const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
-  callbackURL: callbackURLs.webBrowser,
+  callbackURL: CALLBACK_URLS.webBrowser,
 }, facebookOptions));
 
 // options for jwt strategy
@@ -137,7 +136,7 @@ export const requireLoginFacebook = (req, res, next) => {
     return res.json({ error: 'Unknown user agent' });
   }
 
-  const callbackURL = callbackURLs[requesterType];
+  const callbackURL = CALLBACK_URLS[requesterType];
 
   const facebookLogin = newFacebookLogin(
     Object.assign({ callbackURL }, facebookOptions),
