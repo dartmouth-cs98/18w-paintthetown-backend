@@ -1,3 +1,8 @@
 language: node_js
 node_js:
   - "7"
+deploy:
+  provider: heroku
+  app: paint-the-town
+  api_key:
+    secure: 5ed8adb7-bdeb-4390-8ee3-e67e2d8cdb99
