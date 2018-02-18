@@ -25,6 +25,7 @@ class UserData extends Component {
         <h1>{`Middle Name: ${this.props.userData.middleName}`}</h1>
         <h1>{`Last Name: ${this.props.userData.lastName}`}</h1>
         <h1>{`Email: ${this.props.userData.email}`}</h1>
+        <h1>{`Type of Login: ${this.props.userData.typeOfLogin}`}</h1>
       </div>);
     }
 
