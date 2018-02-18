@@ -12,7 +12,6 @@ class UserData extends Component {
   }
 
   render() {
-    console.log(this.props.userData);
     return (
       <div id="user-data" className={this.props.toggled ? 'normal' : 'hidden'}>
         {this.props.userData ?

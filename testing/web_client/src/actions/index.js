@@ -17,7 +17,6 @@ export const getUserData = () => (
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
     })
     .then(response => {
-      console.log(response);
       if (response.data.error) {
         dispatch(authError(`User Data Failed: ${response.data.error.errmsg}`));
       } else {
@@ -35,7 +34,6 @@ export function signupUser(user) {
   return (dispatch) => {
     axios.post(`${ROOT_URL}/signup`, user)
     .then(response => {
-      console.log(response);
       if (response.data.error) {
         dispatch(authError(`Sign Up Failed: ${response.data.error.errmsg}`));
       } else {
@@ -44,7 +42,6 @@ export function signupUser(user) {
 
         localStorage.setItem('token', token);
         localStorage.setItem('id', id);
-        console.log(token);
         dispatch({ type: ActionTypes.AUTH_USER });
       }
     })
@@ -58,7 +55,6 @@ export function signinUser(user) {
   return (dispatch) => {
     axios.post(`${ROOT_URL}/signin`, user)
     .then(response => {
-      console.log(response);
       if (response.data.error) {
         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
       } else {
@@ -67,7 +63,6 @@ export function signinUser(user) {
 
         localStorage.setItem('token', token);
         localStorage.setItem('email', email);
-        console.log(token);
         dispatch({ type: ActionTypes.AUTH_USER });
       }
     })
@@ -97,14 +92,13 @@ export function facebookAuth() {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/auth/facebook`)
     .then(response => {
-      console.log(response);
       if (response.data.error) {
         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
       } else {
         const token = response.data.token;
 
         localStorage.setItem('token', token);
-        console.log(token);
+
         dispatch({ type: ActionTypes.AUTH_USER });
       }
     })
