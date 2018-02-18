@@ -1,10 +1,17 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { browserHistory } from 'react-router';
 
-import { facebookAuth, getUserData } from '../actions';
+import {
+  facebookAuth,
+  getUserData,
+  exchangeCodeForToken,
+  signOut,
+} from '../actions';
 import SignIn from './signin';
 import SignUp from './signup';
 import UserData from './user-data';
+import FacebookAuth from './facebook-auth';
 
 const mapStateToProps = (state) => ({
   users: state.users,
@@ -19,8 +26,25 @@ class App extends Component {
     this.state = {
       signInToggled: false,
       signUpToggled: false,
+      facebookAuthToggled: false,
       userDataToggled: false,
     };
+  }
+
+  componentDidMount() {
+    const { query } = this.props.location;
+
+    if (Object.prototype.hasOwnProperty.call(query, 'code')) {
+      this.props.exchangeCodeForToken(query.code);
+    }
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.users.tokenizedFacebookCode !== null &&
+        this.props.users.tokenizedFacebookCode === null) {
+      localStorage.setItem('token', props.users.tokenizedFacebookCode);
+      browserHistory.push('/');
+    }
   }
 
   render() {
@@ -30,6 +54,7 @@ class App extends Component {
           this.setState({
             signInToggled: !this.state.signInToggled,
             signUpToggled: false,
+            facebookAuthToggled: false,
             userDataToggled: false,
           });
         }}>Sign In</div>
@@ -38,24 +63,49 @@ class App extends Component {
           this.setState({
             signInToggled: false,
             signUpToggled: !this.state.signUpToggled,
+            facebookAuthToggled: false,
             userDataToggled: false,
           });
         }}>Sign Up</div>
         <SignUp toggled={this.state.signUpToggled} />
-        <div className="tab" onClick={this.props.facebookAuth}>Facebook</div>
+        <div className="tab" onClick={() => {
+          this.setState({
+            signInToggled: false,
+            signUpToggled: false,
+            facebookAuthToggled: !this.state.facebookAuthToggled,
+            userDataToggled: false,
+          });
+        }}>Facebook</div>
+        <FacebookAuth toggled={this.state.facebookAuthToggled} />
         <div className="tab" onClick={() => {
           if (!this.state.userDataToggled) { this.props.getUserData(); }
 
           this.setState({
             signInToggled: false,
             signUpToggled: false,
+            facebookAuthToggled: false,
             userDataToggled: !this.state.userDataToggled,
           });
         }}>User Data</div>
         <UserData toggled={this.state.userDataToggled} userData={this.props.users.data} />
+        <div className="tab" onClick={() => {
+          this.setState({
+            signInToggled: false,
+            signUpToggled: false,
+            facebookAuthToggled: false,
+            userDataToggled: false,
+          });
+
+          this.props.signOut();
+        }}>Sign Out</div>
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps, { facebookAuth, getUserData })(App);
+export default connect(mapStateToProps, {
+  facebookAuth,
+  getUserData,
+  exchangeCodeForToken,
+  signOut,
+})(App);
