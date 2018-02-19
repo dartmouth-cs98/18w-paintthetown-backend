@@ -1,10 +1,19 @@
-export const checkLengthArray = (arr, length) => (
-  Array.prototype.length.call(arr) === length
-);
+export const checkLengthArray = (arr, length) => {
+  if (arr.length == length){
+    return true;
+  } else{
+    return false;
+  }
+};
 
-export const checkLengthString = (str, length) => (
-  String.prototype.length.call(str) === length
-);
+export const checkLengthString = (str, length) => {
+  if (str.length==length){
+    return true;
+  } else{
+    return false;
+  }
+  // String.prototype.length.call(str) === length
+};
 
 export const hasProp = (obj, prop) => (
   Object.prototype.hasOwnProperty.call(obj, prop)
@@ -16,4 +25,13 @@ export const hasProps = (obj, props) => {
   }
 
   return true;
+};
+
+export const inRange = (val, lowerBound, upperBound) => {
+  console.log("here");
+  if (val =>lowerBound && val <= upperBound){
+    return true;
+  } else{
+    return false;
+  }
 };

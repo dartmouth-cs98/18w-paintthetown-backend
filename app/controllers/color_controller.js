@@ -4,7 +4,7 @@ import { hasProps } from '../utils';
 
 
 export const newColor = (req, res) => {
-  if (!hasProps(req.body, ['hex', 'rgb', 'name'])) {
+  if (!hasProps(req.body, ['name','hex', 'rgb'])) {
     res.json({
       error: 'Colors need \'name\', \'hex\', and \'rgb\' fields.',
     });
