@@ -1,5 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
+import Country from './country_model';
+import Coordinate from './coordinate_model';
+
 // create a schema for posts with a field
 const CitySchema = new Schema({
   name: {

@@ -9,6 +9,8 @@ import {
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
+import * as Patterns from './controllers/pattern_controller';
+import * as Splotches from './controllers/splotch_controller';
 import * as Buildings from './controllers/building_controller';
 import * as Cities from './controllers/city_controller';
 import * as Continents from './controllers/continent_controller';
@@ -29,6 +31,10 @@ router.route('/colors')
       .post(requireAuth, Colors.newColor);
 router.route('/teams')
       .post(requireAuth, Teams.createTeam);
+router.route('/patterns')
+      .post(requireAuth, Patterns.newPattern);
+router.route('/splotches')
+      .post(requireAuth, Splotches.newSplotch);
 router.route('/buildings')
       .post(requireAuth, Buildings.newBuilding);
 router.route('/cities')

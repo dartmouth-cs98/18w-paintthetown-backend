@@ -24,11 +24,6 @@ const ColorSchema = new Schema({
     required: true,
     validate: {
       validator: (rgb) => {
-
-        console.log("hi "+inRange(rgb[0], 0, 255));
-        console.log("hi-1"+checkLengthArray(rgb,3));
-        console.log("hi2"+ inRange(rgb[1], 0, 255));
-        console.log("hi3"+inRange(rgb[2], 0, 255));
         return checkLengthArray(rgb, 3) && inRange(rgb[0], 0, 255) &&
         inRange(rgb[1], 0, 255) && inRange(rgb[2], 0, 255);
       },

@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
+import Color from './color_model';
+
 // create a schema for posts with a field
 const TeamSchema = new Schema({
   name: {
