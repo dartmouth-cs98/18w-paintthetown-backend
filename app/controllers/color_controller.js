@@ -26,3 +26,13 @@ export const newColor = (req, res) => {
     });
   }
 };
+
+// GET request
+export const getColors = (req, res) => {
+  
+
+
+
+
+
+};

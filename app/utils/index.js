@@ -15,6 +15,15 @@ export const checkLengthString = (str, length) => {
   // String.prototype.length.call(str) === length
 };
 
+export const checkBuildingFace = (str) => {
+  if (str==="N" || str==="S" || str==="E" || str==="W"){
+    return true;
+  } else{
+    return false;
+  }
+};
+
+
 export const hasProp = (obj, prop) => (
   Object.prototype.hasOwnProperty.call(obj, prop)
 );
