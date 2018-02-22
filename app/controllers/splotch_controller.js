@@ -1,4 +1,4 @@
-import Splotch from '../models/Splotch_model.js';
+import Splotch from '../models/splotch_model.js';
 
 import { checkBuildingFace } from '../utils';
 
