@@ -1,6 +1,7 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import FacebookStrategy from 'passport-facebook';
+import FacebookTokenStrategy from 'passport-facebook-token';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import config from '../config';
 
@@ -19,8 +20,8 @@ const CALLBACK_URLS = {
 const facebookOptions = {
   clientID: config.facebookAppId,
   clientSecret: config.facebookAppSecret,
-  profileFields: ['id', 'email', 'name'],
-  passReqToCallback: true,
+  // profileFields: ['id', 'email', 'name'],
+  // passReqToCallback: true,
 };
 
 const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
@@ -105,11 +106,20 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 // Tell passport to use this strategy
 passport.use(jwtLogin);
 passport.use(localLogin);
-passport.use(DEFAULT_FACEBOOK_LOGIN);
+// passport.use(DEFAULT_FACEBOOK_LOGIN);
 
-export const requireAuth = (req, res, next) => {
-  passport.authenticate('jwt', { session: false })(req, res, next);
-};
+passport.use(new FacebookTokenStrategy(facebookOptions, (accessToken, refreshToken, profile, done) => {
+  console.log(profile, accessToken);
+}));
+
+export const requireAuth = passport.authenticate('facebook-token');
+
+// export const requireAuthFacebook = (req, res, next, callback) => {
+//   passport.authenticate('facebook', (err, user) => {
+//     if (err) { return res.json({ error: err }); }
+//     return callback(Object.assign({ user }, req), res);
+//   })(req, res, next);
+// };
 
 export const requireAuthFacebook = (req, res, next, callback) => {
   passport.authenticate('facebook', (err, user) => {
