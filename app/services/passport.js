@@ -23,10 +23,10 @@ const facebookOptions = {
   // profileFields: ['id', 'email', 'name'],
   // passReqToCallback: true,
 };
-
-const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
-  callbackURL: CALLBACK_URLS.webBrowser,
-}, facebookOptions));
+//
+// const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
+//   callbackURL: CALLBACK_URLS.webBrowser,
+// }, facebookOptions));
 
 // options for jwt strategy
 // we'll pass in the jwt in an `authorization` header
@@ -126,6 +126,10 @@ export const requireAuthFacebook = (req, res, next, callback) => {
     if (err) { return res.json({ error: err }); }
     return callback(Object.assign({ user }, req), res);
   })(req, res, next);
+};
+
+export const requireAuth = (req, res, next) => {
+  passport.authenticate('jwt', { session: false })(req, res, next);
 };
 
 export const requireLoginFacebook = (req, res, next) => {
