@@ -112,7 +112,7 @@ passport.use(new FacebookTokenStrategy(facebookOptions, (accessToken, refreshTok
   console.log(profile, accessToken);
 }));
 
-export const requireAuth = passport.authenticate('facebook-token');
+// export const requireAuth = passport.authenticate('facebook-token');
 
 // export const requireAuthFacebook = (req, res, next, callback) => {
 //   passport.authenticate('facebook', (err, user) => {
@@ -122,7 +122,7 @@ export const requireAuth = passport.authenticate('facebook-token');
 // };
 
 export const requireAuthFacebook = (req, res, next, callback) => {
-  passport.authenticate('facebook', (err, user) => {
+  passport.authenticate('facebook-token', (err, user) => {
     if (err) { return res.json({ error: err }); }
     return callback(Object.assign({ user }, req), res);
   })(req, res, next);

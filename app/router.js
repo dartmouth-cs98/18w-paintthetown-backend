@@ -53,10 +53,8 @@ router.post('/signup', Users.signUp);
 
 // facebook
 router.get('/auth/facebook', requireLoginFacebook);
-router.get('/facebook/tokenize', requireAuthFacebook, (req, res) => { console.log(req.user); });
-
-// (req, res, next) => {
-//   requireAuthFacebook(req, res, next, Users.signIn);
-// }
+router.get('/facebook/tokenize', (req, res, next) => {
+  requireAuthFacebook(req, res, next, Users.signIn);
+});
 
 export default router;
