@@ -12,8 +12,8 @@ import User from '../models/user_model';
 const localOptions = { usernameField: 'email' };
 
 const CALLBACK_URLS = {
-  webBrowser: 'https://paint-the-town.surge.sh/',
-  // webBrowser: 'http://localhost:8080/',
+  // webBrowser: 'https://paint-the-town.surge.sh/',
+  webBrowser: 'http://localhost:8080/',
 };
 
 const facebookOptions = {
@@ -133,6 +133,7 @@ export const requireLoginFacebook = (req, res, next) => {
   }
 
   if (requesterType === null) {
+    console.log(userAgent);
     return res.json({ error: 'Unknown user agent' });
   }
 

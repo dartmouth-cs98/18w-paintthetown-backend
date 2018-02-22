@@ -11,8 +11,8 @@ export const newSplotch = (req, res) => {
   } else {
     const splotch = new Splotch();
 
-    splotch.centroid=req.body.centroid;
-    splotch.buildingFace=req.body.buildingFace;
+    splotch.centroid = req.body.centroid;
+    splotch.buildingFace = req.body.buildingFace;
 
 
     splotch.save()

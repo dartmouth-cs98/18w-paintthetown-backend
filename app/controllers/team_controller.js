@@ -25,3 +25,19 @@ export const createTeam = (req, res) => {
     });
   }
 };
+
+export const countUsersInTeam = (req, res) => {
+  if (!hasProps(req.params, ['id'])) {
+    res.json({
+      error: 'Teams need \'name\' and \'color\' fields.',
+    });
+  } else {
+    User.find({ team: req.params.id })
+    .then(users => {
+      return User.find({ team: req.params.id });
+    })
+    .catch(error => {
+      res.json({ error: error.message });
+    });
+  }
+};
