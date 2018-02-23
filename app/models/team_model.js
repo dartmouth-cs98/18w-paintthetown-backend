@@ -7,6 +7,10 @@ const TeamSchema = new Schema({
     unique: true,
     required: true,
   },
+  type: { // global, private, public
+    type: String,
+    required: true,
+  },
   color: {
     type: mongoose.Schema.ObjectId,
     ref: 'Color',
