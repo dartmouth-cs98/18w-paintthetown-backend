@@ -52,7 +52,7 @@ router.post('/signin', requireSignin, Users.signIn);
 router.post('/signup', Users.signUp);
 
 // facebook
-router.get('/auth/facebook', requireLoginFacebook);
+// router.get('/auth/facebook', requireLoginFacebook);
 router.get('/facebook/tokenize', (req, res, next) => {
   requireAuthFacebook(req, res, next, Users.signIn);
 });
