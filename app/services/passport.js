@@ -1,6 +1,6 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-import FacebookStrategy from 'passport-facebook';
+// import FacebookStrategy from 'passport-facebook';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import config from '../config';
@@ -12,10 +12,10 @@ import User from '../models/user_model';
 // not have separate ones
 const localOptions = { usernameField: 'email' };
 
-const CALLBACK_URLS = {
-  // webBrowser: 'https://paint-the-town.surge.sh/',
-  webBrowser: 'http://localhost:8080/',
-};
+// const CALLBACK_URLS = {
+//   // webBrowser: 'https://paint-the-town.surge.sh/',
+//   webBrowser: 'http://localhost:8080/',
+// };
 
 const facebookOptions = {
   clientID: config.facebookAppId,
@@ -62,31 +62,29 @@ const localLogin = new LocalStrategy(localOptions, (emailRaw, password, done) =>
   });
 });
 
-function newFacebookLogin(opts) {
-  return new FacebookStrategy(opts, (req, token, refreshToken, profile, done) => {
-    const data = profile._json;
-    const { email } = data;
+const facebookLogin = new FacebookTokenStrategy(facebookOptions, (token, refreshToken, profile, done) => {
+  const data = profile._json;
+  const { email } = data;
 
-    User.findOne({ email }, (err, user) => {
-      if (err) { return done(err); }
-      if (user) { return done(null, user); }
+  User.findOne({ email }, (err, user) => {
+    if (err) { return done(err); }
+    if (user) { return done(null, user); }
 
-      const newUser = new User();
+    const newUser = new User();
 
-      newUser.name = data.first_name;
-      newUser.lastName = data.last_name;
-      newUser.email = data.email;
-      newUser.typeOfLogin = 'facebook';
+    newUser.name = data.first_name;
+    newUser.lastName = data.last_name;
+    newUser.email = data.email;
+    newUser.typeOfLogin = 'facebook';
 
-      return newUser.save()
-      .then(result => {
-        console.log(`POST:\tFacebook user added ${newUser.name} ${newUser.lastName}.`);
-        return done(null, newUser);
-      })
-      .catch(err => (done(err)));
-    });
+    return newUser.save()
+    .then(result => {
+      console.log(`POST:\tFacebook user added ${newUser.name} ${newUser.lastName}.`);
+      return done(null, newUser);
+    })
+    .catch(err => (done(err)));
   });
-}
+});
 
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
   // See if the user ID in the payload exists in our database
@@ -106,11 +104,7 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 // Tell passport to use this strategy
 passport.use(jwtLogin);
 passport.use(localLogin);
-// passport.use(DEFAULT_FACEBOOK_LOGIN);
-
-passport.use(new FacebookTokenStrategy(facebookOptions, (accessToken, refreshToken, profile, done) => {
-  console.log(profile, accessToken);
-}));
+passport.use(facebookLogin);
 
 // export const requireAuth = passport.authenticate('facebook-token');
 
@@ -132,36 +126,36 @@ export const requireAuth = (req, res, next) => {
   passport.authenticate('jwt', { session: false })(req, res, next);
 };
 
-export const requireLoginFacebook = (req, res, next) => {
-  const userAgent = req.headers['user-agent'];
-
-  if (!userAgent) {
-    return res.json({ error: 'Unknown user agent' });
-  }
-
-  let requesterType = null;
-
-  if (userAgent.indexOf('Mozilla') > -1 || userAgent.indexOf('Chrome') > -1 ||
-      userAgent.indexOf('Safari') > -1) {
-    requesterType = 'webBrowser';
-  }
-
-  if (requesterType === null) {
-    console.log(userAgent);
-    return res.json({ error: 'Unknown user agent' });
-  }
-
-  const callbackURL = CALLBACK_URLS[requesterType];
-
-  const facebookLogin = newFacebookLogin(
-    Object.assign({ callbackURL }, facebookOptions),
-  );
-
-  passport.use(facebookLogin);
-
-  return passport.authenticate('facebook', {
-    scope: ['public_profile', 'email'],
-  })(req, res, next);
-};
+// export const requireLoginFacebook = (req, res, next) => {
+//   const userAgent = req.headers['user-agent'];
+//
+//   if (!userAgent) {
+//     return res.json({ error: 'Unknown user agent' });
+//   }
+//
+//   let requesterType = null;
+//
+//   if (userAgent.indexOf('Mozilla') > -1 || userAgent.indexOf('Chrome') > -1 ||
+//       userAgent.indexOf('Safari') > -1) {
+//     requesterType = 'webBrowser';
+//   }
+//
+//   if (requesterType === null) {
+//     console.log(userAgent);
+//     return res.json({ error: 'Unknown user agent' });
+//   }
+//
+//   const callbackURL = CALLBACK_URLS[requesterType];
+//
+//   const facebookLogin = newFacebookLogin(
+//     Object.assign({ callbackURL }, facebookOptions),
+//   );
+//
+//   passport.use(facebookLogin);
+//
+//   return passport.authenticate('facebook', {
+//     scope: ['public_profile', 'email'],
+//   })(req, res, next);
+// };
 
 export const requireSignin = passport.authenticate('local', { session: false });

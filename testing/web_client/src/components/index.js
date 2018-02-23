@@ -13,7 +13,9 @@ class Index extends Component {
   render() {
     return (
       <nav id="menu">
-        <li><NavLink to="/users">Users</NavLink></li>
+        <ul>
+          <li><NavLink to="/users">Users</NavLink></li>
+        </ul>
       </nav>
     );
   }
