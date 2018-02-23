@@ -2,7 +2,6 @@ import Splotch from '../models/splotch_model.js';
 
 import { checkBuildingFace } from '../utils';
 
-
 export const newSplotch = (req, res) => {
   if (!hasProps(req.body, ['centroid','buildingFace'])) {
     res.json({
@@ -13,7 +12,6 @@ export const newSplotch = (req, res) => {
 
     splotch.centroid = req.body.centroid;
     splotch.buildingFace = req.body.buildingFace;
-
 
     splotch.save()
     .then(result => {
@@ -28,7 +26,7 @@ export const newSplotch = (req, res) => {
 };
 
 // // GET request
-// export const getSplotches = (req, res) => {
+// export const getSplotch = (req, res) => {
 //
 //
 //
