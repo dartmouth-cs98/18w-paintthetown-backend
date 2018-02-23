@@ -32,7 +32,7 @@ router.route('/colors')
 router.route('/teams')
       .post(requireAuth, Teams.createTeam);
 router.route('/teams/countUsers')
-      .post(requireAuth, Teams.countUsers);
+      .get(requireAuth, Teams.countUsers);
 router.route('/patterns')
       .post(requireAuth, Patterns.newPattern);
 router.route('/splotches')

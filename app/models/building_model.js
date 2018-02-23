@@ -22,6 +22,14 @@ const BuildingSchema = new Schema({
     ref: 'Coordinate',
     required: true,
   },
+  baseAltitude: {
+    type: double,
+    required: true,
+  },
+  topAltitude: {
+    type: double,
+    required: true,
+  },
   polyhedron: {
     type: [{
       type: mongoose.Schema.ObjectId,
