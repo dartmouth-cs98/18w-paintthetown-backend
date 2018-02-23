@@ -13,7 +13,7 @@ const ColorSchema = new Schema({
     type: String,
     required: true,
     validate: {
-      validator: (hex) => (checkLengthString(hex, 7)),
+      validator: (hex) => (checkLengthString(hex, 7))
       },
       message: '{VALUE} is not a valid color hexcode.',
     },
@@ -22,7 +22,10 @@ const ColorSchema = new Schema({
     type: [Number],
     required: true,
     validate: {
-      validator: (rgb) => ( checkLengthArray (rgb , 3) && inRange(rgb[0], 0, 255) && inRange(rgb[1], 0, 255) && inRange(rgb[2], 0, 255) ),
+      validator: (rgb) => {
+        return  checkLengthArray(rgb, 3) && inRange(rgb[0], 0, 255) &&
+        inRange(rgb[1], 0, 255) && inRange(rgb[2], 0, 255);
+      },
       message: '{VALUE} is not a valid RGB color.',
     },
   },
