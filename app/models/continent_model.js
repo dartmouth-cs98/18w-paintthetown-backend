@@ -1,7 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-import Coordinate from './coordinate_model';
-
 // create a schema for posts with a field
 const ContinentSchema = new Schema({
   name: {

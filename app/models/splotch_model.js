@@ -1,11 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-// import Pattern from './pattern_model';
-import User from './user_model';
-import Team from './team_model';
-import Coordinate from './coordinate_model';
-import Building from './building_model';
-
 // create a schema for posts with a field
 const SplotchSchema = new Schema({
   centroid: { // coordinate on the building face
@@ -17,26 +11,26 @@ const SplotchSchema = new Schema({
     type: String,
     required: true,
   },
-  shape:{ //should be required
+  shape: { // should be required
     type: String,
     required: false,
   },
-  pattern:{
+  pattern: {
     type: mongoose.Schema.ObjectId,
     ref: 'Pattern',
     default: null,
   },
-  building:{ //should be required
+  building: { // should be required
     type: mongoose.Schema.ObjectId,
     ref: 'Building',
     default: null,
   },
-  team: { //should be required
+  team: { // should be required
     type: mongoose.Schema.ObjectId,
     ref: 'Team',
     default: null,
   },
-  user: { //user that created the splotch. should be required
+  user: { // user that created the splotch. should be required
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     default: null,

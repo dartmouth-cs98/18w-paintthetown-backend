@@ -5,7 +5,7 @@ const PatternSchema = new Schema({
   name: {
     type: String,
     required: true,
-  }
+  },
 }, {
   timestamp: true,
 });
