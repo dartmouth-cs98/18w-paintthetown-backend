@@ -27,7 +27,9 @@ router.route('/users/friends')
       .post(requireAuth, Users.addFriend);
 
 router.route('/colors')
+      .get(requireAuth, Colors.getColorData)
       .post(requireAuth, Colors.newColor);
+
 router.route('/teams')
       .post(requireAuth, Teams.createTeam);
 router.route('/teams/countUsers')

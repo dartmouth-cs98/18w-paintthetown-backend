@@ -9,7 +9,6 @@ import {
 import SignIn from './signin';
 import SignUp from './signup';
 import UserData from './user-data';
-import FacebookAuth from './facebook-auth';
 
 const mapStateToProps = (state) => ({
   users: state.users,
@@ -29,9 +28,24 @@ class Users extends Component {
     };
   }
 
+  componentWillReceiveProps(props) {
+    if (!props.toggled && this.props.toggled) {
+      this.setState({
+        signInToggled: false,
+        signUpToggled: false,
+        facebookAuthToggled: false,
+        userDataToggled: false,
+      });
+    }
+  }
+
   render() {
     return (
       <div id="users">
+        <div
+          className={`large-tab${this.props.toggled ? ' active' : ''}`}
+          onClick={() => { this.props.toggle('users'); }}
+        >Users</div>
         <div className="tab" onClick={() => {
           this.setState({
             signInToggled: !this.state.signInToggled,
@@ -50,15 +64,6 @@ class Users extends Component {
           });
         }}>Sign Up</div>
         <SignUp toggled={this.state.signUpToggled} />
-        <div className="tab" onClick={() => {
-          this.setState({
-            signInToggled: false,
-            signUpToggled: false,
-            facebookAuthToggled: !this.state.facebookAuthToggled,
-            userDataToggled: false,
-          });
-        }}>Facebook</div>
-        <FacebookAuth toggled={this.state.facebookAuthToggled} />
         <div className="tab" onClick={() => {
           if (!this.state.userDataToggled) { this.props.getUserData(); }
 
