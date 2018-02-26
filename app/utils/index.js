@@ -1,24 +1,24 @@
 export const checkLengthArray = (arr, length) => {
-  if (arr.length == length){
+  if (arr.length === length) {
     return true;
-  } else{
+  } else {
     return false;
   }
 };
 
 export const checkLengthString = (str, length) => {
-  if (str.length==length){
+  if (str.length === length){
     return true;
-  } else{
+  } else {
     return false;
   }
   // String.prototype.length.call(str) === length
 };
 
 export const checkBuildingFace = (str) => {
-  if (str==="N" || str==="S" || str==="E" || str==="W"){
+  if (str === 'N' || str === 'S' || str === 'E' || str === 'W') {
     return true;
-  } else{
+  } else {
     return false;
   }
 };

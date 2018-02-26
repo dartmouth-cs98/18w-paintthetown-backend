@@ -30,6 +30,8 @@ router.route('/colors')
       .post(requireAuth, Colors.newColor);
 router.route('/teams')
       .post(requireAuth, Teams.createTeam);
+router.route('/teams/countUsers')
+      .post(requireAuth, Teams.countUsers);
 router.route('/patterns')
       .post(requireAuth, Patterns.newPattern);
 router.route('/splotches')
