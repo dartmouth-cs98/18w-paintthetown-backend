@@ -4,7 +4,6 @@ import {
   requireAuth,
   requireSignin,
   requireAuthFacebook,
-  requireLoginFacebook,
 } from './services/passport';
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';

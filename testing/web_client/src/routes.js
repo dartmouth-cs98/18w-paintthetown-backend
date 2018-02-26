@@ -8,5 +8,6 @@ import Users from './components/users';
 export default(
   <Switch>
     <Route exact path="/" component={App} />
+    <Route path="/users" component={Users} />
   </Switch>
 );
