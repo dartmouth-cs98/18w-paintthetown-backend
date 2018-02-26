@@ -1,27 +1,10 @@
-export const checkLengthArray = (arr, length) => {
-  if (arr.length === length) {
-    return true;
-  } else {
-    return false;
-  }
-};
+export const checkLengthArray = (arr, length) => (arr.length === length);
 
-export const checkLengthString = (str, length) => {
-  if (str.length === length){
-    return true;
-  } else {
-    return false;
-  }
-  // String.prototype.length.call(str) === length
-};
+export const checkLengthString = checkLengthArray;
 
-export const checkBuildingFace = (str) => {
-  if (str === 'N' || str === 'S' || str === 'E' || str === 'W') {
-    return true;
-  } else {
-    return false;
-  }
-};
+export const checkBuildingFace = (str) => (
+  str === 'N' || str === 'S' || str === 'E' || str === 'W'
+);
 
 
 export const hasProp = (obj, prop) => (
@@ -36,11 +19,4 @@ export const hasProps = (obj, props) => {
   return true;
 };
 
-export const inRange = (val, lowerBound, upperBound) => {
-  console.log("here");
-  if (val =>lowerBound && val <= upperBound){
-    return true;
-  } else{
-    return false;
-  }
-};
+export const inRange = (val, lB, uB) => (val >= lB && val <= uB);

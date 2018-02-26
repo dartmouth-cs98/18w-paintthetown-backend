@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
-import { browserHistory } from 'react-router';
 import { connect } from 'react-redux';
 
-import { exchangeCodeForToken } from '../actions';
+import { getColorData } from '../actions';
 
 const mapStateToProps = (state) => ({
-  users: state.users,
+  colors: state.colors,
 });
 
 
-import Index from './index';
+import Users from './users';
+import Colors from './colors';
 
 // example class based component (smart component)
 class App extends Component {
@@ -17,32 +17,45 @@ class App extends Component {
     super(props);
 
     // init component state here
-    this.state = {};
+    this.state = {
+      usersToggled: false,
+      colorsToggled: false,
+    };
+
+    this.toggle = this.toggle.bind(this);
+    this.updateFontColor = this.updateFontColor.bind(this);
   }
 
-  componentDidMount() {
-    const { query } = this.props.location;
+  toggle(type) {
+    const state = this.state;
+    const toggleLabel = `${type}Toggled`;
 
-    if (Object.prototype.hasOwnProperty.call(query, 'code')) {
-      this.props.exchangeCodeForToken(query.code);
-    }
+    state[toggleLabel] = !state[toggleLabel];
+
+    Object.keys(state).reduce((arr, key) => (
+      key === toggleLabel ? arr : arr.concat(key)
+    ), [])
+    .forEach(key => { state[key] = false; });
+
+    this.setState(state);
   }
 
-  componentWillReceiveProps(props) {
-    if (props.users.tokenizedFacebookCode !== null &&
-        this.props.users.tokenizedFacebookCode === null) {
-      localStorage.setItem('token', props.users.tokenizedFacebookCode);
-      browserHistory.push('/');
-    }
+  updateFontColor(id) {
+    this.props.getColorData(id);
   }
 
   render() {
     return (
-      <div id="main-container">
-        <Index />
+      <div id="main-container" style={{ color: this.props.colors.fontColor }}>
+        <Users toggle={this.toggle} toggled={this.state.usersToggled} />
+        <Colors
+          toggle={this.toggle}
+          toggled={this.state.colorsToggled}
+          updateFontColor={this.updateFontColor}
+        />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps, { exchangeCodeForToken })(App);
+export default connect(mapStateToProps, { getColorData })(App);

@@ -19,6 +19,11 @@ body {
     div {
       transition: all 0.5s;
       width: 100%;
+      color: inherit;
+    }
+
+    h1 {
+      color: black;
     }
 
     div.tab {
@@ -27,8 +32,28 @@ body {
       align-items: center;
       height: 50px;
       background: blue;
-      color: white;
       border-radius: 10px;
+    }
+
+    div.large-tab {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 75px;
+      background: purple;
+      border-radius: 10px;
+
+      &:not(.active) {
+        & ~ div {
+          height: 0;
+          width: 0;
+          font-size: 0;
+        }
+
+        & ~ h1 {
+          opacity: 0;
+        }
+      }
     }
 
     form {
@@ -51,14 +76,15 @@ body {
       justify-content: center;
       height: 100px;
 
-      &#signup {
-        height: 200px;
+      &#signup, &#new-color {
+        height: 220px;
       }
 
-      &#user-data, &#facebook {
+      &#user-data {
         display: flex;
         flex-direction: column;
         justify-content: space-around;
+        color: black;
       }
 
       &#user-data {

@@ -14,7 +14,8 @@ function UsersReducer(state = defaultUsers, action) {
     case ActionTypes.TOKENIZE_FACEBOOK_CODE:
       return Object.assign({ }, state, { tokenizedFacebookCode: action.token });
 
-    case ActionTypes.AUTH_ERROR:
+    case ActionTypes.ERROR:
+      console.log(action.message);
       return Object.assign({}, state, {
         error: action.message,
       });

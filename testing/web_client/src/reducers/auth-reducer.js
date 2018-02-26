@@ -17,7 +17,8 @@ function AuthReducer(state = defaultAuth, action) {
         authenticated: false,
       });
 
-    case ActionTypes.AUTH_ERROR:
+    case ActionTypes.ERROR:
+      console.log(action.message);
       return Object.assign({}, state, {
         authenticated: false,
         error: action.message,
