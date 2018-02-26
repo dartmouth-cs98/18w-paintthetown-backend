@@ -4,7 +4,6 @@ import {
   requireAuth,
   requireSignin,
   requireAuthFacebook,
-  requireLoginFacebook,
 } from './services/passport';
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
@@ -28,7 +27,9 @@ router.route('/users/friends')
       .post(requireAuth, Users.addFriend);
 
 router.route('/colors')
+      .get(requireAuth, Colors.getColorData)
       .post(requireAuth, Colors.newColor);
+
 router.route('/teams')
       .post(requireAuth, Teams.createTeam);
 router.route('/teams/countUsers')

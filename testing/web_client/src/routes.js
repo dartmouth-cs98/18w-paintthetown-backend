@@ -1,12 +1,10 @@
 import React from 'react';
-// import { Route } from 'react-router';
-import { Route, Switch } from 'react-router-dom';
+import { Route } from 'react-router';
 
 import App from './components/app';
-import Users from './components/users';
+
+// <Route path="/posts/new" component={Index} />
 
 export default(
-  <Switch>
-    <Route exact path="/" component={App} />
-  </Switch>
+  <Route path="/" component={App} />
 );

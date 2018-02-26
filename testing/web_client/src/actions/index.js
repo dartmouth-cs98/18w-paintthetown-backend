@@ -7,14 +7,22 @@ export const ActionTypes = {
   DEAUTH_USER: 'DEAUTH_USER',
   GET_USER_DATA: 'GET_USER_DATA',
   TOKENIZE_FACEBOOK_CODE: 'TOKENIZE_FACEBOOK_CODE',
+  ERROR: 'ERROR',
+  NEW_COLOR: 'NEW_COLOR',
+  GET_COLOR_DATA: 'GET_COLOR_DATA',
 };
 
 // USER ACTIONS
-
 export const getUserData = () => (
   (dispatch) => {
-    axios.get(`${ROOT_URL}/users`, {
-      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    const token = localStorage.getItem('token');
+
+    if (token === null) {
+      return dispatch(authError('User Data Failed: No token available.'));
+    }
+
+    return axios.get(`${ROOT_URL}/users`, {
+      headers: { Authorization: `JWT ${token}` },
     })
     .then(response => {
       if (response.data.error) {
@@ -29,26 +37,8 @@ export const getUserData = () => (
   }
 );
 
-export const exchangeCodeForToken = (code) => (
-  dispatch => {
-    axios.get(`${ROOT_URL}/facebook/tokenize`, { params: { code } })
-    .then(response => {
-      if (response.data.error) {
-        dispatch(authError(`Facebook Tokenization Failed: ${response.data.error.message}`));
-      } else {
-        dispatch({
-          token: response.data.token,
-          type: ActionTypes.TOKENIZE_FACEBOOK_CODE,
-        });
-      }
-    })
-    .catch(error => {
-      dispatch(authError(`Facebook Tokenization Failed: ${error}`));
-    });
-  }
-);
 
-
+// AUTH ACTIONS
 export function signupUser(user) {
   return (dispatch) => {
     axios.post(`${ROOT_URL}/signup`, user)
@@ -57,10 +47,9 @@ export function signupUser(user) {
         dispatch(authError(`Sign Up Failed: ${response.data.error.errmsg}`));
       } else {
         const token = response.data.token;
-        const id = response.data.id;
 
         localStorage.setItem('token', token);
-        localStorage.setItem('id', id);
+
         dispatch({ type: ActionTypes.AUTH_USER });
       }
     })
@@ -78,10 +67,9 @@ export function signinUser(user) {
         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
       } else {
         const token = response.data.token;
-        const email = response.data.email;
 
         localStorage.setItem('token', token);
-        localStorage.setItem('email', email);
+
         dispatch({ type: ActionTypes.AUTH_USER });
       }
     })
@@ -125,11 +113,51 @@ export function facebookAuth() {
   };
 }
 
-// trigger to deauth if there is error
-// can also use in your error reducer if you have one to display an error message
+
+// COLOR ACTIONS
+export const newColor = (color) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/colors`, color, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        dispatch(authError(`New Color Failed: ${response.data.error.errmsg}`));
+      } else {
+        const id = response.data.id;
+        dispatch({ type: ActionTypes.NEW_COLOR, id });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`New Color Failed: ${error}`));
+    });
+  };
+};
+
+export const getColorData = (id) => (
+  (dispatch) => {
+    return axios.get(`${ROOT_URL}/colors`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { id },
+    })
+    .then(response => {
+      if (response.data.error) {
+        dispatch(authError(`Color Data Failed: ${response.data.error.errmsg}`));
+      } else {
+        dispatch({ type: ActionTypes.GET_COLOR_DATA, hex: response.data.hex });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`Color Data Failed: ${error}`));
+    });
+  }
+);
+
+
+// trigger error
 export function authError(error) {
   return {
-    type: ActionTypes.AUTH_ERROR,
+    type: ActionTypes.ERROR,
     message: error,
   };
 }
