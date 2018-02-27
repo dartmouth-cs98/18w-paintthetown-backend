@@ -55,14 +55,37 @@ export const getLocationInfo = (req, res) => {
   }
 };
 
+// GET request
 export const getTeam = (req, res) => {
   if (!hasProps(req.params, ['id'])) {
     res.json({
-      error: 'getControl needs a building \'id\' field.',
+      error: 'getTeam needs a building \'id\' field.',
     });
   } else {
     const building = req.building;
     res.json(building.team)
     console.log(`GET:\tSending building data for ${building.name} on team ${buidling.team}.`);
+  }
+};
+
+// PUT
+export const changeTeam = (req, res) => {
+  if (!hasProp(req.body, ['building_id','team_id'])) {
+    res.json({
+      error: 'changeTeam needs \'building_id\' for building and \'team_id\' field.',
+    });
+  } else {
+    const building = req.building;
+    const _id = building.id;
+    const team = req.body.team;
+
+    Building.update({ _id }, { team })
+    .then(result => {
+      console.log(`PUT:\tChanged building ${building.id} to team with id ${team}.`);
+      res.json({ building: _id, team });
+    })
+    .catch(error => {
+      res.json({ error: error.message });
+    });
   }
 };
