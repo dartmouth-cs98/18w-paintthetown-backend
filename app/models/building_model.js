@@ -40,7 +40,11 @@ const BuildingSchema = new Schema({
   city: {
     type: mongoose.Schema.ObjectId,
     ref: 'City',
-    required: true,
+  },
+  team: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Team',
+    default: null,
   },
 }, {
   timestamp: true,
