@@ -23,11 +23,11 @@ const BuildingSchema = new Schema({
     required: true,
   },
   baseAltitude: {
-    type: double,
+    type: Number,
     required: true,
   },
   topAltitude: {
-    type: double,
+    type: Number,
     required: true,
   },
   polyhedron: {

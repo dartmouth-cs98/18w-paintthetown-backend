@@ -10,6 +10,7 @@ const mapStateToProps = (state) => ({
 
 import Users from './users';
 import Colors from './colors';
+import Buildings from './buildings';
 
 // example class based component (smart component)
 class App extends Component {
@@ -20,6 +21,7 @@ class App extends Component {
     this.state = {
       usersToggled: false,
       colorsToggled: false,
+      buildingsToggled: false,
     };
 
     this.toggle = this.toggle.bind(this);
@@ -53,6 +55,7 @@ class App extends Component {
           toggled={this.state.colorsToggled}
           updateFontColor={this.updateFontColor}
         />
+        <Buildings toggle={this.toggle} toggled={this.state.buildingsToggled} />
       </div>
     );
   }
