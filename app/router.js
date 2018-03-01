@@ -40,6 +40,10 @@ router.route('/splotches')
       .post(requireAuth, Splotches.newSplotch);
 router.route('/buildings')
       .post(requireAuth, Buildings.newBuilding);
+router.route('/buildings/getTeam')
+      .get(requireAuth, Buildings.getTeam);
+router.route('/buildings/changeTeam')
+      .post(requireAuth, Buildings.changeTeam);
 router.route('/cities')
       .post(requireAuth, Cities.newCity);
 router.route('/coordinates')
