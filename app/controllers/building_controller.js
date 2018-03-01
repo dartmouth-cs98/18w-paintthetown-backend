@@ -4,9 +4,9 @@ import { hasProps } from '../utils';
 
 
 export const newBuilding = (req, res) => {
-  if (!hasProps(req.body, ['name', 'centroid', 'polyhedron', 'baseAltitude', 'topAltitude'])) {
+  if (!hasProps(req.body, ['name', 'centroid', 'baseAltitude', 'topAltitude'])) {
     res.json({
-      error: 'Building needs \'name\', \'centroid\', \'baseAltitude\', \'topAltitude\', and \'polyhedron\' fields.',
+      error: 'Building needs \'name\', \'centroid\', \'baseAltitude\', and \'topAltitude\' fields.',
     });
   } else {
     const building = new Building();
@@ -15,7 +15,6 @@ export const newBuilding = (req, res) => {
     building.centroid=req.body.centroid;
     building.baseAltitude = req.body.baseAltitude;
     building.topAltitude = req.body.topAltitude;
-    building.polyhedron=req.body.polyhedron;
 
     if (hasProp(req.body, 'description')) {
       building.description=req.body.description;
@@ -26,10 +25,13 @@ export const newBuilding = (req, res) => {
     if (hasProp(req.body,'city')) {
       building.city=req.body.city;
     }
+    if (hasProp(req.body, 'polyhedron')) {
+      building.polyhedron=req.body.polyhedron;
+    }
 
     building.save()
     .then(result => {
-      console.log(`POST:\tAdded building ${building.name} in the city of ${building.city}.`);
+      console.log(`POST:\tAdded building ${building.name}.`);
 
       res.json({ id: result._id });
     })
@@ -55,33 +57,60 @@ export const getLocationInfo = (req, res) => {
   }
 };
 
+// // GET request
+// export const getBuilding = (req, res) => {
+//   if (!hasProps(req.query, ['id'])) {
+//     res.json({
+//       error: 'getBuilding needs a building \'id\' field.',
+//     });
+//   } else {
+//     Building.findOne({id:req.query.id})
+//     .then(result => {
+//       res.json(result.team)
+//       console.log(`GET:\tSending building data for ${building.name} on team ${building.team}.`);
+//     })
+//     .catch(error => {
+//       console.log('ERROR: building does not exist.');
+//       res.json({ error: error.message });
+//     });
+//     }
+// };
+
 // GET request
 export const getTeam = (req, res) => {
-  if (!hasProps(req.params, ['id'])) {
+  if (!hasProps(req.query, ['id'])) {
     res.json({
       error: 'getTeam needs a building \'id\' field.',
     });
   } else {
-    const building = req.building;
-    res.json(building.team)
-    console.log(`GET:\tSending building data for ${building.name} on team ${buidling.team}.`);
-  }
+    Building.findById(req.query.id)
+    .then(result => {
+      res.json(result.team)
+      console.log(`GET:\tSending building data for ${building.name} on team ${building.team}.`);
+    })
+    .catch(error => {
+      console.log('ERROR: building does not exist.');
+      res.json({ error: error.message });
+    });
+    }
 };
 
-// PUT
-export const changeTeam = (req, res) => {
+// POST
+export const updateTeam = (req, res) => {
   if (!hasProp(req.body, ['building_id','team_id'])) {
     res.json({
-      error: 'changeTeam needs \'building_id\' for building and \'team_id\' field.',
+      error: 'updateTeam needs \'building_id\' for building and \'team_id\' field.',
     });
   } else {
-    const building = req.building;
+
+
+    const building = req.body.building;
     const _id = building.id;
     const team = req.body.team;
 
     Building.update({ _id }, { team })
     .then(result => {
-      console.log(`PUT:\tChanged building ${building.id} to team with id ${team}.`);
+      console.log(`POST:\tUpdated building ${building.id} to team with id ${team}.`);
       res.json({ building: _id, team });
     })
     .catch(error => {
