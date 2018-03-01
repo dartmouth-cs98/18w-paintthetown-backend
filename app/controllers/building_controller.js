@@ -47,11 +47,13 @@ export const getLocationInfo = (req, res) => {
       error: 'getLocationInfo needs a building \'id\' field.',
     });
   } else {
-    User.find({ team: req.params.id })
-    .then(userCount => {
-      return User.count({ team: req.params.id }).exec();
+    Building.findById(req.query.id)
+    .then(result => {
+      res.json(centroid:result.centroid);
+      console.log(`GET:\tSending location data for ${building.name}.`);
     })
     .catch(error => {
+      console.log('ERROR: building does not exist.');
       res.json({ error: error.message });
     });
   }
@@ -102,19 +104,16 @@ export const updateTeam = (req, res) => {
       error: 'updateTeam needs \'building_id\' for building and \'team_id\' field.',
     });
   } else {
-
-
-    const building = req.body.building;
-    const _id = building.id;
-    const team = req.body.team;
-
-    Building.update({ _id }, { team })
+    Team.findById(req.body.team_id)
+    .then(result => (
+      Building.update({ _id: req.body.building_id }, { team: req.body.team_id })
+    ))
     .then(result => {
       console.log(`POST:\tUpdated building ${building.id} to team with id ${team}.`);
       res.json({ building: _id, team });
     })
-    .catch(error => {
-      res.json({ error: error.message });
-    });
+    .catch(error =>
+      res.json({ error: error.message })
+    );
   }
 };
