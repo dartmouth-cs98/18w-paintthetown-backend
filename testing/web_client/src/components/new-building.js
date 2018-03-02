@@ -1,26 +1,43 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { signinUser } from '../actions';
+import { newBuilding } from '../actions';
+
+import { inRange } from '../../../../app/utils';
 
 function isComplete(data) {
   const arr = Object.values(data);
 
   for (let i = 0; i < arr.length; i += 1) {
-    if (arr[i].length === 0) { return false; }
+    if (arr[i] === null || arr[i].length === 0) {
+      return false;
+    }
   }
 
-  return true;
+  return data.topAltitude > data.baseAltitude;
 }
 
 const mapStateToProps = (state) => (
   {
-    auth: state.auth,
+    buildings: state.buildings,
   }
 );
 
+const validateLngLat = (val) => (val.length === 0 || inRange(val, -180, 180));
+
+const validateAltidude = (base, top) => (
+  top === null || base === null || top.length === 0 || base.length === 0 ||
+  parseFloat(base) < parseFloat(top)
+);
+
+const validators = {
+  centroidLng: validateLngLat,
+  centroidLat: validateLngLat,
+  topAltitude: validateAltidude,
+};
+
 // example class based component (smart component)
-class SignIn extends Component {
+class NewBuilding extends Component {
   constructor(props) {
     super(props);
 
@@ -28,10 +45,10 @@ class SignIn extends Component {
     this.state = {
       data: {
         name: '',
-        centroid: [null, null],
+        centroidLng: null,
+        centroidLat: null,
         baseAltitude: null,
         topAltitude: null,
-        city: '',
       },
     };
 
@@ -42,7 +59,19 @@ class SignIn extends Component {
   onChange(type, e) {
     const { data } = this.state;
 
-    data[type] = e.target.value;
+    if (type !== 'baseAltitude' &&
+        !Object.prototype.hasOwnProperty.call(validators, type)) {
+      data[type] = e.target.value;
+    } else if (type === 'baseAltitude') {
+      data[type] = e.target.value;
+
+      if (data.topAltitude === null ||
+          parseFloat(data.topAltitude) < parseFloat(data[type])) {
+        data.topAltitude = e.target.value;
+      }
+    } else if (type === 'topAltitude' || validators[type](e.target.value)) {
+      data[type] = e.target.value;
+    }
 
     this.setState({ data, isComplete: isComplete(data) });
   }
@@ -50,24 +79,68 @@ class SignIn extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.signinUser(this.state.data);
+    this.props.newBuilding(this.state.data);
   }
 
   render() {
     return (
-      <div className={this.props.toggled ? 'normal' : 'hidden'}>
+      <div id="new-building" className={this.props.toggled ? 'normal' : 'hidden'}>
         <form autoComplete="on" onSubmit={this.handleSubmit}>
           <input autoComplete="on" type="text" placeholder="* Name" value={this.state.data.name} onChange={e => { this.onChange('name', e); }} />
           <input
             autoComplete="on"
             type="number"
-            placeholder="* Centroid Latitude"
+            placeholder="* Centroid Longitude"
+            min="-180"
+            max="180"
+            step="1e-6"
             value={
-              this.state.data.centroid[0] === null ?
-              0 :
-              this.state.data.centroid[0]
+              this.state.data.centroidLng === null ?
+              '' :
+              this.state.data.centroidLng
             }
-            onChange={e => { this.onChange('centroid', e); }} />
+            onChange={e => { this.onChange('centroidLng', e); }}
+          />
+          <input
+            autoComplete="on"
+            type="number"
+            placeholder="* Centroid Latitude"
+            min="-180"
+            max="180"
+            step="1e-6"
+            value={
+              this.state.data.centroidLat === null ?
+              '' :
+              this.state.data.centroidLat
+            }
+            onChange={e => { this.onChange('centroidLat', e); }}
+          />
+          <input
+            autoComplete="on"
+            type="number"
+            placeholder="* Base Altitude"
+            min="0"
+            step="1e-6"
+            value={
+              this.state.data.baseAltitude === null ?
+              '' :
+              this.state.data.baseAltitude
+            }
+            onChange={e => { this.onChange('baseAltitude', e); }}
+          />
+          <input
+            autoComplete="on"
+            type="number"
+            placeholder="* Top Altitude"
+            min={this.state.baseAltitude === null ? '0' : this.state.baseAltitude}
+            step="1e-6"
+            value={
+              this.state.data.topAltitude === null ?
+              '' :
+              this.state.data.topAltitude
+            }
+            onChange={e => { this.onChange('topAltitude', e); }}
+          />
           <input type="submit" value="Submit" disabled={!this.state.isComplete} />
         </form>
       </div>
@@ -75,4 +148,4 @@ class SignIn extends Component {
   }
 }
 
-export default connect(mapStateToProps, { signinUser })(SignIn);
+export default connect(mapStateToProps, { newBuilding })(NewBuilding);

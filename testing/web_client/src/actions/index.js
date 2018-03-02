@@ -10,6 +10,7 @@ export const ActionTypes = {
   ERROR: 'ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
+  NEW_BUILDING: 'NEW_BUILDING',
 };
 
 // USER ACTIONS
@@ -153,6 +154,38 @@ export const getColorData = (id) => (
   }
 );
 
+
+// BUILDING ACTIONS
+export const newBuilding = ({
+  name,
+  centroidLng,
+  centroidLat,
+  baseAltitude,
+  topAltitude,
+}) => {
+  return (dispatch) => {
+    const building = {
+      name,
+      centroid: [centroidLng, centroidLat],
+      baseAltitude,
+      topAltitude,
+    };
+    axios.post(`${ROOT_URL}/buildings`, building, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        dispatch(authError(`New Building Failed: ${response.data.error}`));
+      } else {
+        const id = response.data.id;
+        dispatch({ type: ActionTypes.NEW_BUILDING, id });
+      }
+    })
+    .catch(error => {
+      dispatch(authError(`New Building Failed: ${error}`));
+    });
+  };
+};
 
 // trigger error
 export function authError(error) {
