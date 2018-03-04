@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import {
-  facebookAuth,
-  getUserData,
-  signOut,
+  newBuilding,
 } from '../actions';
 
 import NewBuilding from './new-building';
@@ -24,28 +22,40 @@ class Buildings extends Component {
   }
 
   componentWillReceiveProps(props) {
-
+    if (!props.toggled && this.props.toggled) {
+      this.setState({
+        newBuildingToggled: false,
+      });
+    }
   }
 
   render() {
     return (
-      <div id="buildings">
-        <div
-          className={`large-tab${this.props.toggled ? ' active' : ''}`}
-          onClick={() => { this.props.toggle('buildings'); }}
-        >Buildings</div>
-        <div className="tab" onClick={() => {
-          this.setState({ newBuildingToggled: !this.state.newBuildingToggled });
-        }}>New Building</div>
-        <NewBuilding toggled={this.state.newBuildingToggled} />
-        <div className="tab" onClick={() => { }}>Get Location Info</div>
-      </div>
+      localStorage.getItem('token') !== null ? (
+        <div id="buildings">
+          <div
+            className={`large-tab${this.props.toggled ? ' active' : ''}`}
+            onClick={() => { this.props.toggle('buildings'); }}
+          >Buildings</div>
+          <div className="tab" onClick={() => {
+            this.setState({ newBuildingToggled: !this.state.newBuildingToggled });
+          }}>New Building</div>
+          <NewBuilding toggled={this.state.newBuildingToggled} />
+          <div className="tab" onClick={() => { }}>Get Location Info</div>
+        </div>
+      ) : (
+        <div id="buildings">
+          <div
+            className={`large-tab${this.props.toggled ? ' active' : ''}`}
+            onClick={() => { this.props.toggle('buildings'); }}
+          >Colors</div>
+          <h1>No token available</h1>
+        </div>
+      )
     );
   }
 }
 
 export default connect(mapStateToProps, {
-  facebookAuth,
-  getUserData,
-  signOut,
+  newBuilding,
 })(Buildings);
