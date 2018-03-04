@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { getColorData } from '../actions';
+import { getColorData, clearError } from '../actions';
 
 const mapStateToProps = (state) => ({
   colors: state.colors,
@@ -11,6 +11,7 @@ const mapStateToProps = (state) => ({
 import Users from './users';
 import Colors from './colors';
 import Buildings from './buildings';
+import ErrorWindow from './error-window';
 
 // example class based component (smart component)
 class App extends Component {
@@ -22,10 +23,12 @@ class App extends Component {
       usersToggled: false,
       colorsToggled: false,
       buildingsToggled: false,
+      error: null,
     };
 
     this.toggle = this.toggle.bind(this);
     this.updateFontColor = this.updateFontColor.bind(this);
+    this.displayError = this.displayError.bind(this);
   }
 
   toggle(type) {
@@ -35,7 +38,7 @@ class App extends Component {
     state[toggleLabel] = !state[toggleLabel];
 
     Object.keys(state).reduce((arr, key) => (
-      key === toggleLabel ? arr : arr.concat(key)
+      key === toggleLabel || key === 'error' ? arr : arr.concat(key)
     ), [])
     .forEach(key => { state[key] = false; });
 
@@ -46,19 +49,43 @@ class App extends Component {
     this.props.getColorData(id);
   }
 
+  displayError(error, type) {
+    this.setState({ error });
+
+    setTimeout(() => {
+      this.setState({ error: null });
+      this.props.clearError(type);
+    }, 4000);
+  }
+
   render() {
     return (
-      <div id="main-container" style={{ color: this.props.colors.fontColor }}>
-        <Users toggle={this.toggle} toggled={this.state.usersToggled} />
-        <Colors
-          toggle={this.toggle}
-          toggled={this.state.colorsToggled}
-          updateFontColor={this.updateFontColor}
-        />
-        <Buildings toggle={this.toggle} toggled={this.state.buildingsToggled} />
+      <div id="main-container" >
+        <div id="tabs" style={{ color: this.props.colors.fontColor }}>
+          <Users
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.usersToggled}
+          />
+          <Colors
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.colorsToggled}
+            updateFontColor={this.updateFontColor}
+          />
+          <Buildings
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.buildingsToggled}
+          />
+        </div>
+        <ErrorWindow error={this.state.error} />
       </div>
     );
   }
 }
 
-export default connect(mapStateToProps, { getColorData })(App);
+export default connect(mapStateToProps, {
+  getColorData,
+  clearError,
+})(App);

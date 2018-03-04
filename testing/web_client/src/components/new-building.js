@@ -14,7 +14,7 @@ function isComplete(data) {
     }
   }
 
-  return data.topAltitude > data.baseAltitude;
+  return parseFloat(data.topAltitude) > parseFloat(data.baseAltitude);
 }
 
 const mapStateToProps = (state) => (
@@ -54,6 +54,13 @@ class NewBuilding extends Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.buildings.error !== null &&
+        props.buildings.error !== this.props.buildings.error) {
+      this.props.displayError(props.buildings.error, 'building');
+    }
   }
 
   onChange(type, e) {

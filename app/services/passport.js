@@ -1,12 +1,14 @@
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
-// import FacebookStrategy from 'passport-facebook';
+import CustomStrategy from 'passport-custom';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import config from '../config';
 
 // and import User and your config with the secret
 import User from '../models/user_model';
+
+const ADMIN_TEST = /^(ADMIN) ([^ ]+$)/;
 
 // options for local strategy, we'll use email AS the username
 // not have separate ones
@@ -76,6 +78,7 @@ const facebookLogin = new FacebookTokenStrategy(facebookOptions, (token, refresh
     newUser.lastName = data.last_name;
     newUser.email = data.email;
     newUser.typeOfLogin = 'facebook';
+    newUser.role = 'user';
 
     return newUser.save()
     .then(result => {
@@ -101,10 +104,39 @@ const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
   });
 });
 
+const customAuth = new CustomStrategy((req, next) => {
+  const { headers } = req;
+
+  if (Object.prototype.hasOwnProperty.call(headers, 'Authorization')) {
+    return next(null, false, { message: 'Unauthorized' });
+  }
+
+  const { authorization } = headers;
+
+  if (!ADMIN_TEST.test(authorization)) {
+    return next(null, false, { message: 'Unauthorized' });
+  }
+
+  const [token] = ADMIN_TEST.exec(authorization).slice(2, 3);
+  let authorized = false;
+
+  for (let i = 0; i < config.adminTokens.length; i++) {
+    if (token === config.adminTokens[i]) {
+      authorized = true;
+      break;
+    }
+  }
+
+  if (!authorized) { return next(null, false, { message: 'Unauthorized' }); }
+
+  return next(null, req);
+});
+
 // Tell passport to use this strategy
 passport.use(jwtLogin);
 passport.use(localLogin);
 passport.use(facebookLogin);
+passport.use(customAuth);
 
 // export const requireAuth = passport.authenticate('facebook-token');
 
@@ -130,36 +162,7 @@ export const requireAuth = (req, res, next) => {
   passport.authenticate('jwt', { session: false })(req, res, next);
 };
 
-// export const requireLoginFacebook = (req, res, next) => {
-//   const userAgent = req.headers['user-agent'];
-//
-//   if (!userAgent) {
-//     return res.json({ error: 'Unknown user agent' });
-//   }
-//
-//   let requesterType = null;
-//
-//   if (userAgent.indexOf('Mozilla') > -1 || userAgent.indexOf('Chrome') > -1 ||
-//       userAgent.indexOf('Safari') > -1) {
-//     requesterType = 'webBrowser';
-//   }
-//
-//   if (requesterType === null) {
-//     console.log(userAgent);
-//     return res.json({ error: 'Unknown user agent' });
-//   }
-//
-//   const callbackURL = CALLBACK_URLS[requesterType];
-//
-//   const facebookLogin = newFacebookLogin(
-//     Object.assign({ callbackURL }, facebookOptions),
-//   );
-//
-//   passport.use(facebookLogin);
-//
-//   return passport.authenticate('facebook', {
-//     scope: ['public_profile', 'email'],
-//   })(req, res, next);
-// };
-
 export const requireSignin = passport.authenticate('local', { session: false });
+export const requireAdminAuth = passport.authenticate('custom', {
+  session: false,
+});

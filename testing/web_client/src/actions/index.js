@@ -1,17 +1,59 @@
 import axios from 'axios';
-
 import { ROOT_URL } from '../';
+
 
 export const ActionTypes = {
   AUTH_USER: 'AUTH_USER',
   DEAUTH_USER: 'DEAUTH_USER',
   GET_USER_DATA: 'GET_USER_DATA',
   TOKENIZE_FACEBOOK_CODE: 'TOKENIZE_FACEBOOK_CODE',
-  ERROR: 'ERROR',
+  USER_ERROR: 'USER_ERROR',
+  AUTH_ERROR: 'AUTH_ERROR',
+  COLOR_ERROR: 'COLOR_ERROR',
+  BUILDING_ERROR: 'BUILDING_ERROR',
+  CLEAR_USER_ERROR: 'CLEAR_USER_ERROR',
+  CLEAR_AUTH_ERROR: 'CLEAR_AUTH_ERROR',
+  CLEAR_COLOR_ERROR: 'CLEAR_COLOR_ERROR',
+  CLEAR_BUILDING_ERROR: 'CLEAR_BUILDING_ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
   NEW_BUILDING: 'NEW_BUILDING',
+  GET_BUILDING_IDS: 'GET_BUILDING_IDS',
+  GET_LOCATION_INFO: 'GET_LOCATION_INFO',
 };
+
+// trigger error
+export const newError = (message, type) => ({ type, message });
+
+
+// ERROR ACTIONS
+export const clearError = (errorType) => (
+  (dispatch) => {
+    let type = null;
+
+    switch (errorType) {
+      case 'user':
+        type = ActionTypes.CLEAR_USER_ERROR;
+        break;
+      case 'building':
+        type = ActionTypes.CLEAR_BUILDING_ERROR;
+        break;
+
+      case 'auth':
+        type = ActionTypes.CLEAR_AUTH_ERROR;
+        break;
+
+      case 'color':
+        type = ActionTypes.CLEAR_COLOR_ERROR;
+        break;
+
+      default: break;
+    }
+
+    dispatch({ type });
+  }
+);
+
 
 // USER ACTIONS
 export const getUserData = () => (
@@ -19,7 +61,10 @@ export const getUserData = () => (
     const token = localStorage.getItem('token');
 
     if (token === null) {
-      return dispatch(authError('User Data Failed: No token available.'));
+      return dispatch(newError(
+        'User Data Failed: No token available.',
+        ActionTypes.USER_ERROR,
+      ));
     }
 
     return axios.get(`${ROOT_URL}/users`, {
@@ -27,13 +72,16 @@ export const getUserData = () => (
     })
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`User Data Failed: ${response.data.error.errmsg}`));
+        dispatch(newError(
+          `User Data Failed: ${response.data.error.errmsg}`,
+          ActionTypes.USER_ERROR,
+        ));
       } else {
         dispatch({ data: response.data, type: ActionTypes.GET_USER_DATA });
       }
     })
     .catch(error => {
-      dispatch(authError(`User Data Failed: ${error}`));
+      dispatch(newError(`User Data Failed: ${error}`, ActionTypes.USER_ERROR));
     });
   }
 );
@@ -45,7 +93,10 @@ export function signupUser(user) {
     axios.post(`${ROOT_URL}/signup`, user)
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`Sign Up Failed: ${response.data.error.errmsg}`));
+        dispatch(newError(
+          `Sign Up Failed: ${response.data.error.errmsg}`,
+          ActionTypes.AUTH_ERROR,
+        ));
       } else {
         const token = response.data.token;
 
@@ -55,7 +106,7 @@ export function signupUser(user) {
       }
     })
     .catch(error => {
-      dispatch(authError(`Sign Up Failed: ${error}`));
+      dispatch(newError(`Sign Up Failed: ${error}`, ActionTypes.AUTH_ERROR));
     });
   };
 }
@@ -65,7 +116,10 @@ export function signinUser(user) {
     axios.post(`${ROOT_URL}/signin`, user)
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
+        dispatch(newError(
+          `Sign In Failed: ${response.data.error.errmsg}`,
+          ActionTypes.AUTH_ERROR,
+        ));
       } else {
         const token = response.data.token;
 
@@ -75,7 +129,7 @@ export function signinUser(user) {
       }
     })
     .catch(error => {
-      dispatch(authError(`Sign in Failed: ${error}`));
+      dispatch(newError(`Sign In Failed: ${error}`, ActionTypes.AUTH_ERROR));
     });
   };
 }
@@ -91,28 +145,28 @@ export function signOut(user) {
   };
 }
 
-export function facebookAuth() {
-  return (dispatch) => {
-    axios.get(`${ROOT_URL}/auth/facebook`, { headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/json',
-    } })
-    .then(response => {
-      if (response.data.error) {
-        dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
-      } else {
-        const token = response.data.token;
-
-        localStorage.setItem('token', token);
-
-        dispatch({ type: ActionTypes.AUTH_USER });
-      }
-    })
-    .catch(error => {
-      dispatch(authError(`Facebook auth failed: ${error}`));
-    });
-  };
-}
+// export function facebookAuth() {
+//   return (dispatch) => {
+//     axios.get(`${ROOT_URL}/auth/facebook`, { headers: {
+//       'Access-Control-Allow-Origin': '*',
+//       'Content-Type': 'application/json',
+//     } })
+//     .then(response => {
+//       if (response.data.error) {
+//         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
+//       } else {
+//         const token = response.data.token;
+//
+//         localStorage.setItem('token', token);
+//
+//         dispatch({ type: ActionTypes.AUTH_USER });
+//       }
+//     })
+//     .catch(error => {
+//       dispatch(authError(`Facebook auth failed: ${error}`));
+//     });
+//   };
+// }
 
 
 // COLOR ACTIONS
@@ -123,14 +177,18 @@ export const newColor = (color) => {
     })
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`New Color Failed: ${response.data.error.errmsg}`));
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `New Color Failed: ${error}`,
+          ActionTypes.COLOR_ERROR,
+        ));
       } else {
         const id = response.data.id;
         dispatch({ type: ActionTypes.NEW_COLOR, id });
       }
     })
     .catch(error => {
-      dispatch(authError(`New Color Failed: ${error}`));
+      dispatch(newError(`New Color Failed: ${error}`, ActionTypes.COLOR_ERROR));
     });
   };
 };
@@ -143,13 +201,17 @@ export const getColorData = (id) => (
     })
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`Color Data Failed: ${response.data.error.errmsg}`));
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Color Failed: ${error}`,
+          ActionTypes.COLOR_ERROR,
+        ));
       } else {
         dispatch({ type: ActionTypes.GET_COLOR_DATA, hex: response.data.hex });
       }
     })
     .catch(error => {
-      dispatch(authError(`Color Data Failed: ${error}`));
+      dispatch(newError(`Get Color Failed: ${error}`, ActionTypes.COLOR_ERROR));
     });
   }
 );
@@ -175,22 +237,80 @@ export const newBuilding = ({
     })
     .then(response => {
       if (response.data.error) {
-        dispatch(authError(`New Building Failed: ${response.data.error}`));
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `New Building Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
       } else {
         const id = response.data.id;
         dispatch({ type: ActionTypes.NEW_BUILDING, id });
       }
     })
     .catch(error => {
-      dispatch(authError(`New Building Failed: ${error}`));
+      dispatch(newError(
+        `New Building Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
     });
   };
 };
 
-// trigger error
-export function authError(error) {
-  return {
-    type: ActionTypes.ERROR,
-    message: error,
+
+export const getBuildingIDs = (offset) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/buildings`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { offset },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Building IDs Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
+      } else {
+        const buildings = response.data.buildings;
+        dispatch({ type: ActionTypes.GET_BUILDING_IDS, buildings });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Building IDs Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
+    });
   };
-}
+};
+
+
+export const getLocationInfo = (id) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/buildings/info`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { id, fields: ['centroid'] },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Location Info Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
+      } else {
+        const centroid = response.data.centroid;
+        dispatch({
+          type: ActionTypes.GET_LOCATION_INFO,
+          building: { id, centroid },
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Location Info Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};

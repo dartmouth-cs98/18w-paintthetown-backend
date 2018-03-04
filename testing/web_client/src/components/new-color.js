@@ -64,6 +64,13 @@ class NewColor extends Component {
     this.onChange = this.onChange.bind(this);
   }
 
+  componentWillReceiveProps(props) {
+    if (props.colors.error !== null &&
+        props.colors.error !== this.props.colors.error) {
+      this.props.displayError(props.colors.error, 'color');
+    }
+  }
+
   onChange(type, e) {
     const { data } = this.state;
 

@@ -17,7 +17,9 @@ function tokenForUser(user) {
 export const signUp = (req, res) => {
   if (!hasProps(req.body, ['name', 'lastName'])) {
     res.json({
-      error: 'Users need \'email\', \'password\', \'name\', and \'lastName\' fields',
+      error: {
+        errmsg: 'Users need \'email\', \'password\', \'name\', and \'lastName\' fields',
+      },
     });
   } else {
     const user = new User();
@@ -32,6 +34,7 @@ export const signUp = (req, res) => {
 
     user.name = req.body.name;
     user.lastName = req.body.lastName;
+    user.role = 'user';
 
     let name = `${user.name} `;
 
@@ -52,7 +55,7 @@ export const signUp = (req, res) => {
       res.json({ token, id: result._id });
     })
     .catch(error => {
-      res.json({ error: error.message });
+      res.json({ error: { errmsg: error.message } });
     });
   }
 };
@@ -78,7 +81,7 @@ export const getUserData = (req, res) => {
 export const addUserToTeam = (req, res) => {
   if (!hasProp(req.body, ['team'])) {
     res.json({
-      error: 'Query needs \'email\' field.',
+      error: { errmsg: 'Query needs \'email\' field.' },
     });
   } else {
     const user = req.user;
@@ -92,7 +95,7 @@ export const addUserToTeam = (req, res) => {
       res.json({ user: _id, team });
     })
     .catch(error => {
-      res.json({ error: error.message });
+      res.json({ error: { errmsg: error.message } });
     });
   }
 };
@@ -100,7 +103,7 @@ export const addUserToTeam = (req, res) => {
 export const addFriend = (req, res) => {
   if (!hasProp(req.body, ['friend'])) {
     res.json({
-      error: 'Query needs \'email\' field.',
+      error: { errmsg: 'Query needs \'email\' field.' },
     });
   } else {
     const user = req.user;
@@ -125,11 +128,11 @@ export const addFriend = (req, res) => {
         });
       })
       .catch(error => {
-        res.json({ error: error.message });
+        res.json({ error: { errmsg: error.message } });
       });
     })
     .catch(error => {
-      res.json({ error: error.message });
+      res.json({ error: { errmsg: error.message } });
     });
   }
 };

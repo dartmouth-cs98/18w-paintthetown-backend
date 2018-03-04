@@ -21,7 +21,6 @@ const ColorSchema = new Schema({
   rgb: {
     type: [Number],
     required: true,
-    unique: true,
     validate: {
       validator: (rgb) => (checkLengthArray(rgb, 3) && inRange(rgb[0], 0, 255) && inRange(rgb[1], 0, 255) && inRange(rgb[2], 0, 255)),
       message: '{VALUE} is not a valid RGB color.',
