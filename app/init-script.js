@@ -18,8 +18,6 @@ export default (collections) => (new Promise((resolve, reject) => {
     })))
   );
 
-  console.log(users);
-
   red.name = 'red';
   red.hex = '#ff0000';
   red.rgb = [255, 0, 0];
