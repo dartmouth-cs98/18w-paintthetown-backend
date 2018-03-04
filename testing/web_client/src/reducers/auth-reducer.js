@@ -17,17 +17,14 @@ function AuthReducer(state = defaultAuth, action) {
         authenticated: false,
       });
 
-    case ActionTypes.ERROR:
-      console.log(action.message);
+    case ActionTypes.AUTH_ERROR:
       return Object.assign({}, state, {
         authenticated: false,
         error: action.message,
       });
 
-    case ActionTypes.CLEAR_ERR:
-      return Object.assign({}, state, {
-        error: null,
-      });
+    case ActionTypes.CLEAR_AUTH_ERROR:
+      return Object.assign({}, state, { error: null });
 
     default:
       return state;

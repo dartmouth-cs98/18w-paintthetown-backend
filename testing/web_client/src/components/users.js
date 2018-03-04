@@ -37,6 +37,11 @@ class Users extends Component {
         userDataToggled: false,
       });
     }
+
+    if (props.users.error !== null &&
+        props.users.error !== this.props.users.error) {
+      this.props.displayError(props.users.error, 'user');
+    }
   }
 
   render() {
@@ -54,7 +59,10 @@ class Users extends Component {
             userDataToggled: false,
           });
         }}>Sign In</div>
-        <SignIn toggled={this.state.signInToggled} />
+        <SignIn
+          displayError={this.props.displayError}
+          toggled={this.state.signInToggled}
+        />
         <div className="tab" onClick={() => {
           this.setState({
             signInToggled: false,
@@ -63,7 +71,10 @@ class Users extends Component {
             userDataToggled: false,
           });
         }}>Sign Up</div>
-        <SignUp toggled={this.state.signUpToggled} />
+        <SignUp
+          displayError={this.props.displayError}
+          toggled={this.state.signUpToggled}
+        />
         <div className="tab" onClick={() => {
           if (!this.state.userDataToggled) { this.props.getUserData(); }
 
@@ -74,7 +85,11 @@ class Users extends Component {
             userDataToggled: !this.state.userDataToggled,
           });
         }}>User Data</div>
-        <UserData toggled={this.state.userDataToggled} userData={this.props.users.data} />
+        <UserData
+          displayError={this.props.displayError}
+          toggled={this.state.userDataToggled}
+          userData={this.props.users.data}
+        />
         <div className="tab" onClick={() => {
           this.setState({
             signInToggled: false,

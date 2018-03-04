@@ -10,6 +10,7 @@ const TeamSchema = new Schema({
   type: { // global, private, public
     type: String,
     required: true,
+    enum: ['global', 'private', 'public'],
   },
   color: {
     type: mongoose.Schema.ObjectId,

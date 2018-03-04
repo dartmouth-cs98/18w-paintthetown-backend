@@ -12,13 +12,15 @@ function UsersReducer(state = defaultColors, action) {
       return Object.assign({ }, state, { latestID: action.id });
 
     case ActionTypes.GET_COLOR_DATA:
-      console.log(action.hex);
       return Object.assign({ }, state, { fontColor: action.hex });
 
-    case ActionTypes.ERROR:
+    case ActionTypes.COLOR_ERROR:
       return Object.assign({}, state, {
         error: action.message,
       });
+
+    case ActionTypes.CLEAR_COLOR_ERROR:
+      return Object.assign({}, state, { error: null });
 
     default:
       return state;

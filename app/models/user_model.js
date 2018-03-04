@@ -16,12 +16,19 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    required: true,
+    enum: ['user', 'admin'],
+  },
   typeOfLogin: {
     type: String,
+    enum: ['email', 'facebook'],
     required: true,
   },
   email: {
     type: String,
+    unique: true,
     lowercase: true,
     validate: {
       validator: (email) => (emailValidator.test(email)),

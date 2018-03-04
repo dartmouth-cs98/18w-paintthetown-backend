@@ -43,7 +43,10 @@ class Colors extends Component {
               newColorToggled: !this.state.newColorToggled,
             });
           }}>New Color</div>
-          <NewColor toggled={this.state.newColorToggled} />
+          <NewColor
+            displayError={this.props.displayError}
+            toggled={this.state.newColorToggled}
+          />
         </div>
       ) : (
         <div id="colors">

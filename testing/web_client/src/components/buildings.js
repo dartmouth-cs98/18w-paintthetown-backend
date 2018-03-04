@@ -2,13 +2,14 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import {
-  newBuilding,
+  getBuildingIDs,
 } from '../actions';
 
 import NewBuilding from './new-building';
+import GetLocationInfo from './get-location-info';
 
 const mapStateToProps = (state) => ({
-  users: state.users,
+  buildings: state.buildings,
 });
 
 // example class based component (smart component)
@@ -18,6 +19,7 @@ class Buildings extends Component {
 
     this.state = {
       newBuildingToggled: false,
+      getLocationInfoToggled: false,
     };
   }
 
@@ -25,6 +27,7 @@ class Buildings extends Component {
     if (!props.toggled && this.props.toggled) {
       this.setState({
         newBuildingToggled: false,
+        getLocationInfoToggled: false,
       });
     }
   }
@@ -38,17 +41,36 @@ class Buildings extends Component {
             onClick={() => { this.props.toggle('buildings'); }}
           >Buildings</div>
           <div className="tab" onClick={() => {
-            this.setState({ newBuildingToggled: !this.state.newBuildingToggled });
+            this.setState({
+              newBuildingToggled: !this.state.newBuildingToggled,
+              getLocationInfoToggled: false,
+            });
           }}>New Building</div>
-          <NewBuilding toggled={this.state.newBuildingToggled} />
-          <div className="tab" onClick={() => { }}>Get Location Info</div>
+          <NewBuilding
+            displayError={this.props.displayError}
+            toggled={this.state.newBuildingToggled}
+          />
+          <div className="tab" onClick={() => {
+            if (!this.state.getLocationInfoToggled) {
+              this.props.getBuildingIDs(0);
+            }
+
+            this.setState({
+              newBuildingToggled: false,
+              getLocationInfoToggled: !this.state.getLocationInfoToggled,
+            });
+          }}>Get Location Info</div>
+          <GetLocationInfo
+            displayError={this.props.displayError}
+            toggled={this.state.getLocationInfoToggled}
+          />
         </div>
       ) : (
         <div id="buildings">
           <div
             className={`large-tab${this.props.toggled ? ' active' : ''}`}
             onClick={() => { this.props.toggle('buildings'); }}
-          >Colors</div>
+          >Buildings</div>
           <h1>No token available</h1>
         </div>
       )
@@ -57,5 +79,5 @@ class Buildings extends Component {
 }
 
 export default connect(mapStateToProps, {
-  newBuilding,
+  getBuildingIDs,
 })(Buildings);

@@ -9,7 +9,7 @@ import { hasProps } from '../utils';
 export const newColor = (req, res) => {
   if (!hasProps(req.body, ['name', 'hex', 'rgb'])) {
     res.json({
-      error: 'Colors need \'name\', \'hex\', and \'rgb\' fields.',
+      error: { errmsg: 'Colors need \'name\', \'hex\', and \'rgb\' fields.' },
     });
   } else {
     const color = new Color();
@@ -25,7 +25,7 @@ export const newColor = (req, res) => {
       res.json({ id: result._id });
     })
     .catch(error => {
-      res.json({ error: error.message });
+      res.json({ error: { errmsg: error.message } });
     });
   }
 };
@@ -34,7 +34,7 @@ export const newColor = (req, res) => {
 export const getColorData = (req, res) => {
   if (!hasProps(req.query, ['id'])) {
     res.json({
-      error: 'Color query needs a color \'id\' field.',
+      error: { errmsg: 'Color query needs a color \'id\' field.' },
     });
   } else {
     const { id } = req.query;
@@ -46,7 +46,7 @@ export const getColorData = (req, res) => {
       res.json(result);
     })
     .catch(error => {
-      res.json({ error: error.message });
+      res.json({ error: { errmsg: error.message } });
     });
   }
 };

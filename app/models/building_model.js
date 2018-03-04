@@ -18,8 +18,7 @@ const BuildingSchema = new Schema({
     default: [],
   },
   centroid: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Coordinate',
+    type: [Number],
     required: true,
   },
   baseAltitude: {
@@ -28,13 +27,6 @@ const BuildingSchema = new Schema({
   },
   topAltitude: {
     type: Number,
-    required: true,
-  },
-  polyhedron: {
-    type: [{
-      type: mongoose.Schema.ObjectId,
-      ref: 'Coordinate',
-    }],
     required: true,
   },
   city: {

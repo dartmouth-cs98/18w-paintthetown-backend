@@ -14,11 +14,13 @@ function UsersReducer(state = defaultUsers, action) {
     case ActionTypes.TOKENIZE_FACEBOOK_CODE:
       return Object.assign({ }, state, { tokenizedFacebookCode: action.token });
 
-    case ActionTypes.ERROR:
-      console.log(action.message);
+    case ActionTypes.USER_ERROR:
       return Object.assign({}, state, {
         error: action.message,
       });
+
+    case ActionTypes.CLEAR_USER_ERROR:
+      return Object.assign({}, state, { error: null });
 
     default:
       return state;

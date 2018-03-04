@@ -36,6 +36,13 @@ class SignIn extends Component {
     this.onChange = this.onChange.bind(this);
   }
 
+  componentWillReceiveProps(props) {
+    if (props.auth.error !== null &&
+        props.auth.error !== this.props.auth.error) {
+      this.props.displayError(props.auth.error, 'auth');
+    }
+  }
+
   onChange(type, e) {
     const { data } = this.state;
 
