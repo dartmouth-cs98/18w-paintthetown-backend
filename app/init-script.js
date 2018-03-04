@@ -4,7 +4,7 @@ import User from './models/user_model';
 
 import config from './config';
 
-export default () => (new Promise((resolve, reject) => {
+export default (collections) => (new Promise((resolve, reject) => {
   const red = new Color();
   const blue = new Color();
 
@@ -17,6 +17,8 @@ export default () => (new Promise((resolve, reject) => {
       typeOfLogin: 'email',
     })))
   );
+
+  console.log(users);
 
   red.name = 'red';
   red.hex = '#ff0000';

@@ -57,7 +57,7 @@ export const resetDB = (req, res) => {
       message = `Successfully removed ${total} items from ${collections.length} collection${collections.length > 1 ? 's' : ''}.`;
       console.log(`POST: ${message}`);
 
-      return initScript();
+      return initScript(collections);
     })
     .then(() => { res.json({ message }); })
     .catch(error => {
