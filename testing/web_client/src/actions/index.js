@@ -223,6 +223,7 @@ export const getColorData = (id) => (
 
 // BUILDING ACTIONS
 export const newBuilding = ({
+  id,
   name,
   centroidLng,
   centroidLat,
@@ -231,6 +232,7 @@ export const newBuilding = ({
 }) => {
   return (dispatch) => {
     const building = {
+      id,
       name,
       centroid: [centroidLng, centroidLat],
       baseAltitude,
@@ -247,8 +249,7 @@ export const newBuilding = ({
           ActionTypes.BUILDING_ERROR,
         ));
       } else {
-        const id = response.data.id;
-        dispatch({ type: ActionTypes.NEW_BUILDING, id });
+        dispatch({ type: ActionTypes.NEW_BUILDING, id: response.data.id });
       }
     })
     .catch(error => {

@@ -45,6 +45,7 @@ class NewBuilding extends Component {
     this.state = {
       data: {
         name: '',
+        id: '',
         centroidLng: null,
         centroidLat: null,
         baseAltitude: null,
@@ -94,6 +95,13 @@ class NewBuilding extends Component {
       <div id="new-building" className={this.props.toggled ? 'normal' : 'hidden'}>
         <form autoComplete="on" onSubmit={this.handleSubmit}>
           <input autoComplete="on" type="text" placeholder="* Name" value={this.state.data.name} onChange={e => { this.onChange('name', e); }} />
+          <input
+            autoComplete="on"
+            type="text"
+            placeholder="* ID"
+            value={this.state.data.id}
+            onChange={e => { this.onChange('id', e); }}
+          />
           <input
             autoComplete="on"
             type="number"
