@@ -7,15 +7,17 @@ import { hasProp, hasProps } from '../utils';
 
 
 export const newBuilding = (req, res) => {
-  if (!hasProps(req.body, ['name', 'centroid', 'baseAltitude', 'topAltitude'])) {
+  if (!hasProps(req.body, ['name', 'centroid', 'baseAltitude', 'topAltitude', 'id'])) {
     res.json({
       error: {
-        errmsg: 'Building needs \'name\', \'centroid\', \'baseAltitude\', and \'topAltitude\' fields.',
+        errmsg: 'Building needs \'id\', \'name\', \'centroid\', \'baseAltitude\', and \'topAltitude\' fields.',
       },
     });
   } else {
     const building = new Building();
+    const id = req.body.id;
 
+    building.id = id;
     building.name = req.body.name;
     building.centroid = req.body.centroid;
     building.baseAltitude = req.body.baseAltitude;
@@ -37,7 +39,7 @@ export const newBuilding = (req, res) => {
     .then(result => {
       console.log(`POST:\tAdded building ${building.name}.`);
 
-      res.json({ id: result._id });
+      res.json({ id });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
@@ -48,7 +50,7 @@ export const newBuilding = (req, res) => {
 export const getBuildingIDs = (req, res) => {
   const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
 
-  Building.find({}, ['_id'], {
+  Building.find({}, ['id'], {
     skip: offset,
     limit: offset + 5,
     sort: { name: 1 },
@@ -68,10 +70,10 @@ export const getInfo = (req, res) => {
       error: { errmsg: 'getInfo needs a building \'id\' and \'fields\' field.' },
     });
   } else {
-    const { id, fields } = req.query;
-    const _id = mongoose.Types.ObjectId(id);
+    const { fields } = req.query;
+    const id = req.query.id;
 
-    Building.findById(_id, fields)
+    Building.findOne({ id }, fields)
     .then(result => {
       res.json(result);
       console.log(`GET:\tSending data for building with id ${id}.`);

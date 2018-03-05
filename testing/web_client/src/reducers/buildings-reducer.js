@@ -26,7 +26,7 @@ function BuildingReducer(state = defaultColors, action) {
 
     case ActionTypes.GET_BUILDING_IDS:
       return Object.assign({ }, state, {
-        buildings: action.buildings.map(({ _id }) => (_id)),
+        buildings: action.buildings.map(({ id }) => (id)),
       });
 
     case ActionTypes.GET_LOCATION_INFO:
