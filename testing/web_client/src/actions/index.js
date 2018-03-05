@@ -314,3 +314,33 @@ export const getLocationInfo = (id) => {
     });
   };
 };
+
+export const getInfo = (id) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/buildings/getInfo`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { id, fields: ['team'] },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Info Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
+      } else {
+        const team = response.data.team;
+        dispatch({
+          type: ActionTypes.GET_INFO,
+          building: { id, team },
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Info Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};
