@@ -16,9 +16,10 @@ const AchievementSchema = new Schema({
     required: true,
   },
   type: {
-      type: 'String',
-      enum: ['coverage','possession','special-building','unlock','miscellaneous'],
-  };
+    type: 'String',
+    enum: ['coverage', 'possession', 'special-building', 'unlock', 'miscellaneous'],
+  },
+});
 
 // create model class
 const AchievementModel = mongoose.model('Achievement', AchievementSchema);
