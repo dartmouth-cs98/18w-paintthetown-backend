@@ -32,6 +32,9 @@ function BuildingReducer(state = defaultColors, action) {
     case ActionTypes.GET_LOCATION_INFO:
       return Object.assign({ }, state, { latestBuilding: action.building });
 
+    case ActionTypes.GET_INFO:
+      return Object.assign({ }, state, { latestBuilding: action.building });
+
     case ActionTypes.CLEAR_BUILDING_ERROR:
       return Object.assign({}, state, { error: null });
 
