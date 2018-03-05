@@ -1,5 +1,5 @@
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
+const fileLoader = require('file-loader');
 const autoprefixer = require('autoprefixer');
 
 module.exports = {
@@ -19,10 +19,11 @@ module.exports = {
     },
     {
       test: /\.scss/,
-      loader: ExtractTextPlugin.extract('style-loader', 'css-loader!sass-loader!postcss-loader'),
-    },
-      // You could also use other loaders the same way. I. e. the autoprefixer-loader
-    ],
+      loader: ExtractTextPlugin.extract('style-loader', 'css-loader?url=false !sass-loader!postcss-loader'),
+    }, {
+      test: /\.(png|svg|jpg|gif)$/,
+      loader: 'file-loader',
+    }],
   },
   postcss: [autoprefixer({ browsers: ['last 2 versions'] })],
   plugins: [

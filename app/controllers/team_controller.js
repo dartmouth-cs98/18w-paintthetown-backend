@@ -1,6 +1,9 @@
-import Team from '../models/team_model.js';
+import mongoose from 'mongoose';
 
-import { hasProps } from '../utils';
+import Team from '../models/team_model.js';
+import User from '../models/user_model.js';
+
+import { hasProps, hasProp } from '../utils';
 
 
 export const createTeam = (req, res) => {
@@ -27,15 +30,35 @@ export const createTeam = (req, res) => {
   }
 };
 
+export const getTeamIDs = (req, res) => {
+  const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
+
+  Team.find({}, ['_id'], {
+    skip: offset,
+    limit: offset + 5,
+    sort: { name: 1 },
+  })
+  .then(teams => {
+    console.log(`GET:\tSending ${teams.length} team ID${teams.length === 1 ? '' : 's'}.`);
+
+    res.json({ teams });
+  })
+  .catch(error => {
+    res.json({ error: { errmsg: error.message } });
+  });
+};
+
 export const countUsers = (req, res) => {
-  if (!hasProps(req.params, ['id'])) {
+  if (!hasProps(req.query, ['id'])) {
     res.json({
       error: 'countUsers needs an \'id\' field (id of team).',
     });
   } else {
-    User.find({ team: req.params.id })
+    const team = mongoose.Types.ObjectId(req.query.id);
+
+    User.find({ team }, ['_id']).count()
     .then(userCount => {
-      return User.count({ team: req.params.id }).exec();
+      res.json({ userCount });
     })
     .catch(error => {
       res.json({ error: error.message });

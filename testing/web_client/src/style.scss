@@ -126,12 +126,20 @@ body {
             height: 220px;
           }
 
-          &#get-location-info {
+          &#get-building-info {
             display: flex;
             flex-direction: column;
             justify-content: space-around;
             align-items: center;
-            height: 150px;
+            height: 175px;
+
+            h1 {
+              margin: 0;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              width: 100%;
+            }
           }
 
           &#user-data {

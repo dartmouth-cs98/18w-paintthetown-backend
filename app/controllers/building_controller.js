@@ -123,22 +123,23 @@ export const getTeam = (req, res) => {
 
 // POST
 export const updateTeam = (req, res) => {
-  if (!hasProp(req.body, ['building_id', 'team_id'])) {
+  if (!hasProps(req.body, ['building', 'team'])) {
     res.json({
       error: {
-        errmsg: 'updateTeam needs \'building_id\' for building and \'team_id\' field.',
+        errmsg: 'updateTeam needs \'building\' for building and \'team\' field.',
       },
     });
   } else {
-    const team = req.body.team_id;
+    const team = mongoose.Types.ObjectId(req.body.team);
+    const _id = mongoose.Types.ObjectId(req.body.building);
 
     Team.findById(team)
     .then(result => (
-      Building.update({ _id: req.body.building_id }, { team })
+      Building.update({ _id }, { team })
     ))
-    .then(result => {
-      console.log(`POST:\tUpdated building ${result._id} to team with id ${team}.`);
-      res.json({ building: req.body.building_id, team });
+    .then(({ nModified }) => {
+      console.log(`POST:\tUpdated ${nModified} building${nModified === 1 ? '' : 's'} to team with id ${team}.`);
+      res.json({ building: req.body.building, team });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
