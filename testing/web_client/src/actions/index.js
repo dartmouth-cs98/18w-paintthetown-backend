@@ -11,15 +11,19 @@ export const ActionTypes = {
   AUTH_ERROR: 'AUTH_ERROR',
   COLOR_ERROR: 'COLOR_ERROR',
   BUILDING_ERROR: 'BUILDING_ERROR',
+  TEAM_ERROR: 'TEAM_ERROR',
   CLEAR_USER_ERROR: 'CLEAR_USER_ERROR',
   CLEAR_AUTH_ERROR: 'CLEAR_AUTH_ERROR',
   CLEAR_COLOR_ERROR: 'CLEAR_COLOR_ERROR',
   CLEAR_BUILDING_ERROR: 'CLEAR_BUILDING_ERROR',
+  CLEAR_TEAM_ERROR: 'CLEAR_TEAM_ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
   NEW_BUILDING: 'NEW_BUILDING',
   GET_BUILDING_IDS: 'GET_BUILDING_IDS',
   GET_LOCATION_INFO: 'GET_LOCATION_INFO',
+  GET_TEAM_IDS: 'GET_TEAM_IDS',
+  UPDATE_TEAM_BUILDING: 'UPDATE_TEAM_BUILDING',
 };
 
 // trigger error
@@ -285,31 +289,92 @@ export const getBuildingIDs = (offset) => {
 };
 
 
-export const getLocationInfo = (id) => {
+export const getBuildingInfo = (id, field) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/buildings/info`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { id, fields: ['centroid'] },
+      params: { id, fields: [field] },
     })
     .then(response => {
       if (response.data.error) {
         const error = response.data.error.errmsg;
         dispatch(newError(
-          `Get Location Info Failed: ${error}`,
+          `Get Building Info Failed: ${error}`,
           ActionTypes.BUILDING_ERROR,
         ));
       } else {
-        const centroid = response.data.centroid;
+        const info = { field, data: response.data[field] };
+
         dispatch({
           type: ActionTypes.GET_LOCATION_INFO,
-          building: { id, centroid },
+          building: { id, info },
         });
       }
     })
     .catch(error => {
       dispatch(newError(
-        `Get Location Info Failed: ${error}`,
+        `Get Building Info Failed: ${error}`,
         ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};
+
+export const updateTeamBuilding = (body) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/buildings/updateTeam`, body, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+
+        dispatch(newError(
+          `Update Team Building Info Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
+      } else {
+        dispatch({
+          type: ActionTypes.UPDATE_TEAM_BUILDING,
+          team: response.data.team,
+          building: response.data.building,
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Update Team Building Info Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};
+
+
+// TEAM ACTIONS
+
+export const getTeamIDs = (offset) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/teams`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { offset },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Team IDs Failed: ${error}`,
+          ActionTypes.TEAM_ERROR,
+        ));
+      } else {
+        const teams = response.data.teams;
+        dispatch({ type: ActionTypes.GET_TEAM_IDS, teams });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Team IDs Failed: ${error}`,
+        ActionTypes.TEAM_ERROR,
       ));
     });
   };

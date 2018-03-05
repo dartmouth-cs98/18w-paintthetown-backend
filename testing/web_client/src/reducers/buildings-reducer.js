@@ -3,7 +3,7 @@ import { ActionTypes } from '../actions';
 const defaultColors = {
   latestBuilding: {
     id: null,
-    centroid: null,
+    info: null,
   },
   buildings: null,
   error: null,
@@ -15,7 +15,7 @@ function BuildingReducer(state = defaultColors, action) {
       return Object.assign({ }, state, {
         latestBuilding: {
           id: action.id,
-          centroid: null,
+          info: null,
         },
       });
 

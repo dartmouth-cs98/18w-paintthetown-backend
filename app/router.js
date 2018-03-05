@@ -37,6 +37,7 @@ router.route('/colors')
       .post(requireAuth, Colors.newColor);
 
 router.route('/teams')
+      .get(requireAuth, Teams.getTeamIDs)
       .post(requireAuth, Teams.createTeam);
 
 router.route('/teams/countUsers')

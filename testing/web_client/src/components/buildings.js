@@ -3,10 +3,12 @@ import { connect } from 'react-redux';
 
 import {
   getBuildingIDs,
+  getTeamIDs,
 } from '../actions';
 
 import NewBuilding from './new-building';
-import GetLocationInfo from './get-location-info';
+import GetBuildingInfo from './get-building-info';
+import UpdateTeamBuilding from './update-team-building';
 
 const mapStateToProps = (state) => ({
   buildings: state.buildings,
@@ -20,6 +22,7 @@ class Buildings extends Component {
     this.state = {
       newBuildingToggled: false,
       getLocationInfoToggled: false,
+      updateTeamBuildingToggled: false,
     };
   }
 
@@ -28,6 +31,7 @@ class Buildings extends Component {
       this.setState({
         newBuildingToggled: false,
         getLocationInfoToggled: false,
+        updateTeamBuildingToggled: false,
       });
     }
   }
@@ -44,6 +48,7 @@ class Buildings extends Component {
             this.setState({
               newBuildingToggled: !this.state.newBuildingToggled,
               getLocationInfoToggled: false,
+              updateTeamBuildingToggled: false,
             });
           }}>New Building</div>
           <NewBuilding
@@ -58,11 +63,28 @@ class Buildings extends Component {
             this.setState({
               newBuildingToggled: false,
               getLocationInfoToggled: !this.state.getLocationInfoToggled,
+              updateTeamBuildingToggled: false,
             });
-          }}>Get Location Info</div>
-          <GetLocationInfo
+          }}>Get Info</div>
+          <GetBuildingInfo
             displayError={this.props.displayError}
             toggled={this.state.getLocationInfoToggled}
+          />
+          <div className="tab" onClick={() => {
+            if (!this.state.updateTeamBuildingToggled) {
+              this.props.getBuildingIDs(0);
+              this.props.getTeamIDs(0);
+            }
+
+            this.setState({
+              newBuildingToggled: false,
+              getLocationInfoToggled: false,
+              updateTeamBuildingToggled: !this.state.updateTeamBuildingToggled,
+            });
+          }}>Update Team</div>
+          <UpdateTeamBuilding
+            displayError={this.props.displayError}
+            toggled={this.state.updateTeamBuildingToggled}
           />
         </div>
       ) : (
@@ -80,4 +102,5 @@ class Buildings extends Component {
 
 export default connect(mapStateToProps, {
   getBuildingIDs,
+  getTeamIDs,
 })(Buildings);
