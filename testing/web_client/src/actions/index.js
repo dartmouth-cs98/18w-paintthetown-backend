@@ -19,6 +19,7 @@ export const ActionTypes = {
   CLEAR_TEAM_ERROR: 'CLEAR_TEAM_ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
+  GET_COLOR_IDS: 'GET_COLOR_IDS',
   NEW_BUILDING: 'NEW_BUILDING',
   GET_BUILDING_IDS: 'GET_BUILDING_IDS',
   GET_LOCATION_INFO: 'GET_LOCATION_INFO',
@@ -149,28 +150,7 @@ export function signOut(user) {
   };
 }
 
-// export function facebookAuth() {
-//   return (dispatch) => {
-//     axios.get(`${ROOT_URL}/auth/facebook`, { headers: {
-//       'Access-Control-Allow-Origin': '*',
-//       'Content-Type': 'application/json',
-//     } })
-//     .then(response => {
-//       if (response.data.error) {
-//         dispatch(authError(`Sign in Failed: ${response.data.error.errmsg}`));
-//       } else {
-//         const token = response.data.token;
-//
-//         localStorage.setItem('token', token);
-//
-//         dispatch({ type: ActionTypes.AUTH_USER });
-//       }
-//     })
-//     .catch(error => {
-//       dispatch(authError(`Facebook auth failed: ${error}`));
-//     });
-//   };
-// }
+
 
 
 // COLOR ACTIONS
@@ -197,6 +177,34 @@ export const newColor = (color) => {
   };
 };
 
+
+export const getColorIDs = (offset) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/colors/ids`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { offset },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Color IDs Failed: ${error}`,
+          ActionTypes.COLOR_ERROR,
+        ));
+      } else {
+        const colors = response.data.colors;
+        dispatch({ type: ActionTypes.GET_COLOR_IDS, colors });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Color IDs Failed: ${error}`,
+        ActionTypes.COLOR_ERROR,
+      ));
+    });
+  };
+};
+
 export const getColorData = (id) => (
   (dispatch) => {
     return axios.get(`${ROOT_URL}/colors`, {
@@ -215,7 +223,7 @@ export const getColorData = (id) => (
       }
     })
     .catch(error => {
-      dispatch(newError(`Get Color Failed: ${error}`, ActionTypes.COLOR_ERROR));
+      dispatch(newError(`Get Color Data Failed: ${error}`, ActionTypes.COLOR_ERROR));
     });
   }
 );

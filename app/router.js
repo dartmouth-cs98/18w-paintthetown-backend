@@ -36,6 +36,9 @@ router.route('/colors')
       .get(requireAuth, Colors.getColorData)
       .post(requireAuth, Colors.newColor);
 
+router.route('/colors/ids')
+      .get(requireAuth, Colors.getColorIDs)
+
 router.route('/teams')
       .get(requireAuth, Teams.getTeamIDs)
       .post(requireAuth, Teams.createTeam);

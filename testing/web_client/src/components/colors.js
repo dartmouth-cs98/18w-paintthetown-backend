@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import NewColor from './new-color';
+import GetColorData from './get-color-data';
+import { getColorIDs } from '../actions';
 
 const mapStateToProps = (state) => ({
   colors: state.colors,
@@ -15,6 +17,7 @@ class Colors extends Component {
     // init component state here
     this.state = {
       newColorToggled: false,
+      getColorDataToggled: false,
     };
   }
 
@@ -22,6 +25,7 @@ class Colors extends Component {
     if (!props.toggled && this.props.toggled) {
       this.setState({
         newColorToggled: false,
+        getColorDataToggled: false,
       });
     }
 
@@ -41,11 +45,26 @@ class Colors extends Component {
           <div className="tab" onClick={() => {
             this.setState({
               newColorToggled: !this.state.newColorToggled,
+              getColorDataToggled: false,
             });
           }}>New Color</div>
           <NewColor
             displayError={this.props.displayError}
             toggled={this.state.newColorToggled}
+          />
+          <div className="tab" onClick={() => {
+            if (!this.state.getColorDataToggled) {
+              this.props.getColorIDs(0);
+            }
+
+            this.setState({
+              newColorToggled: false,
+              getColorDataToggled: !this.state.newColorToggled,
+            });
+          }}>Get Color Data</div>
+          <GetColorData
+            displayError={this.props.displayError}
+            toggled={this.state.getColorDataToggled}
           />
         </div>
       ) : (
@@ -61,4 +80,4 @@ class Colors extends Component {
   }
 }
 
-export default connect(mapStateToProps, { })(Colors);
+export default connect(mapStateToProps, { getColorIDs })(Colors);
