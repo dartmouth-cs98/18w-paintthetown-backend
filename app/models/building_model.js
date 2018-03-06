@@ -2,6 +2,11 @@ import mongoose, { Schema } from 'mongoose';
 
 // create a schema for posts with a field
 const BuildingSchema = new Schema({
+  id: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     required: true,
