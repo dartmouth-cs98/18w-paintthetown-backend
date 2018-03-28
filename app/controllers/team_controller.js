@@ -33,7 +33,7 @@ export const createTeam = (req, res) => {
 export const getTeamIDs = (req, res) => {
   const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
 
-  Team.find({}, ['_id'], {
+  Team.find({}, ['_id', 'color'], {
     skip: offset,
     limit: offset + 5,
     sort: { name: 1 },
