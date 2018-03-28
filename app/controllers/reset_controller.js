@@ -11,7 +11,7 @@ import Team from '../models/team_model.js';
 import User from '../models/user_model.js';
 
 import { hasProps } from '../utils';
-import initScript from '../init-script';
+import initScript from '../init_script';
 
 const MODELS = {
   Building,
