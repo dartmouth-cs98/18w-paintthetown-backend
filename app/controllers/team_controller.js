@@ -38,6 +38,7 @@ export const getTeamIDs = (req, res) => {
     limit: offset + 5,
     sort: { name: 1 },
   })
+  .populate('color', 'name')
   .then(teams => {
     console.log(`GET:\tSending ${teams.length} team ID${teams.length === 1 ? '' : 's'}.`);
 
