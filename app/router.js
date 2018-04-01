@@ -27,7 +27,7 @@ router.route('/reset')
 
 router.route('/users')
       .get(requireAuth, Users.getUserData)
-      .put(requireAuth, Users.addUserToTeam);
+      .post(requireAuth, Users.addUserToTeam);
 
 router.route('/users/friends')
       .post(requireAuth, Users.addFriend);

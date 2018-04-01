@@ -149,12 +149,15 @@ passport.use(customAuth);
 
 export const requireAuthFacebook = (req, res, next, callback) => {
   passport.authenticate('facebook-token', (err, user) => {
-    if (err) {
-      console.log(req.query);
-      console.log('here');
+    if (err || !user) {
+      if (err === null) {
+        return res.json({ error: 'Facebook authentication token required.' });
+      }
+
       return res.json({ error: err });
     }
-    return callback(Object.assign({ user }, req), res);
+
+    return callback(Object.assign(req, { user }), res);
   })(req, res, next);
 };
 

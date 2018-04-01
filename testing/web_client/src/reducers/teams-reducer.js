@@ -7,6 +7,7 @@ const defaultTeams = {
 function TeamsReducer(state = defaultTeams, action) {
   switch (action.type) {
     case ActionTypes.GET_TEAM_IDS:
+      console.log(action.teams);
       return Object.assign({ }, state, {
         teams: action.teams.map(({ _id }) => (_id)),
       });
