@@ -28,6 +28,9 @@ router.route('/users')
       .get(requireAuth, Users.getUserData)
       .post(requireAuth, Users.addUserToTeam);
 
+router.route('/users/updateInfo')
+      .post(requireAuth, Users.updateUserData);
+
 router.route('/users/friends')
       .post(requireAuth, Users.addFriend);
 
