@@ -2,7 +2,6 @@ import Building from '../models/building_model.js';
 import City from '../models/city_model.js';
 import Color from '../models/color_model.js';
 import Continent from '../models/continent_model.js';
-import Coordinate from '../models/coordinate_model.js';
 import Country from '../models/country_model.js';
 import Pattern from '../models/pattern_model.js';
 import Splotch from '../models/splotch_model.js';
@@ -18,7 +17,6 @@ const MODELS = {
   City,
   Color,
   Continent,
-  Coordinate,
   Country,
   Pattern,
   Splotch,
@@ -55,11 +53,13 @@ export const resetDB = (req, res) => {
       });
 
       message = `Successfully removed ${total} items from ${collections.length} collection${collections.length > 1 ? 's' : ''}.`;
-      console.log(`POST: ${message}`);
 
       return initScript(collections);
     })
-    .then(() => { res.json({ message }); })
+    .then(() => {
+      console.log(`POST: ${message}`);
+      res.json({ message });
+    })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
     });

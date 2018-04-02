@@ -133,11 +133,11 @@ export const updateTeam = (req, res) => {
     });
   } else {
     const team = mongoose.Types.ObjectId(req.body.team);
-    const _id = mongoose.Types.ObjectId(req.body.building);
+    const id = req.body.building;
 
     Team.findById(team)
     .then(result => (
-      Building.update({ _id }, { team })
+      Building.update({ id }, { team })
     ))
     .then(({ nModified }) => {
       console.log(`POST:\tUpdated ${nModified} building${nModified === 1 ? '' : 's'} to team with id ${team}.`);

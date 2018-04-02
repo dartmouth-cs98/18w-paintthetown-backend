@@ -5,6 +5,7 @@ import UsersReducer from './users-reducer';
 import ColorsReducer from './colors-reducer';
 import BuildingsReducer from './buildings-reducer';
 import TeamsReducer from './teams-reducer';
+import ResetReducer from './reset-reducer';
 
 const rootReducer = combineReducers({
   auth: AuthReducer,
@@ -12,6 +13,7 @@ const rootReducer = combineReducers({
   colors: ColorsReducer,
   buildings: BuildingsReducer,
   teams: TeamsReducer,
+  reset: ResetReducer,
 });
 
 export default rootReducer;

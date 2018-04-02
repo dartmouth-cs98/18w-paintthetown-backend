@@ -15,7 +15,6 @@ import * as Splotches from './controllers/splotch_controller';
 import * as Buildings from './controllers/building_controller';
 import * as Cities from './controllers/city_controller';
 import * as Continents from './controllers/continent_controller';
-import * as Coordinates from './controllers/coordinate_controller';
 import * as Countries from './controllers/country_controller';
 import * as Tags from './controllers/tag_controller';
 import * as Reset from './controllers/reset_controller';
@@ -40,8 +39,8 @@ router.route('/teams')
       .get(requireAuth, Teams.getTeamIDs)
       .post(requireAuth, Teams.createTeam);
 
-router.route('/teams/countUsers')
-      .get(requireAuth, Teams.countUsers);
+router.route('/teams/info')
+      .get(requireAuth, Teams.getInfo);
 
 router.route('/patterns')
       .post(requireAuth, Patterns.newPattern);
@@ -64,9 +63,6 @@ router.route('/buildings/updateTeam')
 
 router.route('/cities')
       .post(requireAuth, Cities.newCity);
-
-router.route('/coordinates')
-      .post(requireAuth, Coordinates.newCoordinate);
 
 router.route('/continents')
       .post(requireAuth, Continents.newContinent);
