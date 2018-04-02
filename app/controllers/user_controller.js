@@ -90,7 +90,7 @@ export const addUserToTeam = (req, res) => {
 
     User.update({ _id }, { team })
     .then(result => {
-      console.log(`PUT:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
+      console.log(`POST:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
 
       res.json({ user: _id, team });
     })

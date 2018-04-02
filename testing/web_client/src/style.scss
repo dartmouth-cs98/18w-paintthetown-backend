@@ -66,6 +66,10 @@ body {
           border-radius: 10px;
         }
 
+        div#reset div.large-tab {
+          background: red;
+        }
+
         div.large-tab {
           display: flex;
           justify-content: center;
@@ -114,6 +118,10 @@ body {
             height: 40px;
             width: 100%;
           }
+
+          label {
+            color: black;
+          }
         }
 
         div.normal {
@@ -126,7 +134,38 @@ body {
             height: 220px;
           }
 
-          &#get-building-info {
+          &#reset-db {
+            height: 250px;
+
+            form {
+              div.checklist {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-around;
+
+                div.option {
+                  width: 25%;
+                  display: flex;
+                  justify-content: flex-start;
+                  align-items: center;
+
+                  input {
+                    width: 20px;
+
+                    &[type="checkbox"] {
+                      transition: none;
+                    }
+                  }
+
+                  label {
+                    transition: none;
+                  }
+                }
+              }
+            }
+          }
+
+          &#get-building-info, &#get-team-info {
             display: flex;
             flex-direction: column;
             justify-content: space-around;

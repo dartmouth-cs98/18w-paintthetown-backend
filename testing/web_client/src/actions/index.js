@@ -12,6 +12,7 @@ export const ActionTypes = {
   COLOR_ERROR: 'COLOR_ERROR',
   BUILDING_ERROR: 'BUILDING_ERROR',
   TEAM_ERROR: 'TEAM_ERROR',
+  RESET_ERROR: 'RESET_ERROR',
   CLEAR_USER_ERROR: 'CLEAR_USER_ERROR',
   CLEAR_AUTH_ERROR: 'CLEAR_AUTH_ERROR',
   CLEAR_COLOR_ERROR: 'CLEAR_COLOR_ERROR',
@@ -24,6 +25,9 @@ export const ActionTypes = {
   GET_LOCATION_INFO: 'GET_LOCATION_INFO',
   GET_TEAM_IDS: 'GET_TEAM_IDS',
   UPDATE_TEAM_BUILDING: 'UPDATE_TEAM_BUILDING',
+  GET_TEAM_INFO: 'GET_TEAM_INFO',
+  ASSIGN_USER_TO_TEAM: 'ASSIGN_USER_TO_TEAM',
+  RESET: 'RESET',
 };
 
 // trigger error
@@ -353,7 +357,6 @@ export const updateTeamBuilding = (body) => {
 
 
 // TEAM ACTIONS
-
 export const getTeamIDs = (offset) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/teams`, {
@@ -376,6 +379,97 @@ export const getTeamIDs = (offset) => {
       dispatch(newError(
         `Get Team IDs Failed: ${error}`,
         ActionTypes.TEAM_ERROR,
+      ));
+    });
+  };
+};
+
+export const getTeamInfo = (id, field) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/teams/info`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { id, fields: [field] },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Team Info Failed: ${error}`,
+          ActionTypes.TEAM_ERROR,
+        ));
+      } else {
+        const info = { field, data: response.data[field] };
+
+        dispatch({
+          type: ActionTypes.GET_TEAM_INFO,
+          team: { id, info },
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Team Info Failed: ${error}`,
+        ActionTypes.TEAM_ERROR,
+      ));
+    });
+  };
+};
+
+export const assignUserToTeam = (team) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/users`, { team }, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+
+        dispatch(newError(
+          `Update Team User Failed: ${error}`,
+          ActionTypes.TEAM_ERROR,
+        ));
+      } else {
+        dispatch({
+          type: ActionTypes.ASSIGN_USER_TO_TEAM,
+          team: response.data.team,
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Update Team User Failed: ${error}`,
+        ActionTypes.TEAM_ERROR,
+      ));
+    });
+  };
+};
+
+
+// RESET ACTIONS
+export const resetDB = (collections, adminPassword) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/reset`, { collections }, {
+      headers: { Authorization: `ADMIN ${adminPassword}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+
+        dispatch(newError(
+          `Reset Failed: ${error}`,
+          ActionTypes.RESET_ERROR,
+        ));
+      } else {
+        dispatch({
+          type: ActionTypes.RESET,
+          message: response.data.message,
+        });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Reset Failed: ${error}`,
+        ActionTypes.RESET_ERROR,
       ));
     });
   };
