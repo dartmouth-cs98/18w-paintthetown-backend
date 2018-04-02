@@ -113,6 +113,10 @@ export const updateUserData = (req, res) => {
     updateObj.lastName = req.body.lastName;
   }
 
+  if (hasProp(req.body, 'middleName')) {
+    updateObj.middleName = req.body.middleName;
+  }
+
   User.update({ _id }, updateObj)
   .then(result => {
     console.log(`POST:\tData updated for user with id ${_id}.`);

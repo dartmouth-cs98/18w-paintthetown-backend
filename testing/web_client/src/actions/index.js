@@ -28,6 +28,7 @@ export const ActionTypes = {
   GET_TEAM_INFO: 'GET_TEAM_INFO',
   ASSIGN_USER_TO_TEAM: 'ASSIGN_USER_TO_TEAM',
   RESET: 'RESET',
+  UPDATE_USER_DATA: 'UPDATE_USER_DATA',
 };
 
 // trigger error
@@ -90,6 +91,40 @@ export const getUserData = () => (
     })
     .catch(error => {
       dispatch(newError(`User Data Failed: ${error}`, ActionTypes.USER_ERROR));
+    });
+  }
+);
+
+export const updateUserData = (field, value) => (
+  (dispatch) => {
+    const token = localStorage.getItem('token');
+
+    if (token === null) {
+      return dispatch(newError(
+        'Update User Data Failed: No token available.',
+        ActionTypes.USER_ERROR,
+      ));
+    }
+
+    const body = {};
+
+    body[field] = value;
+
+    return axios.post(`${ROOT_URL}/users/updateInfo`, body, {
+      headers: { Authorization: `JWT ${token}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        dispatch(newError(
+          `Update User Data Failed: ${response.data.error.errmsg}`,
+          ActionTypes.USER_ERROR,
+        ));
+      } else {
+        dispatch({ data: response.data, type: ActionTypes.UPDATE_USER_DATA });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(`Update User Data Failed: ${error}`, ActionTypes.USER_ERROR));
     });
   }
 );

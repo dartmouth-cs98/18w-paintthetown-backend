@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { updateTeamBuilding } from '../actions';
+import { updateUserData } from '../actions';
 
 const mapStateToProps = ({ users }) => ({ users });
 
@@ -18,75 +18,47 @@ class UpdateUserData extends Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
-    this.getBuildingIDs = this.getBuildingIDs.bind(this);
-    this.getTeamIDs = this.getTeamIDs.bind(this);
   }
 
   componentWillReceiveProps(props) {
-    if (props.buildings.error !== null &&
-        props.buildings.error !== this.props.buildings.error) {
-      this.props.displayError(props.buildings.error, 'building');
+    if (props.users.error !== null &&
+        props.users.error !== this.props.users.error) {
+      this.props.displayError(props.users.error, 'users');
     }
   }
 
-  onChange(e, type) {
-    const val = e.target.value;
-    const state = this.state;
+  onChange(e) {
+    const field = e.target.value;
 
-    state[type] = val === 'default' ? null : val;
-
-    this.setState(state);
-  }
-
-  getBuildingIDs() {
-    if (this.props.buildings.buildings === null) {
-      return <option value="Loading...">Loading...</option>;
+    if (field !== 'default') {
+      this.setState({ field });
     }
-
-    return ['Select building id...'].concat(this.props.buildings.buildings)
-    .map(id => (
-      <option
-        value={id === 'Select building id...' ? 'default' : id}
-        key={id}
-      >{id}</option>
-    ));
-  }
-
-  getTeamIDs() {
-    if (this.props.teams.teams === null) {
-      return <option value="Loading...">Loading...</option>;
-    }
-
-    return ['Select team id...'].concat(this.props.teams.teams)
-    .map(id => (
-      <option
-        value={id === 'Select team id...' ? 'default' : id}
-        key={id}
-      >{id}</option>
-    ));
   }
 
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.updateTeamBuilding(this.state);
+    this.props.updateUserData(this.state.field, this.state.value);
   }
 
   render() {
     return (
-      <div id="update-building-team" className={this.props.toggled ? 'normal' : 'hidden'}>
+      <div id="update-user-data" className={this.props.toggled ? 'normal' : 'hidden'}>
         <form autoComplete="on" onSubmit={this.handleSubmit}>
-          <select
-            onChange={(e) => { this.onChange(e, 'building'); }}
-            disabled={this.props.buildings.buildings === null}
-          >{this.getBuildingIDs()}</select>
-          <select
-            onChange={(e) => { this.onChange(e, 'team'); }}
-            disabled={this.props.buildings.buildings === null}
-          >{this.getTeamIDs()}</select>
+          <select onChange={this.onChange} >
+            <option value="default">Select field to update...</option>
+            <option value="name">Name</option>
+            <option value="middleName">Middle name</option>
+            <option value="lastName">Last name</option>
+          </select>
+          <input
+            type="text"
+            placeholder="New value"
+            onChange={(e) => { this.setState({ value: e.target.value }); }}
+          />
           <input
             type="submit"
-            disabled={this.state.building === null || this.state.team === null}
+            disabled={this.state.value === null || this.state.value.length === 0 || this.state.field === null}
             value="Update"
           />
         </form>
@@ -96,5 +68,5 @@ class UpdateUserData extends Component {
 }
 
 export default connect(mapStateToProps, {
-  updateTeamBuilding,
+  updateUserData,
 })(UpdateUserData);
