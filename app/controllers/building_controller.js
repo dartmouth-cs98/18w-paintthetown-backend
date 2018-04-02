@@ -132,6 +132,7 @@ export const updateTeam = (req, res) => {
       },
     });
   } else {
+    console.log(req.body.team, req.body.building);
     const team = mongoose.Types.ObjectId(req.body.team);
     const id = req.body.building;
 
