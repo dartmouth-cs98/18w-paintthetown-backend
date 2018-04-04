@@ -2,12 +2,15 @@ import { ActionTypes } from '../actions';
 
 const defaultTeams = {
   teams: null,
+  latestTeam: {
+    id: null,
+    info: null,
+  },
 };
 
 function TeamsReducer(state = defaultTeams, action) {
   switch (action.type) {
     case ActionTypes.GET_TEAM_IDS:
-      console.log(action.teams);
       return Object.assign({ }, state, {
         teams: action.teams.map(({ _id }) => (_id)),
       });
@@ -16,6 +19,9 @@ function TeamsReducer(state = defaultTeams, action) {
       return Object.assign({}, state, {
         error: action.message,
       });
+
+    case ActionTypes.GET_TEAM_INFO:
+      return Object.assign({ }, state, { latestTeam: action.team });
 
     case ActionTypes.CLEAR_TEAM_ERROR:
       return Object.assign({}, state, { error: null });

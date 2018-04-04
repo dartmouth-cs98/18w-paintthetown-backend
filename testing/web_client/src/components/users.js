@@ -56,6 +56,7 @@ class Users extends Component {
             signInToggled: !this.state.signInToggled,
             signUpToggled: false,
             facebookAuthToggled: false,
+            updateUserDataToggled: false,
             userDataToggled: false,
           });
         }}>Sign In</div>
@@ -68,6 +69,7 @@ class Users extends Component {
             signInToggled: false,
             signUpToggled: !this.state.signUpToggled,
             facebookAuthToggled: false,
+            updateUserDataToggled: false,
             userDataToggled: false,
           });
         }}>Sign Up</div>
@@ -76,12 +78,26 @@ class Users extends Component {
           toggled={this.state.signUpToggled}
         />
         <div className="tab" onClick={() => {
+          this.setState({
+            signInToggled: false,
+            signUpToggled: false,
+            facebookAuthToggled: false,
+            updateUserDataToggled: !this.state.updateUserDataToggled,
+            userDataToggled: false,
+          });
+        }}>Update user data</div>
+        <UpdateUserData
+          displayError={this.props.displayError}
+          toggled={this.state.userDataToggled}
+        />
+        <div className="tab" onClick={() => {
           if (!this.state.userDataToggled) { this.props.getUserData(); }
 
           this.setState({
             signInToggled: false,
             signUpToggled: false,
             facebookAuthToggled: false,
+            updateUserDataToggled: false,
             userDataToggled: !this.state.userDataToggled,
           });
         }}>User Data</div>
@@ -95,6 +111,7 @@ class Users extends Component {
             signInToggled: false,
             signUpToggled: false,
             facebookAuthToggled: false,
+            updateUserDataToggled: false,
             userDataToggled: false,
           });
 

@@ -90,7 +90,7 @@ export const addUserToTeam = (req, res) => {
 
     User.update({ _id }, { team })
     .then(result => {
-      console.log(`PUT:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
+      console.log(`POST:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
 
       res.json({ user: _id, team });
     })
@@ -99,6 +99,31 @@ export const addUserToTeam = (req, res) => {
     });
   }
 };
+
+export const updateUserData = (req, res) => {
+  const updateObj = {};
+  const user = req.user;
+  const _id = user._id;
+
+  if (hasProp(req.body, 'name')) {
+    updateObj.name = req.body.name;
+  }
+
+  if (hasProp(req.body, 'lastName')) {
+    updateObj.lastName = req.body.lastName;
+  }
+
+  User.update({ _id }, updateObj)
+  .then(result => {
+    console.log(`POST:\tData updated for user with id ${_id}.`);
+
+    res.json({ message: 'Done' });
+  })
+  .catch(error => {
+    res.json({ error: { errmsg: error.message } });
+  });
+};
+
 
 export const addFriend = (req, res) => {
   if (!hasProp(req.body, ['friend'])) {

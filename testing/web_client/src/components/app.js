@@ -11,6 +11,8 @@ const mapStateToProps = (state) => ({
 import Users from './users';
 import Colors from './colors';
 import Buildings from './buildings';
+import Teams from './teams';
+import Reset from './reset';
 import ErrorWindow from './error-window';
 
 // example class based component (smart component)
@@ -23,6 +25,8 @@ class App extends Component {
       usersToggled: false,
       colorsToggled: false,
       buildingsToggled: false,
+      teamsToggled: false,
+      resetToggled: false,
       error: null,
     };
 
@@ -77,6 +81,16 @@ class App extends Component {
             displayError={this.displayError}
             toggle={this.toggle}
             toggled={this.state.buildingsToggled}
+          />
+          <Teams
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.teamsToggled}
+          />
+          <Reset
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.resetToggled}
           />
         </div>
         <ErrorWindow error={this.state.error} />
