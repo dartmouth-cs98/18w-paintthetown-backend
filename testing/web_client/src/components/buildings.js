@@ -8,6 +8,7 @@ import {
 
 import NewBuilding from './new-building';
 import GetBuildingInfo from './get-building-info';
+import GetBuildingsBbox from './get-buildings-bbox';
 import UpdateTeamBuilding from './update-team-building';
 
 const mapStateToProps = (state) => ({
@@ -22,6 +23,7 @@ class Buildings extends Component {
     this.state = {
       newBuildingToggled: false,
       getLocationInfoToggled: false,
+      getBuildingsBboxToggled: false,
       updateTeamBuildingToggled: false,
     };
   }
@@ -31,6 +33,7 @@ class Buildings extends Component {
       this.setState({
         newBuildingToggled: false,
         getLocationInfoToggled: false,
+        getBuildingsBboxToggled: false,
         updateTeamBuildingToggled: false,
       });
     }
@@ -48,6 +51,7 @@ class Buildings extends Component {
             this.setState({
               newBuildingToggled: !this.state.newBuildingToggled,
               getLocationInfoToggled: false,
+              getBuildingsBboxToggled: false,
               updateTeamBuildingToggled: false,
             });
           }}>New Building</div>
@@ -63,12 +67,25 @@ class Buildings extends Component {
             this.setState({
               newBuildingToggled: false,
               getLocationInfoToggled: !this.state.getLocationInfoToggled,
+              getBuildingsBboxToggled: false,
               updateTeamBuildingToggled: false,
             });
           }}>Get Info</div>
           <GetBuildingInfo
             displayError={this.props.displayError}
             toggled={this.state.getLocationInfoToggled}
+          />
+          <div className="tab" onClick={() => {
+            this.setState({
+              newBuildingToggled: false,
+              getLocationInfoToggled: false,
+              getBuildingsBboxToggled: !this.state.getBuildingsBboxToggled,
+              updateTeamBuildingToggled: false,
+            });
+          }}>Get Buildings in Bbox</div>
+          <GetBuildingsBbox
+            displayError={this.props.displayError}
+            toggled={this.state.getBuildingsBboxToggled}
           />
           <div className="tab" onClick={() => {
             if (!this.state.updateTeamBuildingToggled) {
@@ -79,6 +96,7 @@ class Buildings extends Component {
             this.setState({
               newBuildingToggled: false,
               getLocationInfoToggled: false,
+              getBuildingsBboxToggled: false,
               updateTeamBuildingToggled: !this.state.updateTeamBuildingToggled,
             });
           }}>Update Team</div>

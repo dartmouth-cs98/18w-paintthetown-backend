@@ -22,8 +22,12 @@ const BuildingSchema = new Schema({
     }],
     default: [],
   },
-  centroid: {
-    type: [Number],
+  centroidLng: {
+    type: Number,
+    required: true,
+  },
+  centroidLat: {
+    type: Number,
     required: true,
   },
   baseAltitude: {
@@ -47,6 +51,7 @@ const BuildingSchema = new Schema({
   timestamp: true,
 });
 
+BuildingSchema.index({ centroidLng: 1, centroidLat: 1 }, { unique: true });
 // create model class
 const BuildingModel = mongoose.model('Building', BuildingSchema);
 

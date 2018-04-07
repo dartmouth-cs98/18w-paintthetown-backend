@@ -12,15 +12,20 @@ export const ActionTypes = {
   COLOR_ERROR: 'COLOR_ERROR',
   BUILDING_ERROR: 'BUILDING_ERROR',
   TEAM_ERROR: 'TEAM_ERROR',
+  CITY_ERROR: 'CITY_ERROR',
   RESET_ERROR: 'RESET_ERROR',
   CLEAR_USER_ERROR: 'CLEAR_USER_ERROR',
   CLEAR_AUTH_ERROR: 'CLEAR_AUTH_ERROR',
   CLEAR_COLOR_ERROR: 'CLEAR_COLOR_ERROR',
   CLEAR_BUILDING_ERROR: 'CLEAR_BUILDING_ERROR',
   CLEAR_TEAM_ERROR: 'CLEAR_TEAM_ERROR',
+  CLEAR_CITY_ERROR: 'CLEAR_CITY_ERROR',
+  CLEAR_RESET_ERROR: 'CLEAR_RESET_ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
   NEW_BUILDING: 'NEW_BUILDING',
+  NEW_BUILDINGS: 'NEW_BUILDINGS',
+  GET_BUILDINGS_BBOX: 'GET_BUILDINGS_BBOX',
   GET_BUILDING_IDS: 'GET_BUILDING_IDS',
   GET_LOCATION_INFO: 'GET_LOCATION_INFO',
   GET_TEAM_IDS: 'GET_TEAM_IDS',
@@ -29,6 +34,7 @@ export const ActionTypes = {
   ASSIGN_USER_TO_TEAM: 'ASSIGN_USER_TO_TEAM',
   RESET: 'RESET',
   UPDATE_USER_DATA: 'UPDATE_USER_DATA',
+  ADD_CITY: 'ADD_CITY',
 };
 
 // trigger error
@@ -261,39 +267,25 @@ export const getColorData = (id) => (
 
 
 // BUILDING ACTIONS
-export const newBuilding = ({
-  id,
-  name,
-  centroidLng,
-  centroidLat,
-  baseAltitude,
-  topAltitude,
-}) => {
+export const newBuildings = (buildings) => {
   return (dispatch) => {
-    const building = {
-      id,
-      name,
-      centroid: [centroidLng, centroidLat],
-      baseAltitude,
-      topAltitude,
-    };
-    axios.post(`${ROOT_URL}/buildings`, building, {
+    axios.post(`${ROOT_URL}/buildings`, { buildings }, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
     })
     .then(response => {
       if (response.data.error) {
         const error = response.data.error.errmsg;
         dispatch(newError(
-          `New Building Failed: ${error}`,
+          `New Buildings Failed: ${error}`,
           ActionTypes.BUILDING_ERROR,
         ));
       } else {
-        dispatch({ type: ActionTypes.NEW_BUILDING, id: response.data.id });
+        dispatch({ type: ActionTypes.NEW_BUILDINGS });
       }
     })
     .catch(error => {
       dispatch(newError(
-        `New Building Failed: ${error}`,
+        `New Buildings Failed: ${error}`,
         ActionTypes.BUILDING_ERROR,
       ));
     });
@@ -322,6 +314,33 @@ export const getBuildingIDs = (offset) => {
     .catch(error => {
       dispatch(newError(
         `Get Building IDs Failed: ${error}`,
+        ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};
+
+export const getBuildingsBbox = (bbox) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/buildings`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { bbox },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Buildings Bbox Failed: ${error}`,
+          ActionTypes.BUILDING_ERROR,
+        ));
+      } else {
+        const buildings = response.data.buildings;
+        dispatch({ type: ActionTypes.GET_BUILDINGS_BBOX, buildings });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Buildings Bbox Failed: ${error}`,
         ActionTypes.BUILDING_ERROR,
       ));
     });
@@ -474,6 +493,33 @@ export const assignUserToTeam = (team) => {
       dispatch(newError(
         `Update Team User Failed: ${error}`,
         ActionTypes.TEAM_ERROR,
+      ));
+    });
+  };
+};
+
+
+// CITY ACTIONS
+export const addCity = (data) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/cities`, data, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `New City Failed: ${error}`,
+          ActionTypes.CITY_ERROR,
+        ));
+      } else {
+        dispatch({ type: ActionTypes.ADD_CITY, id: response.data.id });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `New City Failed: ${error}`,
+        ActionTypes.CITY_ERROR,
       ));
     });
   };

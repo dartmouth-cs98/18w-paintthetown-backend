@@ -73,7 +73,7 @@ class Teams extends Component {
         <div id="teams">
           <div
             className={`large-tab${this.props.toggled ? ' active' : ''}`}
-            onClick={() => { this.props.toggle('buildings'); }}
+            onClick={() => { this.props.toggle('teams'); }}
           >Teams</div>
           <h1>No token available</h1>
         </div>

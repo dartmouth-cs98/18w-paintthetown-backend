@@ -9,11 +9,14 @@ const CitySchema = new Schema({
   country: {
     type: mongoose.Schema.ObjectId,
     ref: 'Country',
-    required: true,
+    required: false,
   },
   centroid: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Coordinate',
+    type: [Number],
+    required: true,
+  },
+  bbox: {
+    type: [Number],
     required: true,
   },
 }, {
