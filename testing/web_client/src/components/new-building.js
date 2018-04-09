@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { newBuilding } from '../actions';
+import { newBuildings } from '../actions';
 
 import { inRange } from '../../../../app/utils';
 
@@ -87,7 +87,15 @@ class NewBuilding extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.newBuilding(this.state.data);
+    const data = {};
+
+    data.name = this.state.data.name;
+    data.id = this.state.data.id;
+    data.centroid = [this.state.data.centroidLat, this.state.data.centroidLng];
+    data.baseAltitude = this.state.data.baseAltitude;
+    data.topAltitude = this.state.data.topAltitude;
+
+    this.props.newBuildings([data]);
   }
 
   render() {
@@ -163,4 +171,4 @@ class NewBuilding extends Component {
   }
 }
 
-export default connect(mapStateToProps, { newBuilding })(NewBuilding);
+export default connect(mapStateToProps, { newBuildings })(NewBuilding);

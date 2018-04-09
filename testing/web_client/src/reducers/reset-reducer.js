@@ -11,9 +11,10 @@ function UsersReducer(state = defaultReset, action) {
       return Object.assign({ }, state, { message: action.message });
 
     case ActionTypes.RESET_ERROR:
-      return Object.assign({}, state, {
-        error: action.message,
-      });
+      return Object.assign({}, state, { error: action.message });
+
+    case ActionTypes.CLEAR_RESET_ERROR:
+      return Object.assign({}, state, { error: null });
 
     default:
       return state;

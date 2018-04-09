@@ -9,6 +9,7 @@ import {
 import SignIn from './signin';
 import SignUp from './signup';
 import UserData from './user-data';
+import UpdateUserData from './update-user-data';
 
 const mapStateToProps = (state) => ({
   users: state.users,
@@ -24,6 +25,7 @@ class Users extends Component {
       signInToggled: false,
       signUpToggled: false,
       facebookAuthToggled: false,
+      updateUserDataToggled: false,
       userDataToggled: false,
     };
   }
@@ -88,7 +90,7 @@ class Users extends Component {
         }}>Update user data</div>
         <UpdateUserData
           displayError={this.props.displayError}
-          toggled={this.state.userDataToggled}
+          toggled={this.state.updateUserDataToggled}
         />
         <div className="tab" onClick={() => {
           if (!this.state.userDataToggled) { this.props.getUserData(); }

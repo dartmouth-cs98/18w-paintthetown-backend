@@ -5,63 +5,92 @@ import Team from '../models/team_model.js';
 
 import { hasProp, hasProps } from '../utils';
 
+export const newBuildings = (req, res) => {
+  if (!hasProp(req.body, 'buildings')) {
+    res.json({ error: { errmsg: 'Array of buildings needed.' } });
+  } else {
+    const buildings = req.body.buildings;
 
-export const newBuilding = (req, res) => {
-  if (!hasProps(req.body, ['name', 'centroid', 'baseAltitude', 'topAltitude', 'id'])) {
-    res.json({
-      error: {
-        errmsg: 'Building needs \'id\', \'name\', \'centroid\', \'baseAltitude\', and \'topAltitude\' fields.',
-      },
+    Promise.all(buildings.map(building => (newBuilding(building))))
+    .then(() => {
+      const message = `Added ${buildings.length} buildings.`;
+
+      console.log(`POST:\t${message}`);
+
+      res.json({ message });
+    })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
+  }
+};
+
+function newBuilding(buildingData) {
+  return new Promise((resolve, reject) => {
+    if (!hasProps(buildingData, ['name', 'centroid', 'baseAltitude', 'topAltitude', 'id'])) {
+      reject({
+        message: 'Building needs \'id\', \'name\', \'centroid\', \'baseAltitude\', and \'topAltitude\' fields.',
+      });
+    } else {
+      const building = new Building();
+      const id = buildingData.id;
+
+      building.id = id;
+      building.name = buildingData.name;
+      building.centroidLng = buildingData.centroid[0];
+      building.centroidLat = buildingData.centroid[1];
+      building.baseAltitude = buildingData.baseAltitude;
+      building.topAltitude = buildingData.topAltitude;
+
+      if (hasProp(buildingData, 'description')) {
+        building.description = buildingData.description;
+      }
+
+      if (hasProp(buildingData, 'tags')) {
+        building.tags = buildingData.tags;
+      }
+
+      if (hasProp(buildingData, 'city')) {
+        building.city = mongoose.Types.ObjectId(buildingData.city);
+      }
+
+      building.save()
+      .then(result => { resolve(); })
+      .catch(error => { reject(error); });
+    }
+  });
+}
+
+export const getBuildingIDs = (req, res) => {
+  if (hasProp(req.query, 'bbox')) {
+    const { bbox } = req.query;
+    const [minLng, minLat, maxLng, maxLat] = bbox;
+
+    Building.find({
+      centroidLng: { $gte: minLng, $lte: maxLng },
+      centroidLat: { $gte: minLat, $lte: maxLat },
+    }, ['id'])
+    .then(buildings => {
+      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+      res.json({ buildings });
+    })
+    .catch(error => {
+      res.json({ error: { errmsg: error.message } });
     });
   } else {
-    const building = new Building();
-    const id = req.body.id;
+    const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
 
-    building.id = id;
-    building.name = req.body.name;
-    building.centroid = req.body.centroid;
-    building.baseAltitude = req.body.baseAltitude;
-    building.topAltitude = req.body.topAltitude;
-
-    if (hasProp(req.body, 'description')) {
-      building.description = req.body.description;
-    }
-
-    if (hasProp(req.body, 'tags')) {
-      building.tags = req.body.tags;
-    }
-
-    if (hasProp(req.body, 'city')) {
-      building.city = req.body.city;
-    }
-
-    building.save()
-    .then(result => {
-      console.log(`POST:\tAdded building ${building.name}.`);
-
-      res.json({ id });
+    Building.find({}, ['id'], {
+      skip: offset,
+      limit: offset + 5,
+      sort: { name: 1 },
+    })
+    .then(buildings => {
+      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+      res.json({ buildings });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
     });
   }
-};
-
-export const getBuildingIDs = (req, res) => {
-  const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
-
-  Building.find({}, ['id'], {
-    skip: offset,
-    limit: offset + 5,
-    sort: { name: 1 },
-  })
-  .then(buildings => {
-    console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-    res.json({ buildings });
-  })
-  .catch(error => {
-    res.json({ error: { errmsg: error.message } });
-  });
 };
 
 export const getInfo = (req, res) => {
