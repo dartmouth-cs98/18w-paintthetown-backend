@@ -57,17 +57,17 @@ function newBuilding(buildingData) {
       }
 
 
-      Team.find({})
-      .then(teams => {
-        if (parseInt(Math.round(Math.random() + 1), 10) % 2 === 0) {
-          building.team = teams[0]._id;
-        }
+      // Team.find({})
+      // .then(teams => {
+      //   if (parseInt(Math.round(Math.random() + 1), 10) % 2 === 0) {
+      //     building.team = teams[0]._id;
+      //   }
 
-        building.save()
-        .then(result => { resolve(); })
-        .catch(error => { reject(error); });
-      })
+      building.save()
+      .then(result => { resolve(); })
       .catch(error => { reject(error); });
+      // })
+      // .catch(error => { reject(error); });
     }
   });
 }
