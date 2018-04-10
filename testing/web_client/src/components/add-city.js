@@ -10,8 +10,8 @@ const config = {
   WRLD3D_API_KEY: 'c0b58f7240bf36e09f110a3d41d3edee',
 };
 
-const STEP_SIZE = 0.001;
-const CITIES_PER_REQUEST = 20;
+const STEP_SIZE = 0.0002;
+const CITIES_PER_REQUEST = 25;
 
 let initCoord = null;
 let n = null;
@@ -229,7 +229,7 @@ class AddCity extends Component {
 
     if (initCoord[0] >= 43.7049 &&
         Math.abs(initCoord[1] + 72.285) < STEP_SIZE) {
-      initCoord[1] += 0.1;
+      initCoord[1] += STEP_SIZE * 10;
     }
 
     buildings.buildingHighlight(

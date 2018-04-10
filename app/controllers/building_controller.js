@@ -59,7 +59,9 @@ function newBuilding(buildingData) {
 
       Team.find({})
       .then(teams => {
-        building.team = teams[0]._id;
+        if (parseInt(Math.round(Math.random() + 1), 10) % 2 === 0) {
+          building.team = teams[0]._id;
+        }
 
         building.save()
         .then(result => { resolve(); })
@@ -70,17 +72,17 @@ function newBuilding(buildingData) {
   });
 }
 
-function fetchBuildings(fields, query) {
+function fetchBuildings(fields, search, query) {
   let promise = null;
 
   if (hasProp(query, 'bbox')) {
     const { bbox } = query;
     const [minLng, minLat, maxLng, maxLat] = bbox;
 
-    promise = Building.find({
+    promise = Building.find(Object.assign({}, search, {
       centroidLng: { $gte: minLng, $lte: maxLng },
       centroidLat: { $gte: minLat, $lte: maxLat },
-    }, fields);
+    }), fields);
     // .then(buildings => {
     //   console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'} within bbox ${bbox}.`);
     // })
@@ -90,7 +92,7 @@ function fetchBuildings(fields, query) {
   } else {
     const offset = hasProp(query, 'offset') ? parseInt(query.offset, 10) : 0;
 
-    promise = Building.find({}, fields, {
+    promise = Building.find(search, fields, {
       skip: offset,
       limit: offset + 5,
       sort: { name: 1 },
@@ -121,30 +123,19 @@ function fetchBuildings(fields, query) {
 
 export const getBuildingIDs = (req, res) => {
   const fields = ['id'];
+  const query = {};
 
   if (hasProp(req.query, 'extraFields')) {
     req.query.extraFields.forEach(field => { fields.push(field); });
   }
 
-  fetchBuildings(fields, req.query)
+  if (hasProp(req.query, 'teamOnly') && req.query.teamOnly) {
+    query.team = { $ne: null };
+  }
+
+  fetchBuildings(fields, query, req.query)
   .then(buildings => {
     console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-
-    console.log(buildings.map(building => {
-      if (building.team !== null) {
-        for (let i = 0; i < fields.length; i += 1) {
-          if (fields[i] === 'team') {
-            return Object.assign({}, building._doc, {
-              team: building.team.color.name,
-            });
-          }
-        }
-
-        return building;
-      }
-
-      return building;
-    })[0]);
 
     res.json({ buildings: buildings.map(building => {
       if (building.team !== null) {
