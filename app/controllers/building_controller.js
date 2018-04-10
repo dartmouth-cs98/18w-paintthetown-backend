@@ -52,45 +52,120 @@ function newBuilding(buildingData) {
         building.city = mongoose.Types.ObjectId(buildingData.city);
       }
 
-      building.save()
-      .then(result => { resolve(); })
+      if (hasProp(buildingData, 'team')) {
+        building.team = mongoose.Types.ObjectId(buildingData.team);
+      }
+
+
+      Team.find({})
+      .then(teams => {
+        building.team = teams[0]._id;
+
+        building.save()
+        .then(result => { resolve(); })
+        .catch(error => { reject(error); });
+      })
       .catch(error => { reject(error); });
     }
   });
 }
 
-export const getBuildingIDs = (req, res) => {
-  if (hasProp(req.query, 'bbox')) {
-    const { bbox } = req.query;
+function fetchBuildings(fields, query) {
+  let promise = null;
+
+  if (hasProp(query, 'bbox')) {
+    const { bbox } = query;
     const [minLng, minLat, maxLng, maxLat] = bbox;
 
-    Building.find({
+    promise = Building.find({
       centroidLng: { $gte: minLng, $lte: maxLng },
       centroidLat: { $gte: minLat, $lte: maxLat },
-    }, ['id'])
-    .then(buildings => {
-      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-      res.json({ buildings });
-    })
-    .catch(error => {
-      res.json({ error: { errmsg: error.message } });
-    });
+    }, fields);
+    // .then(buildings => {
+    //   console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'} within bbox ${bbox}.`);
+    // })
+    // .catch(error => {
+    //   res.json({ error: { errmsg: error.message } });
+    // });
   } else {
-    const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
+    const offset = hasProp(query, 'offset') ? parseInt(query.offset, 10) : 0;
 
-    Building.find({}, ['id'], {
+    promise = Building.find({}, fields, {
       skip: offset,
       limit: offset + 5,
       sort: { name: 1 },
-    })
-    .then(buildings => {
-      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-      res.json({ buildings });
-    })
-    .catch(error => {
-      res.json({ error: { errmsg: error.message } });
     });
+    // .then(buildings => {
+    //   console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+    //   res.json({ buildings });
+    // })
+    // .catch(error => {
+    //   res.json({ error: { errmsg: error.message } });
+    // });
   }
+
+  for (let i = 0; i < fields.length; i += 1) {
+    if (fields[i] === 'team') {
+      return promise.populate({
+        path: 'team',
+        populate: {
+          path: 'color',
+          model: 'Color',
+        },
+      });
+    }
+  }
+
+  return promise;
+}
+
+export const getBuildingIDs = (req, res) => {
+  const fields = ['id'];
+
+  if (hasProp(req.query, 'extraFields')) {
+    req.query.extraFields.forEach(field => { fields.push(field); });
+  }
+
+  fetchBuildings(fields, req.query)
+  .then(buildings => {
+    console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+
+    console.log(buildings.map(building => {
+      if (building.team !== null) {
+        for (let i = 0; i < fields.length; i += 1) {
+          if (fields[i] === 'team') {
+            return Object.assign({}, building._doc, {
+              team: building.team.color.name,
+            });
+          }
+        }
+
+        return building;
+      }
+
+      return building;
+    })[0]);
+
+    res.json({ buildings: buildings.map(building => {
+      if (building.team !== null) {
+        for (let i = 0; i < fields.length; i += 1) {
+          if (fields[i] === 'team') {
+            return Object.assign({}, building._doc, {
+              team: building.team.color.name,
+            });
+          }
+        }
+
+        return building;
+      }
+
+      return building;
+    }) });
+  })
+  .catch(error => {
+    console.log('ERROR: faulty query.');
+    res.json({ error: { errmsg: error.message } });
+  });
 };
 
 export const getInfo = (req, res) => {
