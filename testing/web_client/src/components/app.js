@@ -12,6 +12,7 @@ import Users from './users';
 import Colors from './colors';
 import Buildings from './buildings';
 import Teams from './teams';
+import Cities from './cities';
 import Reset from './reset';
 import ErrorWindow from './error-window';
 
@@ -86,6 +87,11 @@ class App extends Component {
             displayError={this.displayError}
             toggle={this.toggle}
             toggled={this.state.teamsToggled}
+          />
+          <Cities
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.citiesToggled}
           />
           <Reset
             displayError={this.displayError}

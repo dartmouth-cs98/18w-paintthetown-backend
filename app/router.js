@@ -56,7 +56,7 @@ router.route('/splotches')
 
 router.route('/buildings')
       .get(requireAuth, Buildings.getBuildingIDs)
-      .post(requireAuth, Buildings.newBuilding);
+      .post(requireAuth, Buildings.newBuildings);
 
 router.route('/buildings/info')
       .get(requireAuth, Buildings.getInfo);

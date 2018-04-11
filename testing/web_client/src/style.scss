@@ -134,6 +134,70 @@ body {
             height: 220px;
           }
 
+          &#get-buildings-bbox {
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+
+            form {
+              div#bbox {
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+
+                input[type="number"] {
+                  width: 50px;
+                  height: 50px;
+                }
+              }
+            }
+
+            h1.normal {
+              width: 100%;
+              text-align: center;
+            }
+          }
+
+          &#add-city {
+            height: 240px;
+            flex-wrap: wrap;
+
+            &.loadingBuildings {
+              height: 700px;
+
+              form {
+                height: 240px;
+              }
+            }
+
+            div#map {
+              width: 400px;
+              height: 400px;
+
+              &.hidden {
+                width: 0px;
+                height: 0px;
+              }
+            }
+
+            .hidden {
+              width: 0px;
+              height: 0px;
+            }
+
+            div#bbox {
+              height: 40px;
+              display: flex;
+              justify-content: space-around;
+              flex-wrap: wrap;
+
+              input {
+                width: 50px;
+                height: 100%;
+              }
+            }
+          }
+
           &#reset-db {
             height: 250px;
 
