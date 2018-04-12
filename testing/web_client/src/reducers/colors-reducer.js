@@ -1,7 +1,12 @@
 import { ActionTypes } from '../actions';
 
 const defaultColors = {
+  latestColor: {
+    id: null,
+    name: null,
+  },
   latestID: null,
+  colors: null,
   fontColor: '#ffffff',
   error: null,
 };
@@ -12,7 +17,12 @@ function UsersReducer(state = defaultColors, action) {
       return Object.assign({ }, state, { latestID: action.id });
 
     case ActionTypes.GET_COLOR_DATA:
-      return Object.assign({ }, state, { fontColor: action.hex });
+      return Object.assign({ }, state, { latestColor: action.latestColor });
+
+    case ActionTypes.GET_COLOR_IDS:
+      return Object.assign({ }, state, {
+        colors: action.colors.map(({ _id }) => (_id)),
+      });
 
     case ActionTypes.COLOR_ERROR:
       return Object.assign({}, state, {

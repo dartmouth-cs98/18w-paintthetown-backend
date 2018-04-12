@@ -1,9 +1,8 @@
 import { Types } from 'mongoose';
 
-
 import Color from '../models/color_model.js';
 
-import { hasProps } from '../utils';
+import { hasProps, hasProp } from '../utils';
 
 
 export const newColor = (req, res) => {
@@ -28,6 +27,23 @@ export const newColor = (req, res) => {
       res.json({ error: { errmsg: error.message } });
     });
   }
+};
+
+export const getColorIDs = (req, res) => {
+  const offset = hasProp(req.query, 'offset') ? parseInt(req.query.offset, 10) : 0;
+
+  Color.find({}, ['_id'], {
+    skip: offset,
+    limit: offset + 5,
+    sort: { name: 1 },
+  })
+  .then(colors => {
+    console.log(`GET:\tSending ${colors.length} color ID${colors.length === 1 ? '' : 's'}.`);
+    res.json({ colors });
+  })
+  .catch(error => {
+    res.json({ error: { errmsg: error.message } });
+  });
 };
 
 // GET request
