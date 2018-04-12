@@ -25,6 +25,7 @@ class GetBuildingsBbox extends Component {
     // init component state here
     this.state = {
       bbox: [null, null, null, null],
+      teamOnly: false,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -49,7 +50,7 @@ class GetBuildingsBbox extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.getBuildingsBbox(this.state.bbox);
+    this.props.getBuildingsBbox(this.state.bbox, this.state.teamOnly);
   }
 
   render() {
@@ -109,6 +110,18 @@ class GetBuildingsBbox extends Component {
               }
               onChange={e => { this.onChange(3, e); }}
             />
+          </div>
+          <div id="team-only" >
+            <input
+              autoComplete="on"
+              type="checkbox"
+              name="team-only"
+              id="team-only-checkbox"
+              value={!this.state.teamOnly}
+              checked={!this.state.teamOnly}
+              onChange={e => { this.setState({ teamOnly: !this.state.teamOnly }); }}
+            />
+            <label htmlFor="team-only-checkbox">{'Include buildings with no team'}</label>
           </div>
           <input type="submit" value="Submit" disabled={!this.state.isComplete} />
         </form>

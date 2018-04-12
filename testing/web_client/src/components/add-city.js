@@ -229,7 +229,7 @@ class AddCity extends Component {
 
     if (initCoord[0] >= 43.7049 &&
         Math.abs(initCoord[1] + 72.285) < STEP_SIZE) {
-      initCoord[1] += STEP_SIZE * 10;
+      initCoord[1] += STEP_SIZE;
     }
 
     buildings.buildingHighlight(
