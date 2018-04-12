@@ -48,6 +48,14 @@ const UserSchema = new Schema({
     ref: 'Team',
     default: null,
   },
+  citiesPainted: {
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'City',
+    }],
+    default: [],
+  },
+  buildingsPainted: Number,
 }, {
   timestamp: true,
 });

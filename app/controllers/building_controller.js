@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 import Building from '../models/building_model.js';
 import Team from '../models/team_model.js';
+import User from '../models/user_model.js';
 
 import { hasProp, hasProps } from '../utils';
 
@@ -219,6 +220,8 @@ export const getTeam = (req, res) => {
 };
 
 // POST
+// building has been painted/captured
+// updateTeam and update current user's stats
 export const updateTeam = (req, res) => {
   if (!hasProps(req.body, ['building', 'team'])) {
     res.json({
@@ -230,16 +233,29 @@ export const updateTeam = (req, res) => {
     const team = mongoose.Types.ObjectId(req.body.team);
     const id = req.body.building;
 
-    Team.findById(team)
-    .then(result => (
-      Building.update({ id }, { team })
-    ))
-    .then(({ nModified }) => {
-      console.log(`POST:\tUpdated ${nModified} building${nModified === 1 ? '' : 's'} to team with id ${team}.`);
-      res.json({ building: req.body.building, team });
-    })
-    .catch(error => {
-      res.json({ error: { errmsg: error.message } });
-    });
+    const user = req.body.user;
+
+    Promise.all([
+      Building.update({ id }, { team }),
+      Building.findById(id)
+      .then( building => {
+        var building = Building.findById(id);
+        if (inArray(building.city, user.citiesPainted) != -1) {
+          var citiesPainted = user.citiesPainted;
+          citiesPainted.push(building.city);
+          return User.update({id: user._id}, {buildingsPainted: User.buildingsPainted +1, citiesPainted: citiesPainted});
+        }
+        else{
+          return User.update({id: user._id}, {buildingsPainted: User.buildingsPainted +1});
+        }
+      })
+   ])
+   .then(responses => {
+     console.log(`POST:\tUpdated building to team with id ${team} and updated user buildingsPainted and citiesPainted for user ${user._id}`);
+     res.json({ building: req.body.building, team });
+   })
+   .catch(error => {
+     res.json({ error: { errmsg: error.message } });
+   });
   }
 };
