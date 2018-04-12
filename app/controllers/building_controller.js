@@ -129,7 +129,7 @@ export const getBuildingIDs = (req, res) => {
     req.query.extraFields.forEach(field => { fields.push(field); });
   }
 
-  if (hasProp(req.query, 'teamOnly') && req.query.teamOnly) {
+  if (hasProp(req.query, 'teamOnly') && req.query.teamOnly === 'true') {
     query.team = { $ne: null };
   }
 
