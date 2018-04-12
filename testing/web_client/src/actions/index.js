@@ -320,11 +320,11 @@ export const getBuildingIDs = (offset) => {
   };
 };
 
-export const getBuildingsBbox = (bbox) => {
+export const getBuildingsBbox = (bbox, teamOnly) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/buildings`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { bbox },
+      params: { bbox, teamOnly },
     })
     .then(response => {
       if (response.data.error) {

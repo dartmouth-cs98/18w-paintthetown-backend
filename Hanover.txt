@@ -1,3 +1,0 @@
-const LOWER_LEFT_CORNER = [43.697, -72.3];
-const UPPER_RIGHT_CORNER = [43.71, -72.275];
-const CENTER = [43.705, -72.2855]

@@ -135,9 +135,10 @@ body {
           }
 
           &#get-buildings-bbox {
-            height: 180px;
+            height: 200px;
             display: flex;
             flex-direction: column;
+            justify-content: space-around;
 
             form {
               div#bbox {
@@ -148,6 +149,17 @@ body {
                 input[type="number"] {
                   width: 50px;
                   height: 50px;
+                }
+              }
+
+              div#team-only {
+                display: flex;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+                align-items: center;
+
+                input {
+                  width: 30px;
                 }
               }
             }
