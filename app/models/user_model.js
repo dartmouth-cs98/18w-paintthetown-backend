@@ -55,14 +55,15 @@ const UserSchema = new Schema({
     }],
     default: [],
   },
-  buildingsPainted: Number,
+  buildingsPainted: {
+    type: Number,
+    default: 0,
+  },
 }, {
   timestamp: true,
 });
 
-UserSchema.set('toJSON', {
-  virtuals: true,
-});
+UserSchema.set('toJSON', { virtuals: true });
 
 UserSchema.pre('save', function encryptPassword(next) {
   const user = this;

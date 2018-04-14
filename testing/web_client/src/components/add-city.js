@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { map, buildings } from 'wrld.js';
+import FileSaver from 'file-saver';
 
 import { addCity, newBuildings } from '../actions';
-import { hasProp } from '../../../../app/utils';
+import { hasProp, deltaEncode } from '../../../../app/utils';
 // import config from '../config';
 
 const config = {
   WRLD3D_API_KEY: 'c0b58f7240bf36e09f110a3d41d3edee',
 };
 
+// const STEP_SIZE = 0.005;
 const STEP_SIZE = 0.0002;
 const CITIES_PER_REQUEST = 25;
+const HIGHLIGHT_COLOR = [255, 0, 0, 200];
 
 let initCoord = null;
 let n = null;
@@ -46,11 +49,11 @@ class AddCity extends Component {
     this.state = {
       data: {
         name: '',
-        centroidLng: null,
-        centroidLat: null,
         zoom: null,
         bbox: [null, null, null, null],
       },
+      centroidLng: null,
+      centroidLat: null,
       buildings: {},
       queue: [],
       pointer: 0,
@@ -66,6 +69,8 @@ class AddCity extends Component {
     this.startCityScan = this.startCityScan.bind(this);
     this.handleInformation = this.handleInformation.bind(this);
     this.continueUpload = this.continueUpload.bind(this);
+    this.exportBuildings = this.exportBuildings.bind(this);
+    this.computeCentroid = this.computeCentroid.bind(this);
   }
 
   componentWillReceiveProps(props) {
@@ -84,9 +89,9 @@ class AddCity extends Component {
       // INIT COUNTERS
       n = 0;
       initCoord = lowerLeftCorner.slice();
-      totalCalls = (Math.floor(
+      totalCalls = (Math.ceil(
         Math.abs(lowerLeftCorner[0] - upperRightCorner[0]) / STEP_SIZE
-      ) + 1) * (Math.floor(
+      )) * (Math.ceil(
         Math.abs(lowerLeftCorner[1] - upperRightCorner[1]) / STEP_SIZE)
       );
 
@@ -102,7 +107,7 @@ class AddCity extends Component {
         )
         .addTo(this.state.map);
 
-        this.setState({ lockFields: 'Done' });
+        this.setState({ lockFields: 'Done', buildings: {} });
       }
     }
 
@@ -129,11 +134,17 @@ class AddCity extends Component {
 
     data[type] = e.target.value;
 
-    this.setState({ data, isComplete: isComplete(data) });
+    const complete = isComplete(data);
+    const state = { data, isComplete: complete };
+
+    if (complete) { this.computeCentroid(data); }
+
+    this.setState(state);
   }
 
   startCityScan() {
-    const { centroidLng, centroidLat, zoom } = this.state.data;
+    const { centroidLng, centroidLat, data } = this.state;
+    const { zoom } = data;
     const center = [centroidLng, centroidLat];
     const m = map('map', config.WRLD3D_API_KEY, { center, zoom });
 
@@ -144,7 +155,7 @@ class AddCity extends Component {
       )
       .addTo(m);
 
-      this.setState({ map: m, lockFields: 'Done' });
+      this.setState({ map: m, lockFields: 'Done', buildings: {} });
     });
 
     m.buildings.on('buildinginformationreceived', this.handleInformation);
@@ -154,11 +165,19 @@ class AddCity extends Component {
     const len = this.state.queue.length;
 
     if (len <= CITIES_PER_REQUEST) {
-      if (len > 0) { this.props.newBuildings(this.state.queue); }
+      if (len > 0) {
+        const queue = this.state.queue
+        .map(id => (Object.assign({}, this.state.buildings[id], { id })));
 
-      this.setState({ buildings: {}, pointer: 0 });
+        this.props.newBuildings(queue);
+      }
+
+      this.setState({ pointer: 0 });
     } else {
-      this.props.newBuildings(this.state.queue.slice(0, CITIES_PER_REQUEST));
+      const queue = this.state.queue.slice(0, CITIES_PER_REQUEST)
+      .map(id => (Object.assign({}, this.state.buildings[id], { id })));
+
+      this.props.newBuildings(queue);
     }
   }
 
@@ -181,19 +200,20 @@ class AddCity extends Component {
       const baseAltitude = dims.getBaseAltitude()[0];
       const topAltitude = dims.getTopAltitude()[0];
 
-      builds[id] = true;
-
-      queue.push({
-        id,
-        centroid,
+      builds[id] = {
+        centroidLng: centroid[0],
+        centroidLat: centroid[1],
         city: this.props.cities.latestCity,
         baseAltitude,
         topAltitude,
         name: id,
-      });
+      };
+
+      queue.push(id);
 
       if (pointer + 1 === CITIES_PER_REQUEST) {
-        const outQueue = queue.slice(0, CITIES_PER_REQUEST);
+        const outQueue = queue.slice(0, CITIES_PER_REQUEST)
+        .map(key => (Object.assign({}, builds[key], { id: key })));
 
         this.setState({ pointer: -1 });
 
@@ -212,7 +232,6 @@ class AddCity extends Component {
         this.setState({
           percentDone: null,
           lockFields: 'Submit',
-          buildings: {},
         });
 
         if (this.state.pointer > 0) {
@@ -235,7 +254,7 @@ class AddCity extends Component {
     buildings.buildingHighlight(
       buildings.buildingHighlightOptions()
       .highlightBuildingAtLocation(initCoord)
-      .informationOnly()
+      .color(HIGHLIGHT_COLOR)
     )
     .addTo(this.state.map);
   }
@@ -243,10 +262,11 @@ class AddCity extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    const { name, centroidLng, centroidLat, bbox } = this.state.data;
-    const data = { name, centroid: [centroidLng, centroidLat], bbox };
+    const { centroidLng, centroidLat, data } = this.state;
+    const { name, bbox } = data;
+    const query = { name, centroid: [centroidLng, centroidLat], bbox };
 
-    this.props.addCity(data);
+    this.props.addCity(query);
 
     this.setState({ lockFields: 'Loading...' });
   }
@@ -254,9 +274,51 @@ class AddCity extends Component {
   updateMap(e) {
     if (e) { e.preventDefault(); }
 
-    const { centroidLng, centroidLat, zoom } = this.state.data;
+    const { data } = this.state;
 
-    this.state.map.setView([centroidLng, centroidLat], zoom);
+    this.computeCentroid(data);
+    this.state.map.setView([
+      this.state.centroidLng,
+      this.state.centroidLat,
+    ], data.zoom);
+  }
+
+  exportBuildings(e) {
+    e.preventDefault();
+
+    const object = Object.keys(this.state.buildings).map(id => {
+      const obj = Object.assign({}, this.state.buildings[id], { id });
+
+      delete obj.city;
+
+      return obj;
+    });
+    const buffer = JSON.stringify(object);
+    // const buffer = deltaEncode(object, ['centroidLng', 'centroidLat']);
+    const { data, centroidLng, centroidLat } = this.state;
+    const { name, bbox } = data;
+    const centroid = [centroidLng, centroidLat];
+    const centroidStr = `${centroid.map(
+      c => (parseInt(c * 1000.0, 10) / 1000.0)
+    ).join(',')}`;
+    const coords = bbox.map(c => (parseInt(c * 1000.0, 10) / 1000.0));
+    const minCoord = `${coords[0]},${coords[1]}`;
+    const maxCoord = `${coords[2]},${coords[3]}`;
+    const fileName = `${name}_${centroidStr}_${minCoord}_${maxCoord}.json`;
+    const file = new File([buffer], fileName, {
+      type: 'application/javascript;charset=utf-8',
+    });
+
+    FileSaver.saveAs(file);
+  }
+
+  computeCentroid(data) {
+    const [minLng, minLat, maxLng, maxLat] = data.bbox.map(s => (parseFloat(s)));
+
+    this.setState({
+      centroidLng: `${(maxLng + minLng) / 2.0}`,
+      centroidLat: `${(maxLat + minLat) / 2.0}`,
+    });
   }
 
   render() {
@@ -274,36 +336,6 @@ class AddCity extends Component {
             value={this.state.data.name}
             disabled={this.state.lockFields !== 'Submit'}
             onChange={e => { this.onChange('name', e); }}
-          />
-          <input
-            autoComplete="on"
-            type="number"
-            placeholder="* Centroid Longitude"
-            min="-180"
-            max="180"
-            step="1e-6"
-            disabled={this.state.lockFields !== 'Submit'}
-            value={
-              this.state.data.centroidLng === null ?
-              '' :
-              this.state.data.centroidLng
-            }
-            onChange={e => { this.onChange('centroidLng', e); }}
-          />
-          <input
-            autoComplete="on"
-            type="number"
-            placeholder="* Centroid Latitude"
-            min="-180"
-            max="180"
-            step="1e-6"
-            disabled={this.state.lockFields !== 'Submit'}
-            value={
-              this.state.data.centroidLat === null ?
-              '' :
-              this.state.data.centroidLat
-            }
-            onChange={e => { this.onChange('centroidLat', e); }}
           />
           <input
             autoComplete="on"
@@ -336,7 +368,12 @@ class AddCity extends Component {
               onChange={e => {
                 const bbox = this.state.data.bbox;
                 bbox[0] = e.target.value;
-                this.setState({ bbox, isComplete: isComplete(this.state.data) });
+
+                const complete = isComplete(this.state.data);
+
+                if (complete) { this.computeCentroid(this.state.data); }
+
+                this.setState({ bbox, isComplete: complete });
               }}
             />
             <input
@@ -355,7 +392,12 @@ class AddCity extends Component {
               onChange={e => {
                 const bbox = this.state.data.bbox;
                 bbox[1] = e.target.value;
-                this.setState({ bbox, isComplete: isComplete(this.state.data) });
+
+                const complete = isComplete(this.state.data);
+
+                if (complete) { this.computeCentroid(this.state.data); }
+
+                this.setState({ bbox, isComplete: complete });
               }}
             />
             <input
@@ -374,7 +416,12 @@ class AddCity extends Component {
               onChange={e => {
                 const bbox = this.state.data.bbox;
                 bbox[2] = e.target.value;
-                this.setState({ bbox, isComplete: isComplete(this.state.data) });
+
+                const complete = isComplete(this.state.data);
+
+                if (complete) { this.computeCentroid(this.state.data); }
+
+                this.setState({ bbox, isComplete: complete });
               }}
             />
             <input
@@ -393,17 +440,28 @@ class AddCity extends Component {
               onChange={e => {
                 const bbox = this.state.data.bbox;
                 bbox[3] = e.target.value;
-                this.setState({ bbox, isComplete: isComplete(this.state.data) });
+
+                const complete = isComplete(this.state.data);
+
+                if (complete) { this.computeCentroid(this.state.data); }
+
+                this.setState({ bbox, isComplete: complete });
               }}
             />
           </div>
-          <input
-            type="submit"
-            value={this.state.lockFields}
-            disabled={
-              !this.state.isComplete || this.state.lockFields !== 'Submit'
-            }
-          />
+          <div id="buttons">
+            <input
+              type="submit"
+              value={this.state.lockFields}
+              disabled={
+                !this.state.isComplete || this.state.lockFields !== 'Submit'
+              }
+            />
+            <button
+              disabled={this.state.queue.length > 0 || Object.keys(this.state.buildings).length === 0}
+              onClick={this.exportBuildings}
+            >Export</button>
+          </div>
         </form>
         <h1 className={this.state.lockFields !== 'Submit' ? 'normal' : 'hidden'}>{
           this.state.percentDone === null ? '' : `Progress: ${this.state.percentDone}%`
