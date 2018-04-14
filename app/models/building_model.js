@@ -51,7 +51,9 @@ const BuildingSchema = new Schema({
   timestamp: true,
 });
 
-BuildingSchema.index({ centroidLng: 1, centroidLat: 1 }, { unique: true });
+BuildingSchema.index({ centroidLng: 1, centroidLat: 1, id: 1 }, {
+  unique: true,
+});
 // create model class
 const BuildingModel = mongoose.model('Building', BuildingSchema);
 
