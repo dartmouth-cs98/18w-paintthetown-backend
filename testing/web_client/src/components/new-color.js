@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import { newColor } from '../actions';
 
-import { inRange } from '../../../../app/utils';
+import { inRange, rgbToHex } from '../../../../app/utils';
 
 function isComplete(data) {
   const arr = Object.values(data);
@@ -28,20 +28,6 @@ const validators = {
   g: validateRGB,
   b: validateRGB,
 };
-
-const decToHex = (val) => {
-  let hex = parseInt(val, 10).toString(16);
-
-  while (hex.length !== 2) {
-    hex = `0${hex}`;
-  }
-
-  return hex;
-};
-
-const rgbToHex = (data) => (
-  `#${['r', 'g', 'b'].map(k => (decToHex(data[k]))).join('')}`
-);
 
 // example class based component (smart component)
 class NewColor extends Component {

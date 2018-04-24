@@ -14,6 +14,8 @@ class UpdateTeamBuilding extends Component {
     this.state = {
       building: null,
       team: null,
+      data: {},
+      buildingColor: '#000000',
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -27,6 +29,22 @@ class UpdateTeamBuilding extends Component {
         props.buildings.error !== this.props.buildings.error) {
       this.props.displayError(props.buildings.error, 'building');
     }
+
+    if (props.buildings.latestBuilding !== null &&
+        props.buildings.latestBuilding !== this.props.buildings.latestBuilding) {
+      this.setState({ buildingColor: props.buildings.latestBuilding.hex });
+    }
+
+    if (props.buildings.buildings !== null &&
+        this.props.buildings.buildings !== props.buildings.buildings) {
+      const data = {};
+
+      props.buildings.buildings.forEach(({ id, hex }) => {
+        data[id] = hex;
+      });
+
+      this.setState({ data });
+    }
   }
 
   onChange(e, type) {
@@ -34,6 +52,7 @@ class UpdateTeamBuilding extends Component {
     const state = this.state;
 
     state[type] = val === 'default' ? null : val;
+    state[`${type}Color`] = state.data[val];
 
     this.setState(state);
   }
@@ -43,13 +62,14 @@ class UpdateTeamBuilding extends Component {
       return <option value="Loading...">Loading...</option>;
     }
 
-    return ['Select building id...'].concat(this.props.buildings.buildings)
-    .map(id => (
-      <option
+    return [{ id: 'Select building id...', hex: null }]
+    .concat(this.props.buildings.buildings)
+    .map(({ id }) => {
+      return <option
         value={id === 'Select building id...' ? 'default' : id}
         key={id}
-      >{id}</option>
-    ));
+      >{id}</option>;
+    });
   }
 
   getTeamIDs() {
@@ -57,13 +77,11 @@ class UpdateTeamBuilding extends Component {
       return <option value="Loading...">Loading...</option>;
     }
 
-    return ['Select team id...'].concat(this.props.teams.teams)
-    .map(id => (
-      <option
-        value={id === 'Select team id...' ? 'default' : id}
-        key={id}
-      >{id}</option>
-    ));
+    return ['Select team color...'].concat(this.props.teams.teams)
+    .map(team => (team.length ?
+      <option value={team} key={team}>{team}</option> :
+      <option value={team.id} key={team.id}>{team.color}</option>)
+    );
   }
 
   handleSubmit(e) {
@@ -79,6 +97,7 @@ class UpdateTeamBuilding extends Component {
           <select
             onChange={(e) => { this.onChange(e, 'building'); }}
             disabled={this.props.buildings.buildings === null}
+            style={{ backgroundColor: this.state.buildingColor === '#000000' ? '#ffffff' : this.state.buildingColor }}
           >{this.getBuildingIDs()}</select>
           <select
             onChange={(e) => { this.onChange(e, 'team'); }}

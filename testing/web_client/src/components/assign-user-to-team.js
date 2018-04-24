@@ -42,10 +42,11 @@ class AssignUserToTeam extends Component {
       return <option value="Loading...">Loading...</option>;
     }
 
-    return ['Select team id...'].concat(this.props.teams.teams)
-    .map(id => (
-      <option value={id} key={id}>{id}</option>
-    ));
+    return ['Select team color...'].concat(this.props.teams.teams)
+    .map(team => (team.length ?
+      <option value={team} key={team}>{team}</option> :
+      <option value={team.id} key={team.id}>{team.color}</option>)
+    );
   }
 
   handleSubmit(e) {

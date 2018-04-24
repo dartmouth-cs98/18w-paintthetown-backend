@@ -84,3 +84,27 @@ export const deltaEncode = (vals, delta) => {
 
   return JSON.stringify(out);
 };
+
+function decToHex(val) {
+  let hex = parseInt(val, 10).toString(16);
+
+  while (hex.length !== 2) { hex = `0${hex}`; }
+
+  return hex;
+};
+
+export const rgbToHex = (data) => (
+  `#${['r', 'g', 'b'].map(k => (decToHex(data[k]))).join('')}`
+);
+
+export const maxIndex = (arr) => {
+  if (arr.length === 0) { return -1; }
+
+  let maxI = 0;
+
+  for (let i = 1; i < arr.length; i += 1) {
+    if (arr[i] > arr[maxI]) { maxI = i; }
+  }
+
+  return maxI;
+};

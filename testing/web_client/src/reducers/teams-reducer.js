@@ -12,7 +12,10 @@ function TeamsReducer(state = defaultTeams, action) {
   switch (action.type) {
     case ActionTypes.GET_TEAM_IDS:
       return Object.assign({ }, state, {
-        teams: action.teams.map(({ _id }) => (_id)),
+        teams: action.teams.map(({ color, _id }) => ({
+          color: color.name,
+          id: _id,
+        })),
       });
 
     case ActionTypes.TEAM_ERROR:
