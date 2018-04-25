@@ -26,6 +26,7 @@ class GetBuildingsBbox extends Component {
     this.state = {
       bbox: [null, null, null, null],
       teamOnly: false,
+      extraFields: {},
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -50,7 +51,11 @@ class GetBuildingsBbox extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.getBuildingsBbox(this.state.bbox, this.state.teamOnly);
+    this.props.getBuildingsBbox(
+      this.state.bbox,
+      this.state.teamOnly,
+      Object.keys(this.state.extraFields),
+    );
   }
 
   render() {
@@ -123,6 +128,37 @@ class GetBuildingsBbox extends Component {
             />
             <label htmlFor="team-only-checkbox">{'Include buildings with no team'}</label>
           </div>
+          <select id="extra-fields" onChange={e => {
+            const { options } = e.currentTarget;
+
+            for (let i = 0; i < options.length; i += 1) {
+              const opt = options[i];
+              const { extraFields } = this.state;
+              const key = opt.value;
+
+              if (Object.prototype.hasOwnProperty.call(extraFields, key)) {
+                if (!opt.selected) { delete extraFields[key]; }
+              } else if (opt.selected) {
+                extraFields[key] = true;
+              }
+
+              this.setState({ extraFields });
+            }
+          }} multiple
+          >
+            <option value="name">Name</option>
+            <option value="description">Description</option>
+            <option value="rgb">RGB</option>
+            <option value="hex">Hex</option>
+            <option value="tags">Tags</option>
+            <option value="team">Team</option>
+            <option value="ownership">Ownership</option>
+            <option value="city">City</option>
+            <option value="centroidLng">Centroid Longitude</option>
+            <option value="centroidLat">Centroid Latitude</option>
+            <option value="baseAltitude">Base Altitude</option>
+            <option value="topAltitude">Top Altitude</option>
+          </select>
           <input type="submit" value="Submit" disabled={!this.state.isComplete} />
         </form>
         <h1 className={

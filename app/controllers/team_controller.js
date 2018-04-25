@@ -109,7 +109,7 @@ export const getTeamIDs = (req, res) => {
 
   Team.find({}, ['_id', 'color'], {
     skip: offset,
-    limit: offset + 5,
+    limit: offset + 10,
     sort: { name: 1 },
   })
   .populate('color', 'name')

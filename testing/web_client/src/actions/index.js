@@ -301,11 +301,15 @@ export const newBuildings = (buildings) => {
 };
 
 
-export const getBuildingIDs = (offset) => {
+export const getBuildingIDs = (offset, extraFields) => {
   return (dispatch) => {
+    const params = { offset };
+
+    if (extraFields) { params.extraFields = extraFields; }
+
     axios.get(`${ROOT_URL}/buildings`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { offset },
+      params,
     })
     .then(response => {
       if (response.data.error) {
@@ -328,15 +332,19 @@ export const getBuildingIDs = (offset) => {
   };
 };
 
-export const getBuildingsBbox = (bbox, teamOnly) => {
+export const getBuildingsBbox = (bbox, teamOnly, extraFields) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/buildings`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { bbox, teamOnly },
+      params: Object.assign(extraFields.length > 0 ? { extraFields } : {}, {
+        bbox,
+        teamOnly,
+      }),
     })
     .then(response => {
       if (response.data.error) {
         const error = response.data.error.errmsg;
+
         dispatch(newError(
           `Get Buildings Bbox Failed: ${error}`,
           ActionTypes.BUILDING_ERROR,
@@ -403,7 +411,6 @@ export const updateTeamBuilding = (body) => {
       } else {
         dispatch({
           type: ActionTypes.UPDATE_TEAM_BUILDING,
-          team: response.data.team,
           building: response.data.building,
         });
       }

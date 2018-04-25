@@ -1,5 +1,7 @@
 import mongoose, { Schema } from 'mongoose';
 
+import Team from './team_model';
+
 // create a schema for posts with a field
 const BuildingSchema = new Schema({
   id: {
@@ -43,17 +45,24 @@ const BuildingSchema = new Schema({
     ref: 'City',
   },
   team: {
-    type: mongoose.Schema.ObjectId,
-    ref: 'Team',
-    default: null,
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'Team',
+    }],
+    default: [],
+  },
+  rgb: {
+    type: [Number],
+    default: [0, 0, 0],
+  },
+  hex: {
+    type: String,
+    default: '#000000',
   },
 }, {
   timestamp: true,
 });
 
-BuildingSchema.index({ centroidLng: 1, centroidLat: 1, id: 1 }, {
-  unique: true,
-});
 // create model class
 const BuildingModel = mongoose.model('Building', BuildingSchema);
 

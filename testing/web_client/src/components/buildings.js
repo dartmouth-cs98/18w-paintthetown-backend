@@ -89,7 +89,7 @@ class Buildings extends Component {
           />
           <div className="tab" onClick={() => {
             if (!this.state.updateTeamBuildingToggled) {
-              this.props.getBuildingIDs(0);
+              this.props.getBuildingIDs(0, ['hex']);
               this.props.getTeamIDs(0);
             }
 

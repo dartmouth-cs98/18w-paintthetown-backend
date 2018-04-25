@@ -4,6 +4,7 @@ const defaultBuildings = {
   latestBuilding: {
     id: null,
     info: null,
+    hex: null,
   },
   buildings: null,
   error: null,
@@ -20,6 +21,15 @@ function BuildingReducer(state = defaultBuildings, action) {
         },
       });
 
+    case ActionTypes.UPDATE_TEAM_BUILDING:
+      return Object.assign({ }, state, {
+        latestBuilding: {
+          id: action.building.id,
+          info: null,
+          hex: action.building.hex,
+        },
+      });
+
     case ActionTypes.NEW_BUILDINGS:
       return Object.assign({ }, state, {
         offset: state.offset + 5,
@@ -32,9 +42,7 @@ function BuildingReducer(state = defaultBuildings, action) {
 
     case ActionTypes.GET_BUILDING_IDS:
     case ActionTypes.GET_BUILDINGS_BBOX:
-      return Object.assign({ }, state, {
-        buildings: action.buildings.map(({ id }) => (id)),
-      });
+      return Object.assign({ }, state, { buildings: action.buildings });
 
     case ActionTypes.GET_LOCATION_INFO:
       return Object.assign({ }, state, { latestBuilding: action.building });
