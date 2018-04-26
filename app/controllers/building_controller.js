@@ -328,9 +328,12 @@ function updateTeamsHelper(building, teamID) {
 
 function computeColorsAndTeams(teamID, building) {
   return new Promise((resolve, reject) => {
+    console.log('teamID', teamID);
     Team.findById(teamID)
     .populate('color')
     .then(team => {
+      console.log('team', team);
+
       const { rgb } = team.color._doc;
       let n = building.team.length + 0.0;
       const avg = building.rgb;
@@ -346,6 +349,8 @@ function computeColorsAndTeams(teamID, building) {
         } else {
           n += 1;
         }
+
+        console.log('outTeam', team);
 
         obj.rgb = obj.rgb.map((val, i) => (val / n));
         obj.hex = rgbToHex({ r: obj.rgb[0], g: obj.rgb[1], b: obj.rgb[2] });
