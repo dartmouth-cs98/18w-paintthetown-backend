@@ -8,7 +8,7 @@
     "test": "echo 'No test specified'",
     "dev": "nodemon app/server.js --exec babel-node",
     "start": "babel-node app/server.js",
-    "build": "babel app -d dist; rm -rf dist/cities; cp -r app/cities dist/",
+    "build": "babel app -d dist; cp -rf app/data dist/",
     "prod": "npm run build; node dist/server.js"
   },
   "repository": {
