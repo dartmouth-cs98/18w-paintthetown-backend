@@ -3,7 +3,8 @@ import { connect } from 'react-redux';
 
 import { newColor } from '../actions';
 
-import { inRange, rgbToHex } from '../../../../app/utils';
+import { inRange } from '../../../../app/utils';
+import { rgbToHex } from '../../../../app/utils/color';
 
 function isComplete(data) {
   const arr = Object.values(data);
@@ -64,7 +65,7 @@ class NewColor extends Component {
         validators[type](e.target.value)) {
       if (type === 'r' || type === 'g' || type === 'b') {
         data[type] = `${parseInt(e.target.value, 10)}`;
-        data.hex = rgbToHex(data);
+        data.hex = rgbToHex(['r', 'g', 'b'].map(k => (data[k])));
       } else {
         data[type] = e.target.value;
       }
