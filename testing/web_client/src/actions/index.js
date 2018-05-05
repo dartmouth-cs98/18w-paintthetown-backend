@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { ROOT_URL } from '../';
 
+const SATURATION = 1;
 
 export const ActionTypes = {
   AUTH_USER: 'AUTH_USER',
@@ -339,6 +340,7 @@ export const getBuildingsBbox = (bbox, teamOnly, extraFields) => {
       params: Object.assign(extraFields.length > 0 ? { extraFields } : {}, {
         bbox,
         teamOnly,
+        saturation: SATURATION,
       }),
     })
     .then(response => {
@@ -368,7 +370,7 @@ export const getBuildingInfo = (id, field) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/buildings/info`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { id, fields: [field] },
+      params: { id, fields: [field], saturation: SATURATION },
     })
     .then(response => {
       if (response.data.error) {
@@ -397,7 +399,9 @@ export const getBuildingInfo = (id, field) => {
 
 export const updateTeamBuilding = (body) => {
   return (dispatch) => {
-    axios.post(`${ROOT_URL}/buildings/updateTeam`, body, {
+    axios.post(`${ROOT_URL}/buildings/updateTeam`, Object.assign({
+      saturation: 1,
+    }, body), {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
     })
     .then(response => {

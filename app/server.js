@@ -13,6 +13,12 @@ mongoose.Promise = global.Promise;
 
 // initialize
 const app = express();
+const logFunc = console.log;
+
+console.log = (t) => {
+  const date = new Date();
+  logFunc(`\x1b[36m${date.toLocaleString()}:\x1b[0m ${t}`);
+};
 
 // enable/disable cross origin resource sharing if necessary
 app.use(cors());

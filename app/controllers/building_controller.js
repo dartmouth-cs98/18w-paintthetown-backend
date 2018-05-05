@@ -4,7 +4,8 @@ import Building from '../models/building_model.js';
 import User from '../models/user_model.js';
 import Team from '../models/team_model.js';
 
-import { hasProp, hasProps, rgbToHex, maxIndex } from '../utils';
+import { hasProp, hasProps, maxIndex } from '../utils';
+import { avgHslFromRgb, rgbToHex, hexToRgb, rgbToHsl, hslToRgb } from '../utils/color';
 import config from '../config';
 
 export const newBuildings = (req, res) => {
@@ -122,74 +123,105 @@ function getOwnershipData(fields, ownershipActive) {
 function computeOwnership(building, teams) {
   const colors = [];
   const ownership = {};
+  let dist = Number.POSITIVE_INFINITY;
+  let winningTeam = null;
 
-  teams.forEach(team => {
-    colors.push(team.color.name);
-    ownership[team.color.name] = 0;
-  });
+  teams.forEach(team => { ownership[team.color.name] = 0; });
 
   if (building.team.length === 0) {
     return { ownership, team: null };
   }
 
-  for (let i = 0; i < building.team.length; i += 1) {
-    for (let j = 0; j < teams.length; j += 1) {
-      const team = teams[j];
+  for (let j = 0; j < teams.length; j += 1) {
+    const team = teams[j];
+    const { color } = team._doc;
+    const { name, rgb } = color._doc;
+    const delta = Math.sqrt(rgb.reduce((d, v, i) => (
+      d + (v - building.rgb[i]) ** 2
+    ), 0));
 
+    if (delta < dist) {
+      dist = delta;
+      winningTeam = team;
+    }
+
+    for (let i = 0; i < building.team.length; i += 1) {
       if (`${building.team[i]._id}` === `${team._id}`) {
-        const color = team.color.name;
         const update = {};
 
-        ownership[color] += 1;
+        ownership[name] += 1;
       }
     }
   }
 
-  colors.forEach(color => {
-    const k = ownership[color] / (building.team.length + 0.0);
-    ownership[color] = k;
-  });
-
-  const vals = colors.map(k => (ownership[k]));
-  const i = maxIndex(vals);
-
-  return { ownership, team: teams[i] };
+  return { ownership, team: winningTeam };
 }
 
-function processBuildings(buildings, fields, ownershipActive) {
+function processFields(
+  building,
+  teams,
+  teamActive,
+  ownershipActive,
+  saturation,
+) {
+  const obj = Object.assign({}, building._doc);
+  const keys = Object.keys(obj);
+  const computeTeam = hasProp(building._doc, 'team') &&
+                      building.team.length > 0 && teamActive;
+  const hasRgb = hasProp(obj, 'rbg');
+  const hasHex = hasProp(obj, 'hex');
+
+  if (saturation !== null) {
+    let rgb = hasProp(obj, 'rgb') ? obj.rgb : hexToRgb(obj.hex);
+    const hsl = rgbToHsl(rgb);
+
+    hsl[1] = saturation;
+
+    rgb = hslToRgb(hsl);
+
+    if (hasHex) { obj.hex = rgbToHex(rgb); }
+
+    if (hasRgb) { obj.rgb = rgb; }
+  }
+
+  if (computeTeam || ownershipActive) {
+    const { ownership, team } = computeOwnership(building, teams);
+
+    if (ownershipActive) {
+      keys.push('ownership');
+      obj.ownership = ownership;
+    }
+
+    if (computeTeam) { obj.team = team; }
+  }
+
+  const finalObj = {};
+
+  keys.sort()
+  .forEach(key => {
+    if (hasProp(obj, key)) {
+      finalObj[key] = obj[key];
+    } else {
+      finalObj[key] = building[key];
+    }
+  });
+
+  return finalObj;
+}
+
+function processBuildings(buildings, fields, ownershipActive, saturation) {
   return new Promise((resolve, reject) => {
     getOwnershipData(fields, ownershipActive)
     .then(([teams, teamActive]) => {
-      resolve(buildings.map(building => {
-        const obj = Object.assign({}, building._doc);
-        const keys = Object.keys(obj);
-        const computeTeam = hasProp(building._doc, 'team') &&
-                            building.team.length > 0 && teamActive;
-
-        if (computeTeam || ownershipActive) {
-          const { ownership, team } = computeOwnership(building, teams);
-
-          if (ownershipActive) {
-            keys.push('ownership');
-            obj.ownership = ownership;
-          }
-
-          if (computeTeam) { obj.team = team; }
-        }
-
-        const finalObj = {};
-
-        keys.sort()
-        .forEach(key => {
-          if (hasProp(obj, key)) {
-            finalObj[key] = obj[key];
-          } else {
-            finalObj[key] = building[key];
-          }
-        });
-
-        return finalObj;
-      }));
+      resolve(buildings.map(building => (
+        processFields(
+          building,
+          teams,
+          teamActive,
+          ownershipActive,
+          saturation,
+        )
+      )));
     })
     .catch(error => { reject(error); });
   });
@@ -199,6 +231,21 @@ export const getBuildingIDs = (req, res) => {
   const fields = ['id'];
   const query = {};
   let ownershipActive = false;
+
+  let saturation = null;
+
+  if (hasProp(req.query, 'saturation') &&
+      (fields.includes('hex') || fields.includes('rgb'))) {
+    saturation = parseFloat(req.query.saturation);
+
+    if (saturation < 0 || saturation > 1) {
+      return res.json({
+        error: {
+          errmsg: 'saturation must a float between 0.0 and 1.0 (inclusive)',
+        },
+      });
+    }
+  }
 
   if (hasProp(req.query, 'extraFields')) {
     req.query.extraFields.forEach(field => {
@@ -217,7 +264,9 @@ export const getBuildingIDs = (req, res) => {
   }
 
   fetchBuildings(fields, query, req.query)
-  .then(buildings => (processBuildings(buildings, fields, ownershipActive)))
+  .then(buildings => (
+    processBuildings(buildings, fields, ownershipActive, saturation)
+  ))
   .then(buildings => {
     console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
 
@@ -240,60 +289,47 @@ export const getInfo = (req, res) => {
 
     const ownershipActive = fields.includes('ownership');
     const computeTeam = fields.includes('team');
+    const computeRgb = fields.includes('rgb');
+    let saturation = null;
+
+    if (hasProp(req.query, 'saturation') &&
+        (fields.includes('hex') || computeRgb)) {
+      saturation = parseFloat(req.query.saturation);
+
+      if (saturation < 0 || saturation > 1) {
+        return res.json({
+          error: {
+            errmsg: 'saturation must a float between 0.0 and 1.0 (inclusive)',
+          },
+        });
+      }
+    }
 
     if (ownershipActive && !computeTeam) { fields.push('team'); }
+    if ((ownershipActive || computeTeam) && !computeRgb) {
+      fields.push('rgb');
+    }
 
     Building.findOne({ id }, fields)
     .populate('team', 'color')
     .then(building => {
-      const obj = Object.assign({}, building._doc);
-      const keys = Object.keys(obj);
+      Team.find({}).populate('color')
+      .then(teams => {
+        const finalObj = processFields(
+          building,
+          teams,
+          computeTeam,
+          ownershipActive,
+          saturation,
+        );
 
-      console.log(`GET:\tSending data for building with id ${id}.`);
-
-      if (computeTeam || ownershipActive) {
-        Team.find({}).populate('color')
-        .then(teams => {
-          const { ownership, team } = computeOwnership(building, teams);
-
-          if (ownershipActive) {
-            keys.push('ownership');
-            obj.ownership = ownership;
-          }
-
-          if (computeTeam) { obj.team = team; }
-
-          const finalObj = {};
-
-          keys.sort()
-          .forEach(key => {
-            if (hasProp(obj, key)) {
-              finalObj[key] = obj[key];
-            } else {
-              finalObj[key] = building[key];
-            }
-          });
-
-          res.json(finalObj);
-        })
-        .catch(error => {
-          console.log('ERROR: faulty query.');
-          res.json({ error: { errmsg: error.message } });
-        });
-      } else {
-        const finalObj = {};
-
-        keys.sort()
-        .forEach(key => {
-          if (hasProp(obj, key)) {
-            finalObj[key] = obj[key];
-          } else {
-            finalObj[key] = building[key];
-          }
-        });
-
+        console.log(`GET:\tSending data for building with id ${id}.`);
         res.json(finalObj);
-      }
+      })
+      .catch(error => {
+        console.log('ERROR: faulty query.');
+        res.json({ error: { errmsg: error.message } });
+      });
     })
     .catch(error => {
       console.log('ERROR: faulty query.');
@@ -302,65 +338,49 @@ export const getInfo = (req, res) => {
   }
 };
 
-function updateTeamsHelper(building, teamID) {
+function updateTeamsHelper(building, team) {
   return new Promise((resolve, reject) => {
     const n = building.team.length;
-    let teams = building.team;
+    const { team: teams } = building._doc;
 
     if (n + 1 > config.maxTeams) {
-      Team.findById(building.team[n - 1])
-      .populate('color')
-      .then(outTeam => {
-        resolve({
-          teams: [teamID].concat(teams.slice(0, n - 1)),
-          outTeam,
-        });
-      })
-      .catch(error => { reject(error); });
+      resolve({
+        teams: [teamID, ...team.slice(0, n - 1)],
+        outTeam,
+      });
     } else {
       resolve({
-        teams: [teamID].concat(teams),
+        teams: [teamID, ...team],
         outTeam: null,
       });
     }
   });
 }
 
-function computeColorsAndTeams(teamID, building) {
+function computeColorsAndTeams(teamID, building, saturation) {
   return new Promise((resolve, reject) => {
-    console.log('teamID', teamID);
     Team.findById(teamID)
     .populate('color')
     .then(team => {
-      console.log('team', team);
+      let { team: teams } = building._doc;
+      const { length: n } = teams;
 
-      const { rgb } = team.color._doc;
-      let n = building.team.length + 0.0;
-      const avg = building.rgb;
+      if (n === config.maxTeams) {
+        teams = [team, ...teams.slice(0, n - 1)];
+      } else {
+        teams = [team, ...teams];
+      }
 
+      const rgbVals = teams.map(t => (t.color.rgb));
+      const [avgHue, ...etc1] = avgHslFromRgb(rgbVals.reverse());
       const obj = {
-        rgb: avg.map((val, i) => ((val * n + rgb[i]))),
+        rgb: hslToRgb([avgHue, 1, 0.5]),
+        teams: teams.map(t => (t._id)),
       };
 
-      updateTeamsHelper(building, teamID)
-      .then(({ teams, outTeam }) => {
-        if (outTeam !== null) {
-          obj.rgb = obj.rgb.map((val, i) => (val - outTeam.color.rgb[i]));
-        } else {
-          n += 1;
-        }
+      obj.hex = rgbToHex(obj.rgb);
 
-        console.log('outTeam', team);
-
-        obj.rgb = obj.rgb.map((val, i) => (val / n));
-        obj.hex = rgbToHex({ r: obj.rgb[0], g: obj.rgb[1], b: obj.rgb[2] });
-        obj.teams = teams;
-
-        // console.log(n, avg, obj.rgb);
-
-        resolve(obj);
-      })
-      .catch(error => { reject(error); });
+      resolve(obj);
     })
     .catch(error => { reject(error); });
   });
@@ -399,28 +419,57 @@ export const updateTeam = (req, res) => {
     const team = mongoose.Types.ObjectId(req.body.team);
     const id = req.body.building;
     const user = req.user;
+    let saturation = null;
+
+    if (hasProp(req.body, 'saturation')) {
+      saturation = parseInt(req.body.saturation, 10);
+
+      if (saturation < 0 || saturation > 1) {
+        return res.json({
+          error: {
+            errmsg: 'saturation must be within range 0.0-1.0.',
+          },
+        });
+      }
+    }
 
     Building.findOne({ id })
+    .populate({
+      path: 'team',
+      populate: { path: 'color' },
+    })
     .then(building => {
       const cities = user.citiesPainted.map(city => (`${city}`));
       const query = { _id: user._id };
       const update = { buildingsPainted: user.buildingsPainted + 1 };
 
       if (!cities.includes(`${building.city}`)) {
-        update.citiesPainted = [building.city].concat(user.citiesPainted);
+        update.citiesPainted = [building.city, ...user.citiesPainted];
       }
 
       return User.update(query, update)
       .then(res => (
-        computeColorsAndTeams(team, building)
+        computeColorsAndTeams(team, building, saturation)
         .then(({ rgb, hex, teams }) => (
           Building.update({ id }, { team: teams, rgb, hex })
         ))
       ));
     })
     .then(responses => (Building.findOne({ id })))
-    .then(building => {
+    .then(obj => {
       console.log(`POST:\tUpdated building to team with id ${team} and updated buildingsPainted and citiesPainted for user ${user._id}`);
+
+      const building = Object.assign({}, obj._doc);
+
+      if (saturation !== null) {
+        const hsl = rgbToHsl(building.rgb);
+
+        hsl[1] = saturation;
+
+        building.rgb = hslToRgb(hsl);
+        building.hex = rgbToHex(building.rgb);
+      }
+
       res.json({ building, team });
     })
     .catch(error => {
