@@ -35,7 +35,7 @@ backend
 │   │   │   country_controller.js
 │   │   │   pattern_controller.js
 │   │   │   reset_controller.js
-│   │   │   splotch_controller.js
+│   │   │   particle_controller.js
 │   │   │   tag_controller.js
 │   │   │   team_controller.js
 │   │   │   user_controller.js
@@ -50,7 +50,7 @@ backend
 │   │   │   country_model.js
 │   │   │   pattern_model.js
 │   │   │   reset_model.js
-│   │   │   splotch_model.js
+│   │   │   particle_model.js
 │   │   │   tag_model.js
 │   │   │   team_model.js
 │   │   │   user_model.js

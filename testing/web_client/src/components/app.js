@@ -11,6 +11,7 @@ const mapStateToProps = (state) => ({
 import Users from './users';
 import Colors from './colors';
 import Buildings from './buildings';
+import Particles from './particles';
 import Teams from './teams';
 import Cities from './cities';
 import Reset from './reset';
@@ -26,6 +27,7 @@ class App extends Component {
       usersToggled: false,
       colorsToggled: false,
       buildingsToggled: false,
+      particlesToggled: false,
       teamsToggled: false,
       resetToggled: false,
       error: null,
@@ -82,6 +84,11 @@ class App extends Component {
             displayError={this.displayError}
             toggle={this.toggle}
             toggled={this.state.buildingsToggled}
+          />
+          <Particles
+            displayError={this.displayError}
+            toggle={this.toggle}
+            toggled={this.state.particlesToggled}
           />
           <Teams
             displayError={this.displayError}

@@ -134,6 +134,16 @@ body {
             height: 220px;
           }
 
+          &#add-particles {
+            height: auto;
+            form {
+              display: flex;
+              // height:auto;
+              justify-content: space-around;
+              // height: 200px;
+            }
+          }
+
           &#get-buildings-bbox {
             height: 240px;
             display: flex;

@@ -14,7 +14,7 @@ const MODELS = [
   'Continent',
   'Country',
   'Pattern',
-  'Splotch',
+  'Particle',
   'Tag',
   'Team',
   'User',

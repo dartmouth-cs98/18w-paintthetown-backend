@@ -14,6 +14,7 @@ const defaultColors = {
 function UsersReducer(state = defaultColors, action) {
   switch (action.type) {
     case ActionTypes.NEW_COLOR:
+      console.log('hi there!');
       return Object.assign({ }, state, { latestID: action.id });
 
     case ActionTypes.GET_COLOR_DATA:
