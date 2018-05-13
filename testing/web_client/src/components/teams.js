@@ -18,16 +18,14 @@ class Teams extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      getTeamInfoToggled: false,
-      assignUserToTeamToggled: false,
-    };
+    this.state = { getTeamInfoToggled: false, assignUserToTeamToggled: false };
   }
 
   componentWillReceiveProps(props) {
     if (!props.toggled && this.props.toggled) {
       this.setState({
         getTeamInfoToggled: false,
+        assignUserToTeamToggled: false,
       });
     }
   }
@@ -45,10 +43,10 @@ class Teams extends Component {
               this.props.getTeamIDs(0);
             }
 
-            this.setState({
-              getTeamInfoToggled: !this.state.getTeamInfoToggled,
-              assignUserToTeamToggled: false,
-            });
+            this.setState(({ getTeamInfoToggled: g }) => ({
+              getTeamInfoToggled: !g,
+              assignUserToTeam: false,
+            }));
           }}>Get Info</div>
           <GetTeamInfo
             displayError={this.props.displayError}
@@ -59,10 +57,10 @@ class Teams extends Component {
               this.props.getTeamIDs(0);
             }
 
-            this.setState({
+            this.setState(({ assignUserToTeamToggled: a }) => ({
               getTeamInfoToggled: false,
-              assignUserToTeamToggled: !this.state.assignUserToTeamToggled,
-            });
+              assignUserToTeamToggled: !a,
+            }));
           }}>Assign User to Team</div>
           <AssignUserToTeam
             displayError={this.props.displayError}

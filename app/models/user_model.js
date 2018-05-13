@@ -1,6 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
 
+import config from '../config';
+
 const emailValidator = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
 
 const UserSchema = new Schema({
@@ -58,6 +60,10 @@ const UserSchema = new Schema({
   buildingsPainted: {
     type: Number,
     default: 0,
+  },
+  paintLeft: {
+    type: Number,
+    default: config.INITIAL_PAINT,
   },
 }, {
   timestamp: true,

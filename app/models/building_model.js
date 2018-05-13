@@ -1,7 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
 
-import Team from './team_model';
-
 // create a schema for posts with a field
 const BuildingSchema = new Schema({
   id: {
@@ -37,6 +35,10 @@ const BuildingSchema = new Schema({
     required: true,
   },
   topAltitude: {
+    type: Number,
+    required: true,
+  },
+  surfaceArea: {
     type: Number,
     required: true,
   },

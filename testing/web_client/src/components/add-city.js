@@ -1,24 +1,35 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { map, buildings } from 'wrld.js';
+import { map, buildings, polygon } from 'wrld.js';
 import FileSaver from 'file-saver';
+import * as topojson from 'topojson';
 
 import { addCity, newBuildings } from '../actions';
-import { hasProp, deltaEncode } from '../../../../app/utils';
-// import config from '../config';
+import { hasProp } from '../../../../app/utils';
+import {
+  computeSurfaceArea,
+  featurizeBuilding,
+  reduceBuildingTopology,
+} from '../../../../app/utils/geometry';
+import { hslToRgb } from '../../../../app/utils/color';
 
 const config = {
   WRLD3D_API_KEY: 'c0b58f7240bf36e09f110a3d41d3edee',
 };
 
-// const STEP_SIZE = 0.005;
-const STEP_SIZE = 0.0002;
-const CITIES_PER_REQUEST = 25;
-const HIGHLIGHT_COLOR = [255, 0, 0, 200];
+const STEP_SIZE = 1e-4;
+const CITIES_PER_REQUEST = 50;
+const QUANTIZE_AMOUNT = 1e6;
 
 let initCoord = null;
 let n = null;
 let totalCalls = null;
+
+function rainbowColor() {
+  const i = parseInt(Math.round(n / totalCalls * 8), 10) % 8;
+
+  return [...hslToRgb([i * 360.0 / 8.0, 1, 0.5]), 200];
+}
 
 function isComplete(data) {
   const arr = Object.values(data);
@@ -71,6 +82,7 @@ class AddCity extends Component {
     this.continueUpload = this.continueUpload.bind(this);
     this.exportBuildings = this.exportBuildings.bind(this);
     this.computeCentroid = this.computeCentroid.bind(this);
+    this.nextCoord = this.nextCoord.bind(this);
   }
 
   componentWillReceiveProps(props) {
@@ -88,12 +100,15 @@ class AddCity extends Component {
 
       // INIT COUNTERS
       n = 0;
-      initCoord = lowerLeftCorner.slice();
+      initCoord = lowerLeftCorner.slice()
+      .map(f => (Math.round(f * 1e6) / 1e6));
+
       totalCalls = (Math.ceil(
         Math.abs(lowerLeftCorner[0] - upperRightCorner[0]) / STEP_SIZE
       )) * (Math.ceil(
         Math.abs(lowerLeftCorner[1] - upperRightCorner[1]) / STEP_SIZE)
       );
+      // totalCalls = hanover.length;
 
       if (this.state.map === null) {
         this.startCityScan();
@@ -103,7 +118,7 @@ class AddCity extends Component {
         buildings.buildingHighlight(
           buildings.buildingHighlightOptions()
           .highlightBuildingAtLocation(initCoord)
-          .informationOnly()
+          .color(rainbowColor())
         )
         .addTo(this.state.map);
 
@@ -144,18 +159,30 @@ class AddCity extends Component {
 
   startCityScan() {
     const { centroidLng, centroidLat, data } = this.state;
-    const { zoom } = data;
+    const { zoom, bbox: [minLng, minLat, maxLng, maxLat] } = data;
     const center = [centroidLng, centroidLat];
     const m = map('map', config.WRLD3D_API_KEY, { center, zoom });
 
     m.on('initialstreamingcomplete', () => {
-      buildings.buildingHighlight(
-        buildings.buildingHighlightOptions()
-        .highlightBuildingAtLocation(initCoord).informationOnly()
-      )
-      .addTo(m);
-
       this.setState({ map: m, lockFields: 'Done', buildings: {} });
+
+      polygon([
+        [minLng, minLat],
+        [minLng, maxLat],
+        [maxLng, maxLat],
+        [maxLng, minLat],
+      ]).addTo(m);
+
+      this.nextCoord();
+
+      if (initCoord !== null) {
+        buildings.buildingHighlight(
+          buildings.buildingHighlightOptions()
+          .highlightBuildingAtLocation(initCoord)
+          .color(rainbowColor())
+        )
+        .addTo(m);
+      }
     });
 
     m.buildings.on('buildinginformationreceived', this.handleInformation);
@@ -169,7 +196,24 @@ class AddCity extends Component {
         const queue = this.state.queue
         .map(id => (Object.assign({}, this.state.buildings[id], { id })));
 
-        this.props.newBuildings(queue);
+        this.props.newBuildings(queue.map(({
+          centroidLng,
+          centroidLat,
+          city,
+          baseAltitude,
+          topAltitude,
+          contours: [contour, ...etc],
+          name,
+        }) => ({
+          centroidLng,
+          centroidLat,
+          city,
+          baseAltitude,
+          topAltitude,
+          surfaceArea: parseInt(Math.round(computeSurfaceArea(baseAltitude, topAltitude, contour)), 10),
+          name,
+          id: name,
+        })));
       }
 
       this.setState({ pointer: 0 });
@@ -177,7 +221,24 @@ class AddCity extends Component {
       const queue = this.state.queue.slice(0, CITIES_PER_REQUEST)
       .map(id => (Object.assign({}, this.state.buildings[id], { id })));
 
-      this.props.newBuildings(queue);
+      this.props.newBuildings(queue.map(({
+        centroidLng,
+        centroidLat,
+        city,
+        baseAltitude,
+        topAltitude,
+        contours: [contour, ...etc],
+        name,
+      }) => ({
+        centroidLng,
+        centroidLat,
+        city,
+        baseAltitude,
+        topAltitude,
+        surfaceArea: parseInt(Math.round(computeSurfaceArea(baseAltitude, topAltitude, contour)), 10),
+        name,
+        id: name,
+      })));
     }
   }
 
@@ -187,9 +248,6 @@ class AddCity extends Component {
     const builds = this.state.buildings;
     const percentDone = parseInt(n++ / totalCalls * 10000.0, 10) / 100.0;
     const { queue, pointer } = this.state;
-    const bbox = this.state.bbox.map(el => (parseFloat(el)));
-    const lowerLeftCorner = bbox.slice(0, 2);
-    const upperRightCorner = bbox.slice(2);
 
     this.setState({ percentDone });
 
@@ -199,6 +257,11 @@ class AddCity extends Component {
       const centroid = [lat, lng];
       const baseAltitude = dims.getBaseAltitude()[0];
       const topAltitude = dims.getTopAltitude()[0];
+      const contours = buildingInformation.getBuildingContours()
+      .map(({ toJson }) => {
+        const { points: p } = toJson();
+        return p.map(({ lat: l, lng: g }) => ([l, g]));
+      });
 
       builds[id] = {
         centroidLng: centroid[0],
@@ -206,6 +269,7 @@ class AddCity extends Component {
         city: this.props.cities.latestCity,
         baseAltitude,
         topAltitude,
+        contours,
         name: id,
       };
 
@@ -217,44 +281,50 @@ class AddCity extends Component {
 
         this.setState({ pointer: -1 });
 
-        this.props.newBuildings(outQueue);
+        this.props.newBuildings(outQueue.map(({
+          centroidLng,
+          centroidLat,
+          city,
+          baseAltitude: bA,
+          topAltitude: tA,
+          contours: [contour, ...etc],
+          name,
+        }) => ({
+          centroidLng,
+          centroidLat,
+          city,
+          baseAltitude: bA,
+          topAltitude: tA,
+          surfaceArea: parseInt(Math.round(computeSurfaceArea(bA, tA, contour)), 10),
+          name,
+          id: name,
+        })));
       } else if (pointer !== -1) {
         this.setState({ queue, pointer: pointer + 1 });
       }
     }
 
     this.setState({ buildings: builds });
+    this.nextCoord(e);
 
-    initCoord[1] += STEP_SIZE;
+    if (initCoord === null) {
+      this.setState({
+        percentDone: null,
+        lockFields: 'Submit',
+      });
 
-    if (initCoord[1] - upperRightCorner[1] >= 0) {
-      if (initCoord[0] - upperRightCorner[0] >= 0) {
-        this.setState({
-          percentDone: null,
-          lockFields: 'Submit',
-        });
-
-        if (this.state.pointer > 0) {
-          this.setState({ pointer: -2 });
-          this.continueUpload();
-        }
-
-        return;
+      if (this.state.pointer > 0) {
+        this.setState({ pointer: -2 });
+        this.continueUpload();
       }
 
-      initCoord[1] = lowerLeftCorner[1];
-      initCoord[0] += STEP_SIZE;
-    }
-
-    if (initCoord[0] >= 43.7049 &&
-        Math.abs(initCoord[1] + 72.285) < STEP_SIZE) {
-      initCoord[1] += STEP_SIZE;
+      return;
     }
 
     buildings.buildingHighlight(
       buildings.buildingHighlightOptions()
       .highlightBuildingAtLocation(initCoord)
-      .color(HIGHLIGHT_COLOR)
+      .color(rainbowColor())
     )
     .addTo(this.state.map);
   }
@@ -269,6 +339,26 @@ class AddCity extends Component {
     this.props.addCity(query);
 
     this.setState({ lockFields: 'Loading...' });
+  }
+
+  nextCoord() {
+    const bbox = this.state.bbox.map(el => (parseFloat(el)));
+    const lowerLeftCorner = bbox.slice(0, 2);
+    const upperRightCorner = bbox.slice(2);
+
+    initCoord[1] += STEP_SIZE;
+
+    if (initCoord[1] - upperRightCorner[1] >= 0) {
+      initCoord[1] = lowerLeftCorner[1];
+      initCoord[0] += STEP_SIZE;
+
+      if (initCoord[0] - upperRightCorner[0] >= 0) {
+        initCoord = null;
+        return;
+      }
+    }
+
+    initCoord = initCoord.map(f => (Math.round(f * 1e6) / 1e6));
   }
 
   updateMap(e) {
@@ -286,15 +376,20 @@ class AddCity extends Component {
   exportBuildings(e) {
     e.preventDefault();
 
-    const object = Object.keys(this.state.buildings).map(id => {
+    const objects = Object.keys(this.state.buildings).map(id => {
       const obj = Object.assign({}, this.state.buildings[id], { id });
 
       delete obj.city;
 
       return obj;
     });
-    const buffer = JSON.stringify(object);
-    // const buffer = deltaEncode(object, ['centroidLng', 'centroidLat']);
+
+    const features = objects.map(featurizeBuilding)
+    .reduce((arr, f) => ([f, ...arr]), []);
+    const topology = topojson.topology(features, QUANTIZE_AMOUNT);
+    const reduced = reduceBuildingTopology(topology);
+
+    const buffer = JSON.stringify(reduced);
     const { data, centroidLng, centroidLat } = this.state;
     const { name, bbox } = data;
     const centroid = [centroidLng, centroidLat];
@@ -458,7 +553,7 @@ class AddCity extends Component {
               }
             />
             <button
-              disabled={this.state.queue.length > 0 || Object.keys(this.state.buildings).length === 0}
+              disabled={Object.keys(this.state.buildings).length === 0 || this.state.percentDone !== null}
               onClick={this.exportBuildings}
             >Export</button>
           </div>
