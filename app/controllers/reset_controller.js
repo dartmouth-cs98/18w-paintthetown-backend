@@ -4,7 +4,7 @@ import Color from '../models/color_model.js';
 import Continent from '../models/continent_model.js';
 import Country from '../models/country_model.js';
 import Pattern from '../models/pattern_model.js';
-import Splotch from '../models/splotch_model.js';
+import Particle from '../models/particle_model.js';
 import Tag from '../models/tag_model.js';
 import Team from '../models/team_model.js';
 import User from '../models/user_model.js';
@@ -19,7 +19,7 @@ const MODELS = {
   Continent,
   Country,
   Pattern,
-  Splotch,
+  Particle,
   Tag,
   Team,
   User,

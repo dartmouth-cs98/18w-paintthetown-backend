@@ -14,6 +14,7 @@ export const ActionTypes = {
   BUILDING_ERROR: 'BUILDING_ERROR',
   TEAM_ERROR: 'TEAM_ERROR',
   CITY_ERROR: 'CITY_ERROR',
+  PARTICLE_ERROR: 'PARTICLE_ERROR',
   RESET_ERROR: 'RESET_ERROR',
   CLEAR_USER_ERROR: 'CLEAR_USER_ERROR',
   CLEAR_AUTH_ERROR: 'CLEAR_AUTH_ERROR',
@@ -21,6 +22,7 @@ export const ActionTypes = {
   CLEAR_BUILDING_ERROR: 'CLEAR_BUILDING_ERROR',
   CLEAR_TEAM_ERROR: 'CLEAR_TEAM_ERROR',
   CLEAR_CITY_ERROR: 'CLEAR_CITY_ERROR',
+  CLEAR_PARTICLE_ERROR: 'CLEAR_PARTICLE_ERROR',
   CLEAR_RESET_ERROR: 'CLEAR_RESET_ERROR',
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
@@ -31,12 +33,14 @@ export const ActionTypes = {
   GET_BUILDING_IDS: 'GET_BUILDING_IDS',
   GET_LOCATION_INFO: 'GET_LOCATION_INFO',
   GET_TEAM_IDS: 'GET_TEAM_IDS',
+  GET_PARTICLES: 'GET_PARTICLES',
   UPDATE_TEAM_BUILDING: 'UPDATE_TEAM_BUILDING',
   GET_TEAM_INFO: 'GET_TEAM_INFO',
   ASSIGN_USER_TO_TEAM: 'ASSIGN_USER_TO_TEAM',
-  RESET: 'RESET',
   UPDATE_USER_DATA: 'UPDATE_USER_DATA',
   ADD_CITY: 'ADD_CITY',
+  ADD_PARTICLES: 'ADD_PARTICLES',
+  RESET: 'RESET',
 };
 
 // trigger error
@@ -423,6 +427,58 @@ export const updateTeamBuilding = (body) => {
       dispatch(newError(
         `Update Team Building Info Failed: ${error}`,
         ActionTypes.BUILDING_ERROR,
+      ));
+    });
+  };
+};
+
+// PARTICLE ACTIONS
+export const addParticles = (particles) => {
+  return (dispatch) => {
+    axios.post(`${ROOT_URL}/particles`, { particles }, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Add Particles Failed: ${error}`,
+          ActionTypes.PARTICLE_ERROR,
+        ));
+      } else {
+        const id = response.data.id;
+        dispatch({ type: ActionTypes.ADD_PARTICLES, id });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(`Add Particles Failed: ${error}`, ActionTypes.PARTICLE_ERROR));
+    });
+  };
+};
+
+
+export const getParticles = (buildingId) => {
+  return (dispatch) => {
+    axios.get(`${ROOT_URL}/particles`, {
+      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
+      params: { buildingId: buildingId },
+    })
+    .then(response => {
+      if (response.data.error) {
+        const error = response.data.error.errmsg;
+        dispatch(newError(
+          `Get Particles Failed: ${error}`,
+          ActionTypes.PARTICLE_ERROR,
+        ));
+      } else {
+        const particles = response.data.particles;
+        dispatch({ type: ActionTypes.GET_PARTICLES, teams });
+      }
+    })
+    .catch(error => {
+      dispatch(newError(
+        `Get Particles Failed: ${error}`,
+        ActionTypes.PARTICLE_ERROR,
       ));
     });
   };

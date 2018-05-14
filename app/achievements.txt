@@ -1,0 +1,26 @@
+You have covered 5% of $town!,coverage,town
+You have covered 10% of $town!,coverage,town
+You have covered 25% of $town!,coverage,town
+You have covered 50% of $town!,coverage,town
+You have covered 75% of $town!,coverage,town
+You have covered 100% of $town!,coverage,town
+You have painted 1 bridge!,coverage,town
+You have painted 1 monument!,coverage,town
+You have painted 10 monuments!,coverage,town
+You have painted in 2 different states!,coverage
+You have painted in 5 different states!,coverage
+You have painted in 25 different states!,coverage
+You have painted in all states!,coverage
+You have conquered 1 building!,possession
+You have conquered 10 buildings!,possession
+You have conquered 50 buildings!,possession
+You have conquered 100 buildings!,possession
+You have conquered 500 buildings!,possession
+You have conquered 1000 buildings!,possession
+You have unlocked your first pattern!,unlock
+You have unlocked your five patterns!,unlock
+You have unlocked your first weapon!,unlock
+You have unlocked your five weapons!,unlock
+You have unlocked all patterns!,unlock
+You have unlocked all weapons!,unlock
+You tried to play with no reception!,miscellaneous

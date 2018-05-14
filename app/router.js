@@ -11,7 +11,7 @@ import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
 import * as Patterns from './controllers/pattern_controller';
-import * as Splotches from './controllers/splotch_controller';
+import * as Particles from './controllers/particle_controller';
 import * as Buildings from './controllers/building_controller';
 import * as Cities from './controllers/city_controller';
 import * as Continents from './controllers/continent_controller';
@@ -51,9 +51,6 @@ router.route('/teams/info')
 router.route('/patterns')
       .post(requireAuth, Patterns.newPattern);
 
-router.route('/splotches')
-      .post(requireAuth, Splotches.newSplotch);
-
 router.route('/buildings')
       .get(requireAuth, Buildings.getBuildingIDs)
       .post(requireAuth, Buildings.newBuildings);
@@ -66,6 +63,10 @@ router.route('/buildings/getTeam')
 
 router.route('/buildings/updateTeam')
       .post(requireAuth, Buildings.updateTeam);
+
+router.route('/particles')
+      .get(requireAuth, Particles.getParticles)
+      .post(requireAuth, Particles.addParticles);
 
 router.route('/cities')
       .post(requireAuth, Cities.newCity);
