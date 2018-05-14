@@ -1,3 +1,5 @@
+import * as topojson from 'topojson';
+
 import Color from './models/color_model';
 import Team from './models/team_model';
 import User from './models/user_model';
@@ -5,8 +7,32 @@ import City from './models/city_model';
 import Building from './models/building_model';
 
 import { getFilesInPath, addData } from './utils/file';
+import { computeSurfaceArea, expandBuildingTopology } from './utils/geometry';
 
 import config from './config';
+
+function decode(objs) {
+  const topology = expandBuildingTopology(objs);
+  const features = Object.keys(topology.objects).map(k => (
+    topojson.feature(topology, topology.objects[k])
+  ));
+
+  const buildings = features.map(({
+    id,
+    properties: { baseAltitude, topAltitude, centroidLng, centroidLat, name },
+    geometry: { coordinates: [c] },
+  }) => ({
+    id,
+    name,
+    centroidLng,
+    centroidLat,
+    baseAltitude,
+    topAltitude,
+    contours: c.map(p => (p.slice(0, p.length - 1))),
+  }));
+
+  return buildings;
+}
 
 function addTeams(filename) {
   return addData(`${__dirname}/data/teams/${filename}`, ({
@@ -50,6 +76,13 @@ function addCity(filename) {
     const { _id } = result._doc;
 
     return addData(`${__dirname}/data/cities/${filename}`, building => {
+      const {
+        topAltitude: tA,
+        baseAltitude: bA,
+        contours: [contour, ...etc],
+      } = building;
+      const surfaceArea = computeSurfaceArea(bA, tA, contour);
+
       const build = new Building({
         name: building.name,
         id: building.id,
@@ -58,12 +91,13 @@ function addCity(filename) {
         centroidLat: building.centroidLat,
         baseAltitude: building.baseAltitude,
         topAltitude: building.topAltitude,
+        surfaceArea: parseInt(Math.round(surfaceArea), 10),
       });
 
       return build.save();
     }, buildings => {
       console.log(`\t•Added ${buildings.length} building${buildings.length === 1 ? '' : 's'} to city ${name}.`);
-    });
+    }, { decode });
   });
 }
 

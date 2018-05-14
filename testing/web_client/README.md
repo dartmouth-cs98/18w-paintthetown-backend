@@ -1,10 +1,4 @@
 # Paint the Town: Test Web Client
-
-![ReactJS Logo](https://www.shareicon.net/data/128x128/2016/07/08/117367_logo_512x512.png)
-![Redux Logo](https://blobscdn.gitbook.com/v0/b/gitbook-28427.appspot.com/o/spaces%2F-L5K1I1WsuQMZ8ecEuWg%2Favatar.png?generation=1518623866348435&alt=media)
-![Babel Logo](https://cdn.worldvectorlogo.com/logos/babel-10.svg)
-![Webpack Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Webpack.png/536px-Webpack.png)
-
 A very simple, minimalistic web client to make test HTTP requests to the API.
 
 ## File Structure

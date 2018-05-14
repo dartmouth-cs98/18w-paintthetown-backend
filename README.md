@@ -1,12 +1,5 @@
 # Paint the Town: Backend
 
-![NodeJS Logo](https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg)
-![Babel Logo](https://cdn.worldvectorlogo.com/logos/babel-10.svg)
-![ExpressJS Logo](http://mean.io/wp-content/themes/twentysixteen-child/images/express.png)
-![MongoDB Logo](https://pdoyl.curd.io/webassets.mongodb.com/_com_assets/global/mongodb-logo-white.png)
-
-![PassportJS Logo](https://avatars1.githubusercontent.com/u/1160530?s=280&v=4)
-
 An API that provides server functionality for the Unity app, *Paint the Town*. The backend consists of two main components: `/app` and `/testing` and deploys to [Heroku](https://paint-the-town.herokuapp.com/api).
 
 ## File Structure
