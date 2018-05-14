@@ -3,6 +3,5 @@ config.js
 npm-debug.log
 dist
 .env
-Hanover.txt
 connect-mongo
 *~

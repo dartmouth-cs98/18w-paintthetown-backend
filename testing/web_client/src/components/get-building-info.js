@@ -50,7 +50,7 @@ class GetBuildingInfo extends Component {
       return <option value="Loading...">Loading...</option>;
     }
 
-    return [{ id: 'Select building id...' }]
+    return [{ id: 'Select building id...' }]
     .concat(this.props.buildings.buildings)
     .map(({ id }) => (
       <option value={id} key={id}>{id}</option>
@@ -80,8 +80,9 @@ class GetBuildingInfo extends Component {
             <option value="hex">Hex</option>
             <option value="tags">Tags</option>
             <option value="centroid">Centroid</option>
-            <option value="baseAltitude">Base Altitude</option>
-            <option value="topAltitude">Top Altitude</option>
+            <option value="baseAltitude">Base altitude</option>
+            <option value="topAltitude">Top altitude</option>
+            <option value="surfaceArea">Surface area</option>
             <option value="city">City</option>
             <option value="team">Team</option>
           </select>

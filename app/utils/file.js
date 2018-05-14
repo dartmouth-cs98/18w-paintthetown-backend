@@ -19,9 +19,19 @@ export const readJSON = (filename) => (
   })
 );
 
-export const addData = (filename, handler, logger) => (
+export const addData = (filename, handler, logger, options = null) => (
   new Promise((resolve, reject) => {
     readJSON(filename)
+    .then(objects => (
+      new Promise((resolve, reject) => {
+        if (options !== null) {
+          const { decode = null } = options;
+          if (decode !== null) { return resolve(decode(objects)); }
+        }
+
+        return resolve(objects);
+      })
+    ))
     .then(objects => {
       Promise.all(objects.map(handler))
       .then(res => {

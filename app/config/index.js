@@ -3,7 +3,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export default {
-  maxTeams: 10,
+  RESTOCK_INTERVAL: 10000,
+  BUILDINGS_PER_RESTOCK: 3,
+  MAX_RESTOCK: 25000,
+  MAX_TEAMS: 10,
+  INITIAL_PAINT: 50000,
   secret: process.env.API_SECRET,
   facebookAppId: process.env.FACEBOOK_APP_ID,
   facebookAppSecret: process.env.FACEBOOK_APP_SECRET,
