@@ -71,6 +71,9 @@ router.route('/particles')
 router.route('/cities')
       .post(requireAuth, Cities.newCity);
 
+router.route('/cities/names')
+      .post(requireAuth, Cities.getCityNames);
+
 router.route('/continents')
       .post(requireAuth, Continents.newContinent);
 

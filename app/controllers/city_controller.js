@@ -25,3 +25,26 @@ export const newCity = (req, res) => {
     });
   }
 };
+
+export const getCityNames = (req, res) => {
+  if (!hasProps(req.query, ['cities'])) {
+    res.json({
+      error: { errmsg: 'getCityNames needs a \'cities\' field.' },
+    });
+  } else {
+    const { cities } = req.query;
+
+    Promise.all(ids.map(id => (City.findById(id, ['name']))))
+    .then(res => {
+      console.log(res);
+      console.log("HI THERE")
+      res.json({ cities: res });
+    })
+    .catch(error => {
+      console.log('ERROR: faulty query.');
+      console.log("YO WAT UP LET'S SLAY GK")
+      res.json({ error: { errmsg: error.message } });
+    });
+
+  }
+};
