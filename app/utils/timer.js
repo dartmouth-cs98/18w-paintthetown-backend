@@ -72,7 +72,7 @@ class Timers {
     const timer = this._timers[key];
 
     if (timer.checkCancel(...args)) {
-      this.timers.cancel(key, msg);
+      this.cancel(key, msg);
       return true;
     }
 
