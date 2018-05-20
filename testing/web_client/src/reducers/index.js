@@ -1,23 +1,23 @@
 import { combineReducers } from 'redux';
 
-import AuthReducer from './auth-reducer';
-import UsersReducer from './users-reducer';
-import ColorsReducer from './colors-reducer';
-import BuildingsReducer from './buildings-reducer';
-import TeamsReducer from './teams-reducer';
-import CitiesReducer from './cities-reducer';
-import ParticlesReducer from './particles-reducer';
-import ResetReducer from './reset-reducer';
+import auth from './auth-reducer';
+import users from './users-reducer';
+import colors from './colors-reducer';
+import buildings from './buildings-reducer';
+import teams from './teams-reducer';
+import cities from './cities-reducer';
+import particles from './particles-reducer';
+import reset from './reset-reducer';
 
 const rootReducer = combineReducers({
-  auth: AuthReducer,
-  users: UsersReducer,
-  colors: ColorsReducer,
-  buildings: BuildingsReducer,
-  teams: TeamsReducer,
-  particles: ParticlesReducer,
-  cities: CitiesReducer,
-  reset: ResetReducer,
+  auth,
+  users,
+  colors,
+  buildings,
+  teams,
+  particles,
+  cities,
+  reset,
 });
 
 export default rootReducer;

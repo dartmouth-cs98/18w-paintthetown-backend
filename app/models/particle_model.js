@@ -4,25 +4,20 @@ import mongoose, { Schema } from 'mongoose';
 const ParticleSchema = new Schema({
   pos: {
     type: [Number],
-    default: null,
-  },
-  size: {
-    type: Number,
-    default: null,
+    required: true,
   },
   rotation: {
     type: [Number],
-    default: null,
+    required: true,
   },
   color: {
     type: mongoose.Schema.ObjectId,
     ref: 'Color',
-    default: null,
+    required: true,
   },
   building: { // should be required
-    type: mongoose.Schema.ObjectId,
-    ref: 'Building',
-    default: null,
+    type: String,
+    required: true,
   },
 }, {
   timestamp: true,

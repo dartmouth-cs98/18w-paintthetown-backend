@@ -1,33 +1,34 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { getCityNames } from '../actions';
+import { getColorData, getColorIDs } from '../actions';
 
 const mapStateToProps = (state) => (
   {
-    cities: state.cities,
+    colors: state.colors,
   }
 );
 
 // example class based component (smart component)
-class GetCityNames extends Component {
+class GetColorData extends Component {
   constructor(props) {
     super(props);
 
     // init component state here
     this.state = {
       id: null,
-      cities: null,
+      name: null,
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
+    this.getColorIDs = this.getColorIDs.bind(this);
   }
 
   componentWillReceiveProps(props) {
-    if (props.cities.error !== null &&
-        props.cities.error !== this.props.cities.error) {
-      this.props.displayError(props.cities.error, 'cities');
+    if (props.colors.error !== null &&
+        props.colors.error !== this.props.colors.error) {
+      this.props.displayError(props.colors.error, 'color');
     }
   }
 
@@ -51,7 +52,7 @@ class GetCityNames extends Component {
   handleSubmit(e) {
     e.preventDefault();
 
-    this.props.getCityNames(this.state.id);
+    this.props.getColorData(this.state.id);
   }
 
   render() {
@@ -78,4 +79,4 @@ class GetCityNames extends Component {
   }
 }
 
-export default connect(mapStateToProps, { getCityNames })(GetCityNames);
+export default connect(mapStateToProps, { getColorData, getColorIDs })(GetColorData);

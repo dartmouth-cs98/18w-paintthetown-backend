@@ -22,8 +22,7 @@ function UsersReducer(state = defaultUsers, action) {
     case ActionTypes.CLEAR_USER_ERROR:
       return Object.assign({}, state, { error: null });
 
-    default:
-      return state;
+    default: return state;
   }
 }
 

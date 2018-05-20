@@ -3,9 +3,10 @@ import { Router } from 'express';
 import {
   requireAuth,
   requireSignin,
-  requireAuthFacebook,
   requireAdminAuth,
 } from './services/passport';
+import { routerPassthrough } from './utils/router';
+import { jsonQuickSort } from './utils';
 
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
@@ -39,7 +40,7 @@ router.route('/colors')
       .post(requireAuth, Colors.newColor);
 
 router.route('/colors/ids')
-      .get(requireAuth, Colors.getColorIDs)
+      .get(requireAuth, Colors.getColorIDs);
 
 router.route('/teams')
       .get(requireAuth, Teams.getTeamIDs)
@@ -69,10 +70,8 @@ router.route('/particles')
       .post(requireAuth, Particles.addParticles);
 
 router.route('/cities')
+      .get(requireAuth, Cities.getData)
       .post(requireAuth, Cities.newCity);
-
-router.route('/cities/names')
-      .post(requireAuth, Cities.getCityNames);
 
 router.route('/continents')
       .post(requireAuth, Continents.newContinent);
@@ -87,10 +86,8 @@ router.post('/signin', requireSignin, Users.signIn);
 
 router.post('/signup', Users.signUp);
 
-// facebook
-// router.get('/auth/facebook', requireLoginFacebook);
-router.get('/facebook/tokenize', (req, res, next) => {
-  requireAuthFacebook(req, res, next, Users.signIn);
+const r = routerPassthrough(router, (req, res, json) => {
+  res.json(jsonQuickSort(json));
 });
 
-export default router;
+export default r;
