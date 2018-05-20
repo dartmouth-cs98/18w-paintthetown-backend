@@ -280,7 +280,6 @@ export const getColorData = (id) => (
 );
 
 
-
 // BUILDING ACTIONS
 export const newBuildings = (buildings) => {
   return (dispatch) => {
@@ -448,8 +447,8 @@ export const addParticles = (particles) => {
           ActionTypes.PARTICLE_ERROR,
         ));
       } else {
-        const id = response.data.id;
-        dispatch({ type: ActionTypes.ADD_PARTICLES, id });
+        const { data: { message } } = response;
+        dispatch({ type: ActionTypes.ADD_PARTICLES, message });
       }
     })
     .catch(error => {
@@ -463,7 +462,7 @@ export const getParticles = (buildingId) => {
   return (dispatch) => {
     axios.get(`${ROOT_URL}/particles`, {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { buildingId: buildingId },
+      params: { buildingId },
     })
     .then(response => {
       if (response.data.error) {
@@ -473,8 +472,8 @@ export const getParticles = (buildingId) => {
           ActionTypes.PARTICLE_ERROR,
         ));
       } else {
-        const particles = response.data.particles;
-        dispatch({ type: ActionTypes.GET_PARTICLES, teams });
+        const { particles } = response.data;
+        dispatch({ type: ActionTypes.GET_PARTICLES, particles });
       }
     })
     .catch(error => {
@@ -602,7 +601,6 @@ export const addCity = (data) => {
   };
 };
 
-
 export const getCityNames = (id) => (
   (dispatch) => {
     return axios.get(`${ROOT_URL}/cities/names`, {
@@ -625,7 +623,6 @@ export const getCityNames = (id) => (
     });
   }
 );
-
 
 
 // RESET ACTIONS

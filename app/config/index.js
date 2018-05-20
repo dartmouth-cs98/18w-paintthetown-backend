@@ -1,59 +1,70 @@
 import dotenv from 'dotenv';
 
+
 dotenv.config();
 
-export default {
-  RESTOCK_INTERVAL: 10000,
-  BUILDINGS_PER_RESTOCK: 3,
-  MAX_RESTOCK: 25000,
-  MAX_TEAMS: 10,
-  INITIAL_PAINT: 50000,
-  secret: process.env.API_SECRET,
-  facebookAppId: process.env.FACEBOOK_APP_ID,
-  facebookAppSecret: process.env.FACEBOOK_APP_SECRET,
-  adminTokens: [
-    process.env.ADMIN_TOKEN_MAU,
-    process.env.ADMIN_TOKEN_ACACIA,
-    process.env.ADMIN_TOKEN_MORGAN,
-    process.env.ADMIN_TOKEN_TED,
-    process.env.ADMIN_TOKEN_ALEX,
-    process.env.ADMIN_TOKEN_WYATT,
-  ],
-  adminData: [{
-    name: process.env.FIRST_NAME_MAU,
-    middleName: process.env.MIDDLE_NAME_MAU,
-    lastName: process.env.LAST_NAME_MAU,
-    email: process.env.EMAIL_MAU,
-    password: process.env.PASSWORD_MAU,
-  }, {
-    name: process.env.FIRST_NAME_ACACIA,
-    middleName: process.env.MIDDLE_NAME_ACACIA,
-    lastName: process.env.LAST_NAME_ACACIA,
-    email: process.env.EMAIL_ACACIA,
-    password: process.env.PASSWORD_ACACIA,
-  }, {
-    name: process.env.FIRST_NAME_MORGAN,
-    middleName: process.env.MIDDLE_NAME_MORGAN,
-    lastName: process.env.LAST_NAME_MORGAN,
-    email: process.env.EMAIL_MORGAN,
-    password: process.env.PASSWORD_MORGAN,
-  }, {
-    name: process.env.FIRST_NAME_TED,
-    middleName: process.env.MIDDLE_NAME_TED,
-    lastName: process.env.LAST_NAME_TED,
-    email: process.env.EMAIL_TED,
-    password: process.env.PASSWORD_TED,
-  }, {
-    name: process.env.FIRST_NAME_ALEX,
-    middleName: process.env.MIDDLE_NAME_ALEX,
-    lastName: process.env.LAST_NAME_ALEX,
-    email: process.env.EMAIL_ALEX,
-    password: process.env.PASSWORD_ALEX,
-  }, {
-    name: process.env.FIRST_NAME_WYATT,
-    middleName: process.env.MIDDLE_NAME_WYATT,
-    lastName: process.env.LAST_NAME_WYATT,
-    email: process.env.EMAIL_WYATT,
-    password: process.env.PASSWORD_WYATT,
-  }],
+const {
+  RESTOCK_INTERVAL,
+  BUILDINGS_PER_RESTOCK,
+  MAX_RESTOCK,
+  INITIAL_PAINT,
+  MAX_TEAMS,
+  API_SECRET,
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
+} = process.env;
+const ADMINS = ['ACACIA', 'MAU', 'WYATT', 'TED', 'ALEX', 'MORGAN'];
+const DATA_FIELDS = [
+  'FIRST_NAME',
+  'MIDDLE_NAME',
+  'LAST_NAME',
+  'EMAIL',
+  'PASSWORD',
+];
+
+
+const adminData = ADMINS.map(name => (
+  DATA_FIELDS.reduce((data, field) => {
+    const obj = {};
+    const [w1, ...w2] = field.split('_');
+    const envKey = `${field}_${name}`;
+    let configKey = w1.toLowerCase();
+
+    if (w2.length > 0) {
+      configKey += `${w2[0].charAt(0)}${w2[0].slice(1).toLowerCase()}`;
+    }
+
+    obj[configKey === 'firstName' ? 'name' : configKey] = process.env[envKey];
+
+    return Object.assign(data, obj);
+  }, {})
+));
+
+const adminTokens = ADMINS.map(name => (process.env[`ADMIN_TOKEN_${name}`]));
+
+const apiKeys = {
+  API_SECRET,
+  FACEBOOK_APP_ID,
+  FACEBOOK_APP_SECRET,
 };
+
+const gameSettings = {
+  paint: {
+    RESTOCK_INTERVAL,
+    BUILDINGS_PER_RESTOCK,
+    MAX_RESTOCK,
+    INITIAL_PAINT,
+  },
+  teams: {
+    MAX_TEAMS,
+  },
+};
+
+Object.keys(gameSettings).forEach(type => {
+  Object.keys(gameSettings[type]).forEach(field => {
+    gameSettings[type][field] = parseInt(gameSettings[type][field], 10);
+  });
+});
+
+
+export default { adminData, adminTokens, apiKeys, gameSettings };

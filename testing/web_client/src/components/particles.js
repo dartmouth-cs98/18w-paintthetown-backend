@@ -4,7 +4,12 @@ import { connect } from 'react-redux';
 import AddParticles from './add-particles';
 import GetParticles from './get-particles';
 
-import { addParticles, getParticles, getColorIDs, getBuildingIDs } from '../actions';
+import {
+  addParticles,
+  getParticles,
+  getBuildingIDs,
+  getColorIDs,
+} from '../actions';
 
 
 const mapStateToProps = (state) => ({
@@ -90,4 +95,9 @@ class Particles extends Component {
 
 }
 
-export default connect(mapStateToProps, { AddParticles, getBuildingIDs, getColorIDs, })(Particles);
+export default connect(mapStateToProps, {
+  addParticles,
+  getParticles,
+  getBuildingIDs,
+  getColorIDs,
+})(Particles);

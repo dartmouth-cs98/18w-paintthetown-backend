@@ -3,10 +3,15 @@ import LocalStrategy from 'passport-local';
 import CustomStrategy from 'passport-custom';
 import FacebookTokenStrategy from 'passport-facebook-token';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import config from '../config';
 
 // and import User and your config with the secret
 import User from '../models/user_model';
+import config from '../config';
+
+const {
+  adminTokens,
+  apiKeys: { API_SECRET, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET },
+} = config;
 
 const ADMIN_TEST = /^(ADMIN) ([^ ]+$)/;
 
@@ -14,32 +19,25 @@ const ADMIN_TEST = /^(ADMIN) ([^ ]+$)/;
 // not have separate ones
 const localOptions = { usernameField: 'email' };
 
-// const CALLBACK_URLS = {
-//   // webBrowser: 'https://paint-the-town.surge.sh/',
-//   webBrowser: 'http://localhost:8080/',
-// };
-
 const facebookOptions = {
-  clientID: config.facebookAppId,
-  clientSecret: config.facebookAppSecret,
-  // profileFields: ['id', 'email', 'name'],
-  // passReqToCallback: true,
+  clientID: FACEBOOK_APP_ID,
+  clientSecret: FACEBOOK_APP_SECRET,
 };
-//
-// const DEFAULT_FACEBOOK_LOGIN = newFacebookLogin(Object.assign({
-//   callbackURL: CALLBACK_URLS.webBrowser,
-// }, facebookOptions));
 
 // options for jwt strategy
 // we'll pass in the jwt in an `authorization` header
 // so passport can find it there
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeader('authorization'),
-  secretOrKey: config.secret,
+  secretOrKey: API_SECRET,
 };
 
 // username + password authentication strategy
-const localLogin = new LocalStrategy(localOptions, (emailRaw, password, done) => {
+const localLogin = new LocalStrategy(localOptions, (
+  emailRaw,
+  password,
+  done,
+) => {
   // Verify this email and password, call done with the user
   // if it is the correct email and password
   // otherwise, call done with false
@@ -64,7 +62,12 @@ const localLogin = new LocalStrategy(localOptions, (emailRaw, password, done) =>
   });
 });
 
-const facebookLogin = new FacebookTokenStrategy(facebookOptions, (token, refreshToken, profile, done) => {
+const facebookLogin = new FacebookTokenStrategy(facebookOptions, (
+  token,
+  refreshToken,
+  profile,
+  done,
+) => {
   const data = profile._json;
   const { email } = data;
 
@@ -90,9 +93,6 @@ const facebookLogin = new FacebookTokenStrategy(facebookOptions, (token, refresh
 });
 
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
-  // See if the user ID in the payload exists in our database
-  // If it does, call 'done' with that other
-  // otherwise, call done without a user object
   User.findById(payload.sub, (err, user) => {
     if (err) {
       done(err, false);
@@ -120,8 +120,8 @@ const customAuth = new CustomStrategy((req, next) => {
   const [token] = ADMIN_TEST.exec(authorization).slice(2, 3);
   let authorized = false;
 
-  for (let i = 0; i < config.adminTokens.length; i++) {
-    if (token === config.adminTokens[i]) {
+  for (let i = 0; i < adminTokens.length; i++) {
+    if (token === adminTokens[i]) {
       authorized = true;
       break;
     }
@@ -137,15 +137,6 @@ passport.use(jwtLogin);
 passport.use(localLogin);
 passport.use(facebookLogin);
 passport.use(customAuth);
-
-// export const requireAuth = passport.authenticate('facebook-token');
-
-// export const requireAuthFacebook = (req, res, next, callback) => {
-//   passport.authenticate('facebook', (err, user) => {
-//     if (err) { return res.json({ error: err }); }
-//     return callback(Object.assign({ user }, req), res);
-//   })(req, res, next);
-// };
 
 export const requireAuthFacebook = (req, res, next, callback) => {
   passport.authenticate('facebook-token', (err, user) => {

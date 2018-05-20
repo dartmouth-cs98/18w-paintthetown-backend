@@ -6,9 +6,12 @@ import Team from '../models/team_model.js';
 
 import { hasProp, hasProps } from '../utils';
 import { avgHslFromRgb, rgbToHex, hexToRgb, rgbToHsl, hslToRgb } from '../utils/color';
+import Timers from '../utils/timer';
 import config from '../config';
 
-const timers = {};
+const { gameSettings } = config;
+
+const timers = new Timers();
 
 export const newBuildings = (req, res) => {
   if (!hasProp(req.body, 'buildings')) {
@@ -349,7 +352,7 @@ function computeColorsAndTeams(teamID, building, saturation) {
       let { team: teams } = building._doc;
       const { length: n } = teams;
 
-      if (n === config.MAX_TEAMS) {
+      if (n === gameSettings.teams.MAX_TEAMS) {
         teams = [team, ...teams.slice(0, n - 1)];
       } else {
         teams = [team, ...teams];
@@ -389,29 +392,31 @@ export const getTeam = (req, res) => {
   }
 };
 
-function restockPaint(id, avg) {
+function restockPaint(timer, id, avg) {
   User.findById(id)
   .then(({ name, lastName, paintLeft: p }) => {
-    if (p < config.MAX_RESTOCK) {
+    if (p < gameSettings.paint.MAX_RESTOCK) {
       const paintLeft = Math.min(
-        p + avg * config.BUILDINGS_PER_RESTOCK,
-        config.MAX_RESTOCK,
+        p + avg * gameSettings.paint.BUILDINGS_PER_RESTOCK,
+        gameSettings.paint.MAX_RESTOCK,
       );
 
       User.update({ _id: id }, { paintLeft })
       .then(() => {
         console.log(`TIMER_TRG:\t Restocked ${name} ${lastName}'s paint supply: ${paintLeft}.`);
 
-        if (paintLeft === config.MAX_RESTOCK) {
-          clearInterval(timers[id]);
-          delete timers[id];
-          console.log(`TIMER_CLR:\t Stopped ${name} ${lastName}'s paint supply automatic restock.`);
-        }
+        timers.cancelConditional(
+          id,
+          `Stopped ${name} ${lastName}'s paint supply automatic restock.`,
+          paintLeft,
+          gameSettings.paint.MAX_RESTOCK,
+        );
       });
     } else {
-      clearInterval(timers[id]);
-      delete timers[id];
-      console.log(`TIMER_CLR:\t Stopped ${name} ${lastName}'s paint supply automatic restock.`);
+      timers.cancel(
+        id,
+        `Stopped ${name} ${lastName}'s paint supply automatic restock.`,
+      );
     }
   })
   .catch(error => { console.log(error); });
@@ -480,15 +485,17 @@ export const updateTeam = (req, res) => {
           return;
         }
 
-        if (update.paintLeft < config.MAX_RESTOCK &&
-            !hasProp(timers, user._id)) {
+        if (update.paintLeft < gameSettings.paint.MAX_RESTOCK &&
+            !timers.hasKey(user._id)) {
           computeAvgSurfaceArea(building.city)
           .then(avg => {
-            timers[user._id] = setInterval(() => {
-              restockPaint(user._id, avg);
-            }, config.RESTOCK_INTERVAL);
-
-            console.log(`TIMER_STRT:\tStarted automatic paint supply restock for ${user.name} ${user.lastName}.`);
+            timers.addTimer(
+              user._id,
+              `Started automatic paint supply restock for ${user.name} ${user.lastName}.`,
+              timer => { restockPaint(timer, user._id, avg); },
+              gameSettings.paint.RESTOCK_INTERVAL,
+              (timer, paintLeft, maxRefill) => (paintLeft === maxRefill),
+            );
 
             computeColorsAndTeams(team, building, saturation)
             .then(({ rgb, hex, teams }) => (
@@ -526,7 +533,21 @@ export const updateTeam = (req, res) => {
       building.hex = rgbToHex(building.rgb);
     }
 
-    res.json({ building, team });
+    User.findById(user._id, ['paintLeft'])
+    .then(({ _doc: { paintLeft } }) => {
+      const gameStatus = {
+        building,
+        team,
+        user: { paintLeft, timeLeft: timers.timeLeft(user._id) },
+      };
+
+      // console.log(JSON.stringify(gameStatus));
+
+      res.json(gameStatus);
+    })
+    .catch(error => {
+      res.json({ error: { errmsg: error.message } });
+    });
   })
   .catch(error => {
     res.json({ error: { errmsg: error.message } });

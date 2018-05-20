@@ -1,16 +1,19 @@
 import jwt from 'jwt-simple';
-import config from '../config';
 import mongoose from 'mongoose';
 
 import User from '../models/user_model.js';
 import { hasProps, hasProp } from '../utils';
+import config from '../config';
+
+
+const { apiKeys: { API_SECRET } } = config;
 
 // encodes a new token for a user object
 function tokenForUser(user) {
   const timestamp = new Date().getTime();
   const sub = user.id ? user.id : user._id;
 
-  return jwt.encode({ sub, iat: timestamp }, config.secret);
+  return jwt.encode({ sub, iat: timestamp }, API_SECRET);
 }
 
 

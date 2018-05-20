@@ -6,6 +6,28 @@ export const checkBuildingFace = (str) => (
   str === 'N' || str === 'S' || str === 'E' || str === 'W'
 );
 
+export const jsonQuickSort = (json, sortFn = null) => {
+  let { _doc: obj = null } = json;
+
+  if (obj === null) { obj = json; }
+
+  const keys = Object.keys(obj);
+
+  if (sortFn === null) {
+    keys.sort();
+  } else {
+    keys.sort(sortFn);
+  }
+
+  return keys.reduce((o, key) => {
+    const newProp = {};
+
+    newProp[key] = obj[key];
+
+    return Object.assign(o, newProp);
+  }, {});
+};
+
 
 export const hasProp = (obj, prop) => (
   Object.prototype.hasOwnProperty.call(obj, prop)

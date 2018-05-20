@@ -26,25 +26,16 @@ export const newCity = (req, res) => {
   }
 };
 
-export const getCityNames = (req, res) => {
-  if (!hasProps(req.query, ['cities'])) {
+export const getData = (req, res) => {
+  if (!hasProps(req.query, ['cities', 'fields'])) {
     res.json({
-      error: { errmsg: 'getCityNames needs a \'cities\' field.' },
+      error: { errmsg: 'getCityNames needs \'cities\' and \'fields\' keys.' },
     });
   } else {
-    const { cities } = req.query;
+    const { cities: c, fields } = req.query;
 
-    Promise.all(ids.map(id => (City.findById(id, ['name']))))
-    .then(res => {
-      console.log(res);
-      console.log("HI THERE")
-      res.json({ cities: res });
-    })
-    .catch(error => {
-      console.log('ERROR: faulty query.');
-      console.log("YO WAT UP LET'S SLAY GK")
-      res.json({ error: { errmsg: error.message } });
-    });
-
+    Promise.all(c.map(id => (City.findById(id, fields))))
+    .then(cities => { res.json({ cities }); })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
 };

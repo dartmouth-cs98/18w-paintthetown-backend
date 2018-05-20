@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt-nodejs';
 
 import config from '../config';
 
+const { gameSettings: { paint: { INITIAL_PAINT } } } = config;
+
 const emailValidator = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i;
 
 const UserSchema = new Schema({
@@ -63,7 +65,7 @@ const UserSchema = new Schema({
   },
   paintLeft: {
     type: Number,
-    default: config.INITIAL_PAINT,
+    default: INITIAL_PAINT,
   },
 }, {
   timestamp: true,
