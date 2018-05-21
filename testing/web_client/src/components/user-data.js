@@ -26,6 +26,7 @@ class UserData extends Component {
         <h1>{`Last name: ${this.props.userData.lastName}`}</h1>
         <h1>{`Email: ${this.props.userData.email}`}</h1>
         <h1>{`Paint left: ${this.props.userData.paintLeft}`}</h1>
+        <h1>{`Time left: ${this.props.userData.timeLeftMin}:${this.props.userData.timeLeftSec}`}</h1>
         <h1>{`Type of login: ${this.props.userData.typeOfLogin}`}</h1>
         <h1>{`Role: ${this.props.userData.role}`}</h1>
         <h1>{`Buildings painted: ${this.props.userData.buildingsPainted}`}</h1>

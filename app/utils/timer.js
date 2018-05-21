@@ -52,7 +52,12 @@ class Timers {
   timeLeft(key) {
     if (!hasProp(this._timers, key)) { return null; }
 
-    return this._timers[key].timeLeft();
+    const ms = this._timers[key].timeLeft();
+
+    const mins = parseInt(Math.floor(ms / 60000.0), 10);
+    const secs = parseInt(Math.round((ms - mins * 60000) / 1000.0), 10);
+
+    return { mins, secs };
   }
 
   cancel(key, msg = null) {

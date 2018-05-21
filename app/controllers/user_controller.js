@@ -6,7 +6,7 @@ import { hasProps, hasProp } from '../utils';
 import config from '../config';
 
 
-const { apiKeys: { API_SECRET } } = config;
+const { apiKeys: { API_SECRET }, timers } = config;
 
 // encodes a new token for a user object
 function tokenForUser(user) {
@@ -75,10 +75,21 @@ export const signIn = (req, res) => {
 
 export const getUserData = (req, res) => {
   const user = req.user;
+  const timeLeft = timers.timeLeft(user._id);
+  const obj = Object.assign({}, user._doc);
+
+  let timeLeftSec = null;
+  let timeLeftMin = null;
+
+  if (timeLeft !== null) {
+    ({ secs: timeLeftSec, mins: timeLeftMin } = timers.timeLeft(user._id));
+  }
+
+  Object.assign(obj, { timeLeftSec, timeLeftMin });
 
   console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
-  res.json(user);
+  res.json(obj);
 };
 
 export const addUserToTeam = (req, res) => {
