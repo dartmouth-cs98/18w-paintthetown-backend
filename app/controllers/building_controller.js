@@ -6,12 +6,9 @@ import Team from '../models/team_model.js';
 
 import { hasProp, hasProps } from '../utils';
 import { avgHslFromRgb, rgbToHex, hexToRgb, rgbToHsl, hslToRgb } from '../utils/color';
-import Timers from '../utils/timer';
 import config from '../config';
 
-const { gameSettings } = config;
-
-const timers = new Timers();
+const { gameSettings, timers } = config;
 
 export const newBuildings = (req, res) => {
   if (!hasProp(req.body, 'buildings')) {
@@ -535,13 +532,15 @@ export const updateTeam = (req, res) => {
 
     User.findById(user._id, ['paintLeft'])
     .then(({ _doc: { paintLeft } }) => {
+      const {
+        secs: timeLeftSec,
+        mins: timeLeftMin,
+      } = timers.timeLeft(user._id);
       const gameStatus = {
         building,
         team,
-        user: { paintLeft, timeLeft: timers.timeLeft(user._id) },
+        user: { paintLeft, timeLeftMin, timeLeftSec },
       };
-
-      // console.log(JSON.stringify(gameStatus));
 
       res.json(gameStatus);
     })

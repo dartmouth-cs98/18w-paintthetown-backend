@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-
+import Timers from '../utils/timer';
 
 dotenv.config();
 
@@ -60,6 +60,8 @@ const gameSettings = {
   },
 };
 
+const timers = new Timers();
+
 Object.keys(gameSettings).forEach(type => {
   Object.keys(gameSettings[type]).forEach(field => {
     gameSettings[type][field] = parseInt(gameSettings[type][field], 10);
@@ -67,4 +69,10 @@ Object.keys(gameSettings).forEach(type => {
 });
 
 
-export default { adminData, adminTokens, apiKeys, gameSettings };
+export default {
+  adminData,
+  adminTokens,
+  apiKeys,
+  gameSettings,
+  timers,
+};
