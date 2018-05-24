@@ -1,7 +1,8 @@
 import jwt from 'jwt-simple';
 import mongoose from 'mongoose';
 
-import User from '../models/user_model.js';
+import User from '../models/user_model';
+import Challenge from '../models/challenge_model';
 import { hasProps, hasProp } from '../utils';
 import config from '../config';
 
@@ -82,14 +83,35 @@ export const getUserData = (req, res) => {
   let timeLeftMin = null;
 
   if (timeLeft !== null) {
-    ({ secs: timeLeftSec, mins: timeLeftMin } = timers.timeLeft(user._id));
+    ({ secs: timeLeftSec, mins: timeLeftMin } = timeLeft);
   }
 
   Object.assign(obj, { timeLeftSec, timeLeftMin });
 
   console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
-  res.json(obj);
+  const $nin = user.challenges;
+
+  Challenge.find({ level: user.level, _id: { $nin } })
+  .then(arr => {
+    Challenge.find({ _id: { $in: user.challenges } })
+    .then(ids => {
+      obj.challenges = [
+        ...arr.map(ch => ({
+          description: ch.description,
+          completed: true,
+        })),
+        ...ids.map(ch => ({
+          description: ch.description,
+          completed: false,
+        })),
+      ];
+
+      res.json(obj);
+    })
+    .catch(err => { res.json({ error: { errmsg: err.message } }); });
+  })
+  .catch(err => { res.json({ error: { errmsg: err.message } }); });
 };
 
 export const addUserToTeam = (req, res) => {
