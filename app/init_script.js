@@ -7,8 +7,6 @@ import City from './models/city_model';
 import Building from './models/building_model';
 import Challenge from './models/challenge_model';
 
-import fs from 'fs';
-
 import { getFilesInPath, addData } from './utils/file';
 import { computeSurfaceArea, expandBuildingTopology } from './utils/geometry';
 
@@ -40,44 +38,62 @@ function decode(objs) {
 function addChallenges() {
   return new Promise((resolve, reject) => {
     const level1Challenges = [];
-    fs.readFile(`${__dirname}/data/challenges/index.js`, (err, ch) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+    // fs.readFile(`${__dirname}/data/challenges/index.js`, (err, ch) => {
+    //   if (err) {
+    //     reject(err);
+    //     return;
+    //   }
 
-      const obj = JSON.parse(ch);
-      const keys = Object.keys(obj);
-      const { length: n } = keys;
-      const challenges = keys.reduce((arr, level) => {
-        obj[level].forEach(({
+
+    const obj = {
+      level1: [{
+        description: 'Paint a total of 5 buildings',
+        checkCompletion: ['AND', 0, 'buildingsPainted', 1],
+        reward: 5000,
+      }, {
+        description: 'Paint a total of 10 buildings',
+        checkCompletion: ['AND', 0, 'buildingsPainted', 2],
+        reward: 10000,
+      }, {
+        description: 'Paint a total of 15 buildings',
+        checkCompletion: ['AND', 0, 'buildingsPainted', 3],
+        reward: 15000,
+      }, {
+        description: 'Paint a total of 20 buildings',
+        checkCompletion: ['AND', 0, 'buildingsPainted', 4],
+        reward: 20000,
+      }],
+    };
+    const keys = Object.keys(obj);
+    const { length: n } = keys;
+    const challenges = keys.reduce((arr, level) => {
+      obj[level].forEach(({
+        description,
+        checkCompletion,
+        reward,
+      }) => {
+        arr.push(new Challenge({
+          level: /^level([1-9]+)$/.exec(level)[1],
           description,
           checkCompletion,
           reward,
-        }) => {
-          arr.push(new Challenge({
-            level: /^level([1-9]+)$/.exec(level)[1],
-            description,
-            checkCompletion,
-            reward,
-          }));
+        }));
 
-          if (level === 'level1') {
-            const { _id: challenge } = arr[arr.length - 1];
-            level1Challenges.push(challenge);
-          }
-        });
+        if (level === 'level1') {
+          const { _id: challenge } = arr[arr.length - 1];
+          level1Challenges.push(challenge);
+        }
+      });
 
-        return arr;
-      }, []);
+      return arr;
+    }, []);
 
-      Promise.all(challenges.map(c => (c.save())))
-      .then(res => {
-        console.log(`\t•Added ${challenges.length} challenge${challenges.length === 1 ? '' : 's'} for ${n} level${n === 1 ? '' : 's'}.`);
-        resolve(level1Challenges);
-      })
-      .catch(error => { reject(error); });
-    });
+    Promise.all(challenges.map(c => (c.save())))
+    .then(res => {
+      console.log(`\t•Added ${challenges.length} challenge${challenges.length === 1 ? '' : 's'} for ${n} level${n === 1 ? '' : 's'}.`);
+      resolve(level1Challenges);
+    })
+    .catch(error => { reject(error); });
   });
 }
 
