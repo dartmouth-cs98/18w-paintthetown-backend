@@ -5,6 +5,9 @@ import Team from './models/team_model';
 import User from './models/user_model';
 import City from './models/city_model';
 import Building from './models/building_model';
+import Challenge from './models/challenge_model';
+
+import CHALLENGE_DATA from './data/challenges';
 
 import { getFilesInPath, addData } from './utils/file';
 import { computeSurfaceArea, expandBuildingTopology } from './utils/geometry';
@@ -32,6 +35,42 @@ function decode(objs) {
   }));
 
   return buildings;
+}
+
+function addChallenges() {
+  return new Promise((resolve, reject) => {
+    const level1Challenges = [];
+    const keys = Object.keys(CHALLENGE_DATA);
+    const { length: n } = keys;
+    const challenges = Object.keys(CHALLENGE_DATA).reduce((arr, level) => {
+      CHALLENGE_DATA[level].forEach(({
+        description,
+        checkCompletion,
+        reward,
+      }) => {
+        arr.push(new Challenge({
+          level: /^level([1-9]+)$/.exec(level)[1],
+          description,
+          checkCompletion,
+          reward,
+        }));
+
+        if (level === 'level1') {
+          const { _id: challenge } = arr[arr.length - 1];
+          level1Challenges.push(challenge);
+        }
+      });
+
+      return arr;
+    }, []);
+
+    Promise.all(challenges.map(c => (c.save())))
+    .then(res => {
+      console.log(`\t•Added ${challenges.length} challenge${challenges.length === 1 ? '' : 's'} for ${n} level${n === 1 ? '' : 's'}.`);
+      resolve(level1Challenges);
+    })
+    .catch(error => { reject(error); });
+  });
 }
 
 function addTeams(filename) {
@@ -103,10 +142,7 @@ function addCity(filename) {
 
 export default (collections) => (new Promise((resolve, reject) => {
   const users = config.adminData.map((data) => (
-    new User(Object.assign({}, data, {
-      role: 'admin',
-      typeOfLogin: 'email',
-    })))
+    new User(Object.assign({}, data, { role: 'admin', typeOfLogin: 'email' })))
   );
 
   getFilesInPath(`${__dirname}/data/`)
@@ -123,6 +159,15 @@ export default (collections) => (new Promise((resolve, reject) => {
 
           if (dir === 'teams') {
             return addTeams(jsonFiles).then(res => { resolve1(res); })
+            .catch(err => { reject1(err); });
+          }
+
+          if (dir === 'challenges') {
+            return addChallenges()
+            .then(challenges => {
+              users.forEach(user => { Object.assign(user, { challenges }); });
+              resolve1();
+            })
             .catch(err => { reject1(err); });
           }
 

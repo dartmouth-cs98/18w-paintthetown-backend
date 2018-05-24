@@ -1,4 +1,5 @@
 import Building from '../models/building_model.js';
+import Challenge from '../models/challenge_model';
 import City from '../models/city_model.js';
 import Color from '../models/color_model.js';
 import Continent from '../models/continent_model.js';
@@ -14,6 +15,7 @@ import initScript from '../init_script';
 
 const MODELS = {
   Building,
+  Challenge,
   City,
   Color,
   Continent,

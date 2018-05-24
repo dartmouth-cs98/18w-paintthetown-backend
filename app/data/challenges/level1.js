@@ -1,18 +1,18 @@
 const Lvl1Challenges = [{
   description: 'Paint a total of 5 buildings',
-  checkCompletion: ({ _doc: { buildingsPainted: n } }) => (n === 5),
+  checkCompletion: ['AND', 0, 'buildingsPainted', 1],
   reward: 5000,
 }, {
   description: 'Paint a total of 10 buildings',
-  checkCompletion: ({ _doc: { buildingsPainted: n } }) => (n === 10),
+  checkCompletion: ['AND', 0, 'buildingsPainted', 2],
   reward: 10000,
 }, {
   description: 'Paint a total of 15 buildings',
-  checkCompletion: ({ _doc: { buildingsPainted: n } }) => (n === 15),
+  checkCompletion: ['AND', 0, 'buildingsPainted', 3],
   reward: 15000,
 }, {
   description: 'Paint a total of 20 buildings',
-  checkCompletion: ({ _doc: { buildingsPainted: n } }) => (n === 20),
+  checkCompletion: ['AND', 0, 'buildingsPainted', 4],
   reward: 20000,
 }];
 
