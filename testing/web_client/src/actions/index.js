@@ -410,6 +410,7 @@ export const updateTeamBuilding = (body) => {
       headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
     })
     .then(response => {
+      console.log(response);
       if (response.data.error) {
         const error = response.data.error.errmsg;
 

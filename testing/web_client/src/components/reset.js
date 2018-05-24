@@ -9,6 +9,7 @@ const mapStateToProps = (state) => ({
 
 const MODELS = [
   'Building',
+  'Challenge',
   'City',
   'Color',
   'Continent',

@@ -530,21 +530,31 @@ export const updateTeam = (req, res) => {
       building.hex = rgbToHex(building.rgb);
     }
 
-    User.findById(user._id, ['paintLeft'])
-    .then(({ _doc: { paintLeft } }) => {
-      const {
-        secs: timeLeftSec,
-        mins: timeLeftMin,
-      } = timers.timeLeft(user._id);
+    User.findById(user._id)
+    .populate('challenges')
+    .then(u => {
+      const { _doc: { paintLeft } } = u;
+      const timeLeft = timers.timeLeft(u._id);
+      let timeLeftSec = null;
+      let timeLeftMin = null;
+
+      if (timeLeft !== null) {
+        ({ secs: timeLeftSec, mins: timeLeftMin } = timeLeft);
+      }
       const gameStatus = {
         building,
         team,
         user: { paintLeft, timeLeftMin, timeLeftSec },
+        checkChallenges: true,
+        challenges: u.challenges,
       };
+
+      Object.assign(req, { user: u });
 
       res.json(gameStatus);
     })
     .catch(error => {
+      console.log(error.stack);
       res.json({ error: { errmsg: error.message } });
     });
   })

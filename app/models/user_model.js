@@ -67,6 +67,17 @@ const UserSchema = new Schema({
     type: Number,
     default: INITIAL_PAINT,
   },
+  level: {
+    type: Number,
+    default: 1,
+  },
+  challenges: {
+    type: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'Challenge',
+    }],
+    required: true,
+  },
 }, {
   timestamp: true,
 });
