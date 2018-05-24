@@ -7,7 +7,7 @@ import City from './models/city_model';
 import Building from './models/building_model';
 import Challenge from './models/challenge_model';
 
-import CHALLENGE_DATA from './data/challenges';
+import fs from 'fs';
 
 import { getFilesInPath, addData } from './utils/file';
 import { computeSurfaceArea, expandBuildingTopology } from './utils/geometry';
@@ -40,34 +40,38 @@ function decode(objs) {
 function addChallenges() {
   return new Promise((resolve, reject) => {
     const level1Challenges = [];
-    const keys = Object.keys(CHALLENGE_DATA);
-    const { length: n } = keys;
-    const challenges = Object.keys(CHALLENGE_DATA).reduce((arr, level) => {
-      CHALLENGE_DATA[level].forEach(({
-        description,
-        checkCompletion,
-        reward,
-      }) => {
-        arr.push(new Challenge({
-          level: /^level([1-9]+)$/.exec(level)[1],
+    fs.readFile(`${__dirname}/data/challenges/index.js`, (err, ch) => {
+      const obj = JSON.parse(ch);
+      const keys = Object.keys(obj);
+      const { length: n } = keys;
+      const challenges = keys.reduce((arr, level) => {
+        obj[level].forEach(({
           description,
           checkCompletion,
           reward,
-        }));
+        }) => {
+          arr.push(new Challenge({
+            level: /^level([1-9]+)$/.exec(level)[1],
+            description,
+            checkCompletion,
+            reward,
+          }));
 
-        if (level === 'level1') {
-          const { _id: challenge } = arr[arr.length - 1];
-          level1Challenges.push(challenge);
-        }
-      });
+          if (level === 'level1') {
+            const { _id: challenge } = arr[arr.length - 1];
+            level1Challenges.push(challenge);
+          }
+        });
 
-      return arr;
-    }, []);
+        return arr;
+      }, []);
 
-    Promise.all(challenges.map(c => (c.save())))
-    .then(res => {
-      console.log(`\t•Added ${challenges.length} challenge${challenges.length === 1 ? '' : 's'} for ${n} level${n === 1 ? '' : 's'}.`);
-      resolve(level1Challenges);
+      Promise.all(challenges.map(c => (c.save())))
+      .then(res => {
+        console.log(`\t•Added ${challenges.length} challenge${challenges.length === 1 ? '' : 's'} for ${n} level${n === 1 ? '' : 's'}.`);
+        resolve(level1Challenges);
+      })
+      .catch(error => { reject(error); });
     })
     .catch(error => { reject(error); });
   });
