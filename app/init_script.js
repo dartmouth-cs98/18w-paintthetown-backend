@@ -41,6 +41,11 @@ function addChallenges() {
   return new Promise((resolve, reject) => {
     const level1Challenges = [];
     fs.readFile(`${__dirname}/data/challenges/index.js`, (err, ch) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
       const obj = JSON.parse(ch);
       const keys = Object.keys(obj);
       const { length: n } = keys;
@@ -72,8 +77,7 @@ function addChallenges() {
         resolve(level1Challenges);
       })
       .catch(error => { reject(error); });
-    })
-    .catch(error => { reject(error); });
+    });
   });
 }
 
