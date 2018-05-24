@@ -1,5 +1,19 @@
-import level1 from './level1';
-import level2 from './level2';
-import level3 from './level3';
-
-export default { level1, level2, level3 };
+{
+  "level1": [{
+    "description": "Paint a total of 5 buildings",
+    "checkCompletion": ["AND", 0, "buildingsPainted", 1],
+    "reward": 5000
+  }, {
+    "description": "Paint a total of 10 buildings",
+    "checkCompletion": ["AND", 0, "buildingsPainted", 2],
+    "reward": 10000
+  }, {
+    "description": "Paint a total of 15 buildings",
+    "checkCompletion": ["AND", 0, "buildingsPainted", 3],
+    "reward": 15000
+  }, {
+    "description": "Paint a total of 20 buildings",
+    "checkCompletion": ["AND", 0, "buildingsPainted", 4],
+    "reward": 20000
+  }]
+}
