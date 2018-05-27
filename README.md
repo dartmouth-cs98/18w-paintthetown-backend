@@ -21,30 +21,21 @@ backend
 │   │
 │   └───controllers
 │   │   │   building_controller.js
+│   │   │   challenge_controller.js
 │   │   │   city_controller.js
 │   │   │   color_controller.js
-│   │   │   continent_controller.js
-│   │   │   coordinate_controller.js
-│   │   │   country_controller.js
-│   │   │   pattern_controller.js
 │   │   │   reset_controller.js
 │   │   │   particle_controller.js
-│   │   │   tag_controller.js
 │   │   │   team_controller.js
 │   │   │   user_controller.js
 │   │
 │   └───models
-│   │   │   achievement_model.js
 │   │   │   building_model.js
+│   │   │   challenge_model.js
 │   │   │   city_model.js
 │   │   │   color_model.js
-│   │   │   continent_model.js
-│   │   │   coordinate_model.js
-│   │   │   country_model.js
-│   │   │   pattern_model.js
 │   │   │   reset_model.js
 │   │   │   particle_model.js
-│   │   │   tag_model.js
 │   │   │   team_model.js
 │   │   │   user_model.js
 │   │
@@ -52,7 +43,13 @@ backend
 │   │   │   passport.js
 │   │
 │   └───utils
+│       │   adders.js
+│       │   color.js
+│       │   file.js
+│       │   geometry.js
 │       │   index.js
+│       │   misc.js
+│       │   timer.js
 │   
 └───testing
     │   clear_db.txt
@@ -63,7 +60,6 @@ backend
 ```
 
 ## Implementation
-### App
 
 The directories in `/app` include the entire implementation of the backend. Written in ES6 and compiled through [Babel](https://babeljs.io/), the implementation follows the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) and consists of a [MongoDB](https://www.mongodb.com/)-powered API that handles security and authentication through [Passport](http://www.passportjs.org/).
 
@@ -83,7 +79,18 @@ The directories in `/app` include the entire implementation of the backend. Writ
 
 ## Configuation
 
-1. If running locally, create a `.env` file that contains all environment variables. Make sure to include an `API_SECRET` variable along with the `MONGODB_URI`, the `FACEBOOK_APP_ID`, and the `FACEBOOK_APP_SECRET`.
+1. If running locally, create a `.env` file that contains all required environment and configuration variables:
+
+  * **Environment**
+    * `API_SECRET` - Secret to be shared between clients and server for encryption
+    * `MONGODB_URI` - The URI of the MongoDB instance to user
+  * **Configuration**
+    * `BUILDINGS_PER_RESTOCK` - Given the average of all buildings `avg`, users will get `avg * BUILDINGS_PER_RESTOCK` units of paint back when their timer runs out
+    * `INITIAL_PAINT`- Total units available for all new users
+    * `MAX_RESTOCK` - Beyond `MAX_RESTOCK` units of paint, the user will stop receiving refills
+    * `MAX_TEAMS` - Total number of teams to consider per building when determining both building color and ownership
+    * `RESTOCK_INTERVAL` - Number of milliseconds between each timer interval
+
 
 2. Run `npm install` from the root folder to install all the required NodeJS modules.
 
