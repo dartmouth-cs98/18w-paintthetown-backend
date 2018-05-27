@@ -36,7 +36,7 @@ export const addData = (filename, handler, logger, options = null) => (
       Promise.all(objects.map(handler))
       .then(res => {
         logger(objects);
-        resolve();
+        resolve(objects);
       })
       .catch(error => { reject(error); });
     })

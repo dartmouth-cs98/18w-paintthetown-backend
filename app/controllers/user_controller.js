@@ -50,17 +50,21 @@ export const signUp = (req, res) => {
 
     name += user.lastName;
 
-    user.save()
-    .then(result => {
-      const token = tokenForUser(result);
+    Challenge.find({ level: 1 })
+    .then(challenges => {
+      user.challenges = challenges;
 
-      console.log(`POST:\tAdded user ${name}.`);
+      user.save()
+      .then(result => {
+        const token = tokenForUser(result);
 
-      res.json({ token, id: result._id });
+        console.log(`POST:\tAdded user ${name}.`);
+
+        res.json({ token, id: result._id });
+      })
+      .catch(error => { res.json({ error: { errmsg: error.message } }); });
     })
-    .catch(error => {
-      res.json({ error: { errmsg: error.message } });
-    });
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
 };
 

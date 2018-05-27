@@ -12,27 +12,13 @@ const MODELS = [
   'Challenge',
   'City',
   'Color',
-  'Continent',
-  'Country',
-  'Pattern',
   'Particle',
-  'Tag',
   'Team',
   'User',
 ];
 
-function oneIsTrue(modelBooleans) {
-  const keys = Object.keys(modelBooleans);
-
-  for (let i = 0; i < keys.length; i++) {
-    if (modelBooleans[keys[i]]) { return true; }
-  }
-
-  return false;
-}
-
 function isComplete(data) {
-  return data.adminPassword !== '' && oneIsTrue(data.models);
+  return data.adminPassword !== '';
 }
 
 // example class based component (smart component)

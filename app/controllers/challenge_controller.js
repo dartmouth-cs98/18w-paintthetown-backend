@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import Challenges from '../models/challenge_model';
 import Users from '../models/user_model';
 
-import { hasProp } from '../utils';
+import config from '../config';
 
 function getNextChallenges(u) {
   return new Promise((resolve, reject) => {
@@ -63,6 +63,13 @@ export const toggleChallenges = (req, res) => {
       paintLeft: user.paintLeft + totReward,
       challenges: diff,
     };
+
+    config.timers.cancelConditional(
+      user._id,
+      `Stopped ${user.name} ${user.lastName}'s paint supply automatic restock`,
+      update.paintLeft,
+      config.gameSettings.paint.MAX_RESTOCK,
+    );
 
     if (update.challenges.length === 0) {
       getNextChallenges(user)
