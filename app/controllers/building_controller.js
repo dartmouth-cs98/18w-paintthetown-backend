@@ -488,10 +488,10 @@ export const updateTeam = (req, res) => {
           .then(avg => {
             timers.addTimer(
               user._id,
-              `Started automatic paint supply restock for ${user.name} ${user.lastName}.`,
+              `Started automatic paint supply restock for ${user.name} ${user.lastName}`,
               timer => { restockPaint(timer, user._id, avg); },
               gameSettings.paint.RESTOCK_INTERVAL,
-              (timer, paintLeft, maxRefill) => (paintLeft === maxRefill),
+              (timer, paintLeft, maxRefill) => (paintLeft >= maxRefill),
             );
 
             computeColorsAndTeams(team, building, saturation)

@@ -32,6 +32,7 @@ class Timer {
     clearInterval(this._timer);
 
     if (msg !== null) { console.log(`TIMER_CLR:\t${msg}.`); }
+    console.log('jojo');
   }
 }
 
@@ -82,6 +83,15 @@ class Timers {
     }
 
     return false;
+  }
+
+  clearAll() {
+    const keys = Object.keys(this._timers);
+    const { length: n } = keys;
+
+    keys.forEach(key => { this.cancel(key); });
+
+    console.log(`TIMER_CLR: Cleared ${n} timer${n === 1 ? '' : 's'}.`);
   }
 }
 

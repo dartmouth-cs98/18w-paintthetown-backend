@@ -2,11 +2,7 @@ import Building from '../models/building_model.js';
 import Challenge from '../models/challenge_model';
 import City from '../models/city_model.js';
 import Color from '../models/color_model.js';
-import Continent from '../models/continent_model.js';
-import Country from '../models/country_model.js';
-import Pattern from '../models/pattern_model.js';
 import Particle from '../models/particle_model.js';
-import Tag from '../models/tag_model.js';
 import Team from '../models/team_model.js';
 import User from '../models/user_model.js';
 
@@ -18,22 +14,16 @@ const MODELS = {
   Challenge,
   City,
   Color,
-  Continent,
-  Country,
-  Pattern,
   Particle,
-  Tag,
   Team,
   User,
 };
 
 export const resetDB = (req, res) => {
-  let collections = null;
+  let { collections = null } = req.body;
 
-  if (!hasProps(req.body, ['collections'])) {
+  if (collections === null || collections.length === 0) {
     collections = Object.keys(MODELS);
-  } else {
-    collections = req.body.collections;
   }
 
   if (!hasProps(MODELS, collections)) {
