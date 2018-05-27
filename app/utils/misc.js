@@ -104,9 +104,11 @@ export const appendChallenges = (req, res, json) => {
           completed: false,
         })),
       ];
+
       res.json(jsonQuickSort(obj));
     })
     .catch(err => { res.json({ error: { errmsg: err.message } }); });
+    return;
   }
 
   res.json(jsonQuickSort(json));

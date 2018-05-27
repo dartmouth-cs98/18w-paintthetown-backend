@@ -47,8 +47,6 @@ web_client
 ```
 
 ## Implementation
-### Source
-
 The directories in `/src` include the entire implementation of the web client. Written in ES6 and compiled through [Babel](https://babeljs.io/), the implementation follows the [Airbnb JavaScript Style Guide](https://github.com/airbnb/javascript) and consists of a [ReactJS](https://reactjs.org/) and [Redux](https://redux.js.org/) web client that uses [Axios](https://github.com/axios/axios) to make HTTP requests to the API.
 
 * **Actions**: Make requests to the server via [axios](https://github.com/axios/axios) in order to test all routes and prepare/parse the response for the reducers. The requests can only be GET or POST as required by Unity. The actions are organized by model (e.g. Building, Team):
@@ -152,20 +150,22 @@ App
     │   UserData
 ```
 
-* **Index**: .
+* **Index**: Create the React DOM, apply middleware, and link components with reducers. Contains the `ROOT_URL` variable that determines whether to run the server with a local or a remote instance of MongoDB.
 
-* **Reducers**: Reducers.
+* **Reducers**: Process and reformat responses from the server and pass them to the components as props via [Redux](https://redux.js.org/). There is one reducer per model, and all of them converge with the master reducer in `reducers/index.js`.
 
-* **Resources**: Resources.
+* **Resources**: Static data files (e.g. .jpg).
 
-* **Routes**: Routes.
+* **Routes**: Define URL routing for the client (currently only one route in place).
 
-* **Style**: Style.
+* **Style**: Determine CSS styling using [SASS](https://sass-lang.com/).
 
 ## Configuation
 
-1. Step 1.
+1. Go to `src/index.js` and set the constant `ROOT_URL` to either 'https://paint-the-town.herokuapp.com/api' if running the web client with the *remote* MongoDB instance, 'http://localhost:9090/api' otherwise.
+
+2. Run `npm install` from the root folder (i.e. `testing/web_client/`) to install all the required NodeJS modules.
 
 ## Execution
 
-1. Step 1.
+1. Run `npm start` from the root folder.
