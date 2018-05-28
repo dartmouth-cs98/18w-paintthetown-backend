@@ -533,7 +533,7 @@ export const updateTeam = (req, res) => {
     User.findById(user._id)
     .populate('challenges')
     .then(u => {
-      const { _doc: { paintLeft } } = u;
+      const { _doc: { paintLeft, level } } = u;
       const timeLeft = timers.timeLeft(u._id);
       let timeLeftSec = null;
       let timeLeftMin = null;
@@ -544,7 +544,7 @@ export const updateTeam = (req, res) => {
       const gameStatus = {
         building,
         team,
-        user: { paintLeft, timeLeftMin, timeLeftSec },
+        user: { paintLeft, timeLeftMin, timeLeftSec, level },
         checkChallenges: true,
         challenges: u.challenges,
       };

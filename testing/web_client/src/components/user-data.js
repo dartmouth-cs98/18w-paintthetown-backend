@@ -20,6 +20,7 @@ class UserData extends Component {
     }
 
     if (this.props.userData) {
+      console.log(this.props.userData);
       return (<div>
         <h1>{`Name: ${this.props.userData.name}`}</h1>
         <h1>{`Middle name: ${this.props.userData.middleName}`}</h1>
@@ -32,7 +33,7 @@ class UserData extends Component {
         <h1>{`Type of login: ${this.props.userData.typeOfLogin}`}</h1>
         <h1>{`Role: ${this.props.userData.role}`}</h1>
         <h1>{`Buildings painted: ${this.props.userData.buildingsPainted}`}</h1>
-        <h1>{`Cities painted: ${this.props.userData.citiesPainted.length}`}</h1>
+        <h1>{`Cities painted: ${this.props.userData.citiesPainted.join(', ')}`}</h1>
       </div>);
     }
 
