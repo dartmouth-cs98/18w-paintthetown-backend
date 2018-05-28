@@ -1,17 +1,17 @@
 [{
-  "description": "Paint a total of 5 buildings",
+  "description": "Paint a total of 25 buildings",
   "checkCompletion": ["AND", 0, "buildingsPainted", 25],
-  "reward": 25000
+  "reward": 2500
 }, {
-  "description": "Paint a total of 10 buildings",
+  "description": "Paint a total of 30 buildings",
   "checkCompletion": ["AND", 0, "buildingsPainted", 30],
-  "reward": 30000
+  "reward": 3000
 }, {
-  "description": "Paint a total of 15 buildings",
+  "description": "Paint a total of 35 buildings",
   "checkCompletion": ["AND", 0, "buildingsPainted", 35],
-  "reward": 35000
+  "reward": 3500
 }, {
-  "description": "Paint a total of 20 buildings",
+  "description": "Paint a total of 40 buildings",
   "checkCompletion": ["AND", 0, "buildingsPainted", 40],
-  "reward": 40000
+  "reward": 4000
 }]

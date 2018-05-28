@@ -3,7 +3,9 @@ import mongoose from 'mongoose';
 
 import User from '../models/user_model';
 import Challenge from '../models/challenge_model';
+import City from '../models/city_model';
 import { hasProps, hasProp } from '../utils';
+
 import config from '../config';
 
 
@@ -97,7 +99,7 @@ export const getUserData = (req, res) => {
   const $nin = user.challenges;
 
   Challenge.find({ level: user.level, _id: { $nin } })
-  .then(arr => {
+  .then(arr => (
     Challenge.find({ _id: { $in: user.challenges } })
     .then(ids => {
       obj.challenges = [
@@ -111,9 +113,15 @@ export const getUserData = (req, res) => {
         })),
       ];
 
-      res.json(obj);
+      const $in = user.citiesPainted;
+
+      return City.find({ _id: { $in } }, ['name']);
     })
-    .catch(err => { res.json({ error: { errmsg: err.message } }); });
+  ))
+  .then(cities => {
+    obj.citiesPainted = cities.map(c => (c.name));
+
+    res.json(obj);
   })
   .catch(err => { res.json({ error: { errmsg: err.message } }); });
 };

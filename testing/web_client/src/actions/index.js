@@ -27,7 +27,6 @@ export const ActionTypes = {
   NEW_COLOR: 'NEW_COLOR',
   GET_COLOR_DATA: 'GET_COLOR_DATA',
   GET_COLOR_IDS: 'GET_COLOR_IDS',
-  GET_CITY_NAMES: 'GET_CITY_NAMES',
   NEW_BUILDING: 'NEW_BUILDING',
   NEW_BUILDINGS: 'NEW_BUILDINGS',
   GET_BUILDINGS_BBOX: 'GET_BUILDINGS_BBOX',
@@ -600,29 +599,6 @@ export const addCity = (data) => {
     });
   };
 };
-
-export const getCityNames = (id) => (
-  (dispatch) => {
-    return axios.get(`${ROOT_URL}/cities/names`, {
-      headers: { Authorization: `JWT ${localStorage.getItem('token')}` },
-      params: { id },
-    })
-    .then(response => {
-      if (response.data.error) {
-        const error = response.data.error.errmsg;
-        dispatch(newError(
-          `Get City Names Failed: ${error}`,
-          ActionTypes.COLOR_ERROR,
-        ));
-      } else {
-        dispatch({ type: ActionTypes.GET_CITY_NAMES, hex: response.data.hex });
-      }
-    })
-    .catch(error => {
-      dispatch(newError(`Get City Names Failed: ${error}`, ActionTypes.CITY_ERROR));
-    });
-  }
-);
 
 
 // RESET ACTIONS
