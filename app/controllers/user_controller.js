@@ -100,49 +100,39 @@ export const getUserData = (req, res) => {
   let $in = user.challenges;
 
   Challenge.find({ _id: { $in } })
-  .then(async challenges => {
-    let error = null;
-
+  .then(challenges => {
     $in = user.citiesPainted;
 
-    const cities = await City.find({ _id: { $in } })
-    .catch(e => { error = e; });
+    City.find({ _id: { $in } })
+    .then(cities => {
+      Building.find({ team: { $ne: null } })
+      .then(all => {
+        const teamOwned = all.reduce((arr, b) => {
+          const { _doc: { team: t } } = b;
+          if (`${t}` === `${user.team}`) { arr.push(b); }
 
-    if (error !== null) {
-      res.json({ error: { errmsg: error.message } });
-      return;
-    }
+          return arr;
+        }, []);
 
-    const all = await Building.find({ team: { $ne: null } })
-    .catch(e => { error = e; });
+        const teamOwnership = Math.round(
+          teamOwned.length * 10000.0 / all.length,
+        ) / 100.0;
 
-    if (error !== null) {
-      res.json({ error: { errmsg: error.message } });
-      return;
-    }
+        const response = Object.assign({}, obj, {
+          checkChallenges: true,
+          challenges,
+          citiesPainted: cities.map(c => (c.name)),
+          teamOwnership,
+        });
+        const u = Object.assign(user._doc, { challenges });
 
-    const teamOwned = all.reduce((arr, b) => {
-      const { _doc: { team: t } } = b;
-      if (`${t}` === `${user.team}`) { arr.push(b); }
+        Object.assign(req, { user: u });
 
-      return arr;
-    }, []);
-
-    const teamOwnership = Math.round(
-      teamOwned.length * 10000.0 / all.length,
-    ) / 100.0;
-
-    const response = Object.assign({}, obj, {
-      checkChallenges: true,
-      challenges,
-      citiesPainted: cities.map(c => (c.name)),
-      teamOwnership,
-    });
-    const u = Object.assign(user._doc, { challenges });
-
-    Object.assign(req, { user: u });
-
-    res.json(response);
+        res.json(response);
+      })
+      .catch(error => { res.json({ error: { errmsg: error.message } }); });
+    })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
   })
   .catch(err => { res.json({ error: { errmsg: err.message } }); });
 };

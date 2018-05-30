@@ -26,13 +26,21 @@ function logger({ length: n }, label, extra = '') {
 }
 
 function resolveField(info, field, query) {
-  return new Promise(async function a(resolve, reject) {
+  return new Promise((resolve, reject) => {
     if (!hasProp(info, field) || !info[field]) {
       const update = {};
 
-      update[field] = await Models[field].find(query, ['_id']);
+      Models[field].find(query, ['_id'])
+      .then(data => {
+        update[field] = data;
 
-      Object.assign(info, update);
+        Object.assign(info, update);
+
+        resolve(info[field]);
+      })
+      .catch(error => { reject(error); });
+
+      return;
     }
 
     resolve(info[field]);

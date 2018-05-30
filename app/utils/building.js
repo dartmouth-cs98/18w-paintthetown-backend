@@ -100,7 +100,7 @@ export const computeColorsAndTeams = (teamID, building, saturation) => (
   new Promise((resolve, reject) => {
     Team.findById(teamID)
     .populate('color')
-    .then(async team => {
+    .then(team => {
       let { teamStack } = building._doc;
       const { length: n } = teamStack;
 
@@ -119,35 +119,30 @@ export const computeColorsAndTeams = (teamID, building, saturation) => (
       const [hue] = rgbToHsl(obj.rgb);
       let dist = Number.POSITIVE_INFINITY;
       let winningTeam = null;
-      let error = null;
 
-      const allTeams = await Team.find({})
+      Team.find({})
       .populate('color')
-      .catch(e => { error = e; });
+      .then(allTeams => {
+        for (let j = 0; j < allTeams.length; j += 1) {
+          const { _doc: { color: { _doc: { rgb } } } } = allTeams[j];
+          const [currHue] = rgbToHsl(rgb);
+          const delta = Math.min(
+            Math.abs(hue - currHue),
+            Math.abs(Math.abs(hue - currHue) - 360),
+          );
 
-      if (error !== null) {
-        reject(error);
-        return;
-      }
-
-      for (let j = 0; j < allTeams.length; j += 1) {
-        const { _doc: { color: { _doc: { rgb } } } } = allTeams[j];
-        const [currHue] = rgbToHsl(rgb);
-        const delta = Math.min(
-          Math.abs(hue - currHue),
-          Math.abs(Math.abs(hue - currHue) - 360),
-        );
-
-        if (delta < dist) {
-          dist = delta;
-          winningTeam = allTeams[j];
+          if (delta < dist) {
+            dist = delta;
+            winningTeam = allTeams[j];
+          }
         }
-      }
 
-      obj.team = winningTeam;
-      obj.hex = rgbToHex(obj.rgb);
+        obj.team = winningTeam;
+        obj.hex = rgbToHex(obj.rgb);
 
-      resolve(obj);
+        resolve(obj);
+      })
+      .catch(error => { reject(error); });
     })
     .catch(error => { reject(error); });
   })
@@ -203,7 +198,7 @@ export const paintBuilding = (building, user, team, saturation, id) => {
 
   return User.update(query, update)
   .then(res => (
-    new Promise(async (resolve, reject) => {
+    new Promise((resolve, reject) => {
       const insufficientPaint = !hasProp(update, 'paintLeft');
 
       if (insufficientPaint) {
@@ -211,20 +206,9 @@ export const paintBuilding = (building, user, team, saturation, id) => {
         return;
       }
 
-      let rgb = null;
-      let teamStack = null;
-      let hex = null;
-      let t = null;
-      let error = null;
-
       if (update.paintLeft < gameSettings.paint.MAX_RESTOCK &&
           !timers.hasKey(user._id)) {
-        ({
-          rgb,
-          hex,
-          teamStack,
-          team: t,
-        } = await computeAvgSurfaceArea(building.city)
+        computeAvgSurfaceArea(building.city)
         .then(avg => {
           timers.addTimer(
             user._id,
@@ -234,25 +218,21 @@ export const paintBuilding = (building, user, team, saturation, id) => {
             (timer, paintLeft, maxRefill) => (paintLeft >= maxRefill),
           );
 
-          return computeColorsAndTeams(team, building, saturation);
+          return computeColorsAndTeams(team, building, saturation)
+          .then(({ rgb, hex, teamStack, team: t }) => (
+            Building.update({ id }, { teamStack, team: t, rgb, hex })
+          ));
         })
-        .catch(e => { error = e; }));
-      } else {
-        ({
-          rgb,
-          hex,
-          teamStack,
-          team: t,
-        } = await computeColorsAndTeams(team, building, saturation)
-        .catch(e => { error = e; }));
-      }
+        .then(() => { resolve(); })
+        .catch(error => { reject(error); });
 
-      if (error !== null) {
-        reject(error);
         return;
       }
 
-      Building.update({ id }, { teamStack, team: t, rgb, hex })
+      computeColorsAndTeams(team, building, saturation)
+      .then(({ rgb, hex, teamStack, team: t }) => (
+        Building.update({ id }, { teamStack, team: t, rgb, hex })
+      ))
       .then(() => { resolve(); })
       .catch(e => { reject(e); });
     })

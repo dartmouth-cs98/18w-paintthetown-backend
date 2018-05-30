@@ -33,7 +33,7 @@ export const newBuildings = (req, res) => {
   }
 };
 
-export const getBuildingIDs = async (req, res) => {
+export const getBuildingIDs = (req, res) => {
   const fields = ['id'];
   const query = {};
 
@@ -62,31 +62,24 @@ export const getBuildingIDs = async (req, res) => {
     query.team = { $ne: null };
   }
 
-  let buildings = null;
-  let error = null;
-
   if (fields.includes('team')) {
-    buildings = await fetchBuildings(fields, query, req.query)
+    fetchBuildings(fields, query, req.query)
     .populate('team')
-    .catch(e => { error = e; });
+    .then(buildings => {
+      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
 
-    if (error !== null) {
-      res.json({ error: { errmsg: error.message } });
-      return;
-    }
+      res.json({ buildings });
+    })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
   } else {
-    buildings = await fetchBuildings(fields, query, req.query)
-    .catch(e => { error = e; });
+    fetchBuildings(fields, query, req.query)
+    .then(buildings => {
+      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
 
-    if (error !== null) {
-      res.json({ error: { errmsg: error.message } });
-      return;
-    }
+      res.json({ buildings });
+    })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
-
-  console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-
-  res.json({ buildings });
 };
 
 export const getInfo = (req, res) => {
@@ -115,20 +108,22 @@ export const getInfo = (req, res) => {
   }
 
   return Building.findOne({ id }, fields)
-  .then(async function a({ _doc: b }) {
+  .then(({ _doc: b }) => {
     const obj = Object.assign({}, b);
     const { team = null } = obj;
-    let error = null;
 
     if (team !== null) {
-      obj.team = await Team.findById(team)
+      Team.findById(team)
       .populate('color')
-      .catch(e => { error = e; });
+      .then(t => {
+        obj.team = t;
 
-      if (error !== null) {
-        res.json({ error: { errmsg: error.message } });
-        return;
-      }
+        console.log(`GET:\tSending data for building with id ${id}.`);
+        res.json(obj);
+      })
+      .catch(error => { res.json({ error: { errmsg: error.message } }); });
+
+      return;
     }
 
     console.log(`GET:\tSending data for building with id ${id}.`);
