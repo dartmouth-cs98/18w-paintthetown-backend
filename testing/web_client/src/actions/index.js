@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { ROOT_URL } from '../';
 
 const SATURATION = 1;
@@ -31,7 +32,7 @@ export const ActionTypes = {
   NEW_BUILDINGS: 'NEW_BUILDINGS',
   GET_BUILDINGS_BBOX: 'GET_BUILDINGS_BBOX',
   GET_BUILDING_IDS: 'GET_BUILDING_IDS',
-  GET_LOCATION_INFO: 'GET_LOCATION_INFO',
+  GET_BUILDING_INFO: 'GET_BUILDING_INFO',
   GET_TEAM_IDS: 'GET_TEAM_IDS',
   GET_PARTICLES: 'GET_PARTICLES',
   UPDATE_TEAM_BUILDING: 'UPDATE_TEAM_BUILDING',
@@ -357,6 +358,7 @@ export const getBuildingsBbox = (bbox, teamOnly, extraFields) => {
         ));
       } else {
         const buildings = response.data.buildings;
+
         dispatch({ type: ActionTypes.GET_BUILDINGS_BBOX, buildings });
       }
     })
@@ -387,7 +389,7 @@ export const getBuildingInfo = (id, field) => {
         const info = { field, data: response.data[field] };
 
         dispatch({
-          type: ActionTypes.GET_LOCATION_INFO,
+          type: ActionTypes.GET_BUILDING_INFO,
           building: { id, info },
         });
       }

@@ -20,7 +20,6 @@ class UserData extends Component {
     }
 
     if (this.props.userData) {
-      console.log(this.props.userData);
       return (<div>
         <h1>{`Name: ${this.props.userData.name}`}</h1>
         <h1>{`Middle name: ${this.props.userData.middleName}`}</h1>
@@ -29,6 +28,7 @@ class UserData extends Component {
         <h1>{`Paint left: ${this.props.userData.paintLeft}`}</h1>
         <h1>{`Level: ${this.props.userData.level}`}</h1>
         <h1>{`Challenges: ${this.props.userData.challenges.reduce((tot, { completed }) => (tot + !completed), 0)}`}</h1>
+        <h1>{`Team Ownership: ${this.props.userData.teamOwnership === null ? 'N/A' : this.props.userData.teamOwnership}%`}</h1>
         <h1>{`Time left: ${this.props.userData.timeLeftMin}:${this.props.userData.timeLeftSec}`}</h1>
         <h1>{`Type of login: ${this.props.userData.typeOfLogin}`}</h1>
         <h1>{`Role: ${this.props.userData.role}`}</h1>

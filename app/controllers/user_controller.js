@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 
 import User from '../models/user_model';
 import Challenge from '../models/challenge_model';
+import Building from '../models/building_model';
 import City from '../models/city_model';
 import { hasProps, hasProp } from '../utils';
 
@@ -96,32 +97,52 @@ export const getUserData = (req, res) => {
 
   console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
-  const $nin = user.challenges;
+  let $in = user.challenges;
 
-  Challenge.find({ level: user.level, _id: { $nin } })
-  .then(arr => (
-    Challenge.find({ _id: { $in: user.challenges } })
-    .then(ids => {
-      obj.challenges = [
-        ...arr.map(ch => ({
-          description: ch.description,
-          completed: true,
-        })),
-        ...ids.map(ch => ({
-          description: ch.description,
-          completed: false,
-        })),
-      ];
+  Challenge.find({ _id: { $in } })
+  .then(async challenges => {
+    let error = null;
 
-      const $in = user.citiesPainted;
+    $in = user.citiesPainted;
 
-      return City.find({ _id: { $in } }, ['name']);
-    })
-  ))
-  .then(cities => {
-    obj.citiesPainted = cities.map(c => (c.name));
+    const cities = await City.find({ _id: { $in } })
+    .catch(e => { error = e; });
 
-    res.json(obj);
+    if (error !== null) {
+      res.json({ error: { errmsg: error.message } });
+      return;
+    }
+
+    const all = await Building.find({ team: { $ne: null } })
+    .catch(e => { error = e; });
+
+    if (error !== null) {
+      res.json({ error: { errmsg: error.message } });
+      return;
+    }
+
+    const teamOwned = all.reduce((arr, b) => {
+      const { _doc: { team: t } } = b;
+      if (`${t}` === `${user.team}`) { arr.push(b); }
+
+      return arr;
+    }, []);
+
+    const teamOwnership = Math.round(
+      teamOwned.length * 10000.0 / all.length,
+    ) / 100.0;
+
+    const response = Object.assign({}, obj, {
+      checkChallenges: true,
+      challenges,
+      citiesPainted: cities.map(c => (c.name)),
+      teamOwnership,
+    });
+    const u = Object.assign(user._doc, { challenges });
+
+    Object.assign(req, { user: u });
+
+    res.json(response);
   })
   .catch(err => { res.json({ error: { errmsg: err.message } }); });
 };

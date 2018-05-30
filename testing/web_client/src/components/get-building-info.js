@@ -64,6 +64,19 @@ class GetBuildingInfo extends Component {
   }
 
   render() {
+    let caption = '';
+
+    if (this.props.buildings.latestBuilding.info !== null) {
+      const { field, data } = this.props.buildings.latestBuilding.info;
+
+      switch (field) {
+        case 'team': caption = data.color.name; break;
+        default: caption = data;
+      }
+
+      caption = `${field}: ${caption}`;
+    }
+
     return (
       <div id="get-building-info" className={this.props.toggled ? 'normal' : 'hidden'}>
         <form autoComplete="on" onSubmit={this.handleSubmit}>
@@ -92,11 +105,7 @@ class GetBuildingInfo extends Component {
             value="Submit"
           />
         </form>
-        <h1>{
-          this.props.buildings.latestBuilding.info === null ?
-          ' ' :
-          `${this.props.buildings.latestBuilding.info.field}: ${this.props.buildings.latestBuilding.info.data}`
-        }</h1>
+        <h1>{caption}</h1>
       </div>
     );
   }

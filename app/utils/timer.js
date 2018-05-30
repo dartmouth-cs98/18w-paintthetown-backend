@@ -12,7 +12,7 @@ class Timer {
       cancelCondition !== null && cancelCondition(this._timer, ...args)
     );
 
-    if (msg !== null) { console.log(`TIMER_STRT:\t${msg}.`); }
+    if (msg !== null) { console.log(`TIMER_STRT:\t${msg}`); }
   }
 
   timeLeft() {
@@ -31,8 +31,7 @@ class Timer {
     this._n = null;
     clearInterval(this._timer);
 
-    if (msg !== null) { console.log(`TIMER_CLR:\t${msg}.`); }
-    console.log('jojo');
+    if (msg !== null) { console.log(`TIMER_CLR:\t${msg}`); }
   }
 }
 
@@ -91,7 +90,7 @@ class Timers {
 
     keys.forEach(key => { this.cancel(key); });
 
-    console.log(`TIMER_CLR: Cleared ${n} timer${n === 1 ? '' : 's'}.`);
+    console.log(`TIMER_CLR_ALL:\tCleared ${n} timer${n === 1 ? '' : 's'}.`);
   }
 }
 

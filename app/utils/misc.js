@@ -36,6 +36,17 @@ function solveLogic(user, q) {
   return bool;
 }
 
+export const sortModels = (a, b) => {
+  if (a === b) { return 0; }
+
+  switch (a) {
+    case 'Color': case 'Challenge': return -1;
+    case 'Team': return -1 + (b === 'Color') * 2;
+    case 'City': return 1 - (b === 'Building') * 2;
+    default: return 1 - 2 * (a === 'City' && b === 'Building');
+  }
+};
+
 export const appendChallenges = (req, res, json) => {
   const { checkChallenges = false, challenges } = json;
 
@@ -69,20 +80,25 @@ export const appendChallenges = (req, res, json) => {
             res.json({ error });
           }
         } else {
-          const $nin = c.map(ch => (ch._id));
+          const $nin = [...c, ...u.challenges].map(ch => (ch._id));
 
           Challenge.find({ level: u.level, _id: { $nin } })
           .then(arr => {
             obj.challenges = [
+              ...arr.map(ch => ({
+                description: ch.description,
+                completed: true,
+              })),
               ...c.map(ch => ({
                 description: ch.description,
                 completed: true,
               })),
-              ...arr.map(ch => ({
+              ...u.challenges.map(ch => ({
                 description: ch.description,
                 completed: false,
               })),
             ];
+
             res.json(jsonQuickSort(obj));
           })
           .catch(err => { res.json({ error: { errmsg: err.message } }); });

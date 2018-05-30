@@ -1,3 +1,5 @@
+import * as topojson from 'topojson';
+
 const WALL_WIDTH = 1e-5;
 
 export const EARTH_RADIUS = 6371009;
@@ -164,4 +166,27 @@ export const expandBuildingTopology = ([arcs, bbox, objs, ...transform]) => {
     bbox,
     objects,
   });
+};
+
+export const decode = (objs) => {
+  const topology = expandBuildingTopology(objs);
+  const features = Object.keys(topology.objects).map(k => (
+    topojson.feature(topology, topology.objects[k])
+  ));
+
+  const buildings = features.map(({
+    id,
+    properties: { baseAltitude, topAltitude, centroidLng, centroidLat, name },
+    geometry: { coordinates: [c] },
+  }) => ({
+    id,
+    name,
+    centroidLng,
+    centroidLat,
+    baseAltitude,
+    topAltitude,
+    contours: c.map(p => (p.slice(0, p.length - 1))),
+  }));
+
+  return buildings;
 };

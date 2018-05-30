@@ -44,8 +44,10 @@ function BuildingReducer(state = defaultBuildings, action) {
     case ActionTypes.GET_BUILDINGS_BBOX:
       return Object.assign({ }, state, { buildings: action.buildings });
 
-    case ActionTypes.GET_LOCATION_INFO:
-      return Object.assign({ }, state, { latestBuilding: action.building });
+    case ActionTypes.GET_BUILDING_INFO:
+      return Object.assign({ }, state, { latestBuilding: {
+        info: action.building.info,
+      } });
 
     case ActionTypes.CLEAR_BUILDING_ERROR:
       return Object.assign({}, state, { error: null });

@@ -6,6 +6,8 @@ export const checkBuildingFace = (str) => (
   str === 'N' || str === 'S' || str === 'E' || str === 'W'
 );
 
+export const contains = (a, v) => (typeof a.find(e => e === v) !== 'undefined');
+
 export const jsonQuickSort = (json, sortFn = null) => {
   let { _doc: obj = null } = json;
 
@@ -129,4 +131,13 @@ export const minIndex = (arr) => {
   }
 
   return minI;
+};
+
+export const pluralize = (label) => {
+  const { length: n } = label;
+  const last = label.charAt(n - 1);
+
+  if (last === 'y') { return `${label.substring(0, n - 1)}ies`; }
+
+  return `${label}s`;
 };
