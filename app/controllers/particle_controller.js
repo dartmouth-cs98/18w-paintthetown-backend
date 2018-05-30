@@ -10,9 +10,15 @@ export const addParticles = (req, res) => {
       errmsg: 'addParticles need \'buildingId\' and \'particles\' fields.',
     } });
   } else {
-    const newParticlesArray = particles.map(p => (new Particle(p)));
+    // const ParticlesArray = req.Items;
+    // ParticlesArray.forEach(function(p,i) {
+    //   p = new Particle(p);
+    //   ParticlesArray[i] = p;
+    // });
 
-    Promise.all(newParticlesArray.map(p => (p.save())))
+    const ParticlesArray = particles.Items.map(p => (new Particle(p)));
+
+    Promise.all(ParticlesArray.map(p => (p.save())))
     .then(() => {
       const { length: n } = particles;
       const message = `Added ${n} particle${n === 1 ? '' : 's'}`;
