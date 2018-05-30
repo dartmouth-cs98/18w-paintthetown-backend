@@ -4,8 +4,9 @@ import Challenges from '../models/challenge_model';
 import Users from '../models/user_model';
 
 import config from '../config';
+import { contains } from '../utils';
 
-function getNextChallenges(u) {
+function levelUp(u) {
   return new Promise((resolve, reject) => {
     const { _doc: { _id, level: l } } = u;
     const level = l + 1;
@@ -34,7 +35,7 @@ export const toggleChallenges = (req, res) => {
   });
 
   for (let i = 0; i < c.length; i += 1) {
-    if (typeof pendingUser.find(ch => (ch === `${c[i]}`)) === 'undefined') {
+    if (!contains(pendingUser, `${c[i]}`)) {
       res.json({ error: {
         errmsg: `${user.name} ${user.lastName} does not currently have the challenge with id ${c[i]}`,
       } });
@@ -72,14 +73,14 @@ export const toggleChallenges = (req, res) => {
     );
 
     if (update.challenges.length === 0) {
-      getNextChallenges(user)
+      levelUp(user)
       .then(newChallenges => {
         update.challenges = newChallenges;
 
         Users.update({ _id: user._id }, update)
-        .then(response => (Users.findById(user._id)))
+        .then(response => (Users.findById(user._id).populate('challenges')))
         .then(u => {
-          res.json({ challenges, user: u });
+          res.json({ challenges: [], user: u });
         })
         .catch(error => { res.json({ error: { errmsg: error.message } }); });
       })
@@ -91,7 +92,7 @@ export const toggleChallenges = (req, res) => {
     }
 
     Users.update({ _id: user._id }, update)
-    .then(response => (Users.findById(user._id)))
+    .then(response => (Users.findById(user._id).populate('challenges')))
     .then(u => {
       res.json({ challenges, user: u });
     })

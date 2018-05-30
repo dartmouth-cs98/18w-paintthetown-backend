@@ -103,7 +103,7 @@ export const hslToRgb = (hsl) => {
 };
 
 export const avgHslFromHsl = (hslVals) => {
-  const { length: n } = hslVals;
+  const { length: n } = hslVals;
   let hue = 0;
   let sat = 0;
   let lum = 0;

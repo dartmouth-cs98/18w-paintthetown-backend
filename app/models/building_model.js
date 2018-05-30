@@ -46,12 +46,17 @@ const BuildingSchema = new Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'City',
   },
-  team: {
+  teamStack: {
     type: [{
       type: mongoose.Schema.ObjectId,
       ref: 'Team',
     }],
     default: [],
+  },
+  team: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Team',
+    default: null,
   },
   rgb: {
     type: [Number],

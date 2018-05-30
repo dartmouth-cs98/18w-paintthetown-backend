@@ -145,7 +145,7 @@ body {
           }
 
           &#get-buildings-bbox {
-            height: 240px;
+            height: 260px;
             display: flex;
             flex-direction: column;
             justify-content: space-around;
@@ -289,7 +289,8 @@ body {
           }
 
           &#user-data {
-            height: 430px;
+            height: 300px;
+            overflow: scroll;
             align-items: flex-start;
 
             h1 {

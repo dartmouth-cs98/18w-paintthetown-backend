@@ -11,7 +11,6 @@ const MODELS = [
   'Building',
   'Challenge',
   'City',
-  'Color',
   'Particle',
   'Team',
   'User',
