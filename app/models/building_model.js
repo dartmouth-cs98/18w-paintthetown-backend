@@ -68,9 +68,17 @@ const BuildingSchema = new Schema({
   },
 }, {
   timestamp: true,
+  autoIndex: false,
 });
+
+BuildingSchema.index({
+  team: 1,
+  centroidLng: 1,
+  centroidLat: 1,
+}, { unique: true });
 
 // create model class
 const BuildingModel = mongoose.model('Building', BuildingSchema);
+
 
 export default BuildingModel;

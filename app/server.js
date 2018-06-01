@@ -15,11 +15,12 @@ mongoose.Promise = global.Promise;
 const app = express();
 const logFunc = console.log;
 
-console.log = (s) => {
+console.log = (...s) => {
   const date = new Date();
   // let s = t;
-
-  logFunc(`\x1b[36m${date.toLocaleString()}:\x1b[0m ${s}`);
+  s.forEach(x => {
+    logFunc(`\x1b[36m${date.toLocaleString()}:\x1b[0m ${x}`);
+  });
 };
 
 // enable/disable cross origin resource sharing if necessary

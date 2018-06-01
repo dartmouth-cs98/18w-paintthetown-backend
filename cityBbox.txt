@@ -6,6 +6,6 @@ Hanover
 
 San Francisco
 36.8
--122.75
+-122.55
 37.8
 -121.75

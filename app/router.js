@@ -5,7 +5,8 @@ import {
   requireSignin,
   requireAdminAuth,
 } from './services/passport';
-import { routerPassthrough, appendChallenges } from './utils/misc';
+import { routerPassthrough } from './utils/misc';
+import { appendChallenges } from './utils/challenge';
 
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
@@ -13,7 +14,6 @@ import * as Teams from './controllers/team_controller';
 import * as Particles from './controllers/particle_controller';
 import * as Buildings from './controllers/building_controller';
 import * as Cities from './controllers/city_controller';
-// import * as Challenges from './controllers/challenge_controller';
 import * as Reset from './controllers/reset_controller';
 
 const router = Router();

@@ -11,6 +11,7 @@ import config from '../config';
 
 const { gameSettings, timers } = config;
 
+export const getOwnedBuildings = () => (Building.find({ team: { $ne: null } }));
 
 export const computeAvgSurfaceArea = (_id) => (
   new Promise((resolve, reject) => {
@@ -198,7 +199,7 @@ export const paintBuilding = (building, user, team, saturation, id) => {
 
   return User.update(query, update)
   .then(res => (
-    new Promise((resolve, reject) => {
+    new Promise(async (resolve, reject) => {
       const insufficientPaint = !hasProp(update, 'paintLeft');
 
       if (insufficientPaint) {
@@ -206,9 +207,20 @@ export const paintBuilding = (building, user, team, saturation, id) => {
         return;
       }
 
+      let rgb = null;
+      let hex = null;
+      let teamStack = null;
+      let t = null;
+      let error = null;
+
       if (update.paintLeft < gameSettings.paint.MAX_RESTOCK &&
           !timers.hasKey(user._id)) {
-        computeAvgSurfaceArea(building.city)
+        ({
+          rgb,
+          hex,
+          teamStack,
+          team: t,
+        } = await computeAvgSurfaceArea(building.city)
         .then(avg => {
           timers.addTimer(
             user._id,
@@ -218,21 +230,25 @@ export const paintBuilding = (building, user, team, saturation, id) => {
             (timer, paintLeft, maxRefill) => (paintLeft >= maxRefill),
           );
 
-          return computeColorsAndTeams(team, building, saturation)
-          .then(({ rgb, hex, teamStack, team: t }) => (
-            Building.update({ id }, { teamStack, team: t, rgb, hex })
-          ));
+          return computeColorsAndTeams(team, building, saturation);
         })
-        .then(() => { resolve(); })
-        .catch(error => { reject(error); });
+        .catch(e => { error = e; }));
+      } else {
+        ({
+          rgb,
+          hex,
+          teamStack,
+          team: t,
+        } = await computeColorsAndTeams(team, building, saturation)
+        .catch(e => { error = e; }));
+      }
 
+      if (error !== null) {
+        reject(error);
         return;
       }
 
-      computeColorsAndTeams(team, building, saturation)
-      .then(({ rgb, hex, teamStack, team: t }) => (
-        Building.update({ id }, { teamStack, team: t, rgb, hex })
-      ))
+      Building.update({ id }, { teamStack, team: t, rgb, hex })
       .then(() => { resolve(); })
       .catch(e => { reject(e); });
     })

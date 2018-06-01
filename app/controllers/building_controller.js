@@ -4,7 +4,7 @@ import Building from '../models/building_model.js';
 import User from '../models/user_model.js';
 import Team from '../models/team_model.js';
 
-import { hasProp, hasProps } from '../utils';
+import { hasProp, hasProps, functionCalls, printStats, MAX_FN_CALLS } from '../utils';
 import { rgbToHex, rgbToHsl, hslToRgb } from '../utils/color';
 import {
   newBuilding,
@@ -33,9 +33,16 @@ export const newBuildings = (req, res) => {
   }
 };
 
-export const getBuildingIDs = (req, res) => {
+export const getBuildingIDs = async (req, res) => {
   const fields = ['id'];
   const query = {};
+
+  if (!hasProp(functionCalls, 'getBuildingIDs')) {
+    functionCalls.getBuildingIDs = [];
+  }
+
+  functionCalls.getBuildingIDs
+  .push({ start: Date.now() });
 
   let saturation = null;
 
@@ -62,24 +69,35 @@ export const getBuildingIDs = (req, res) => {
     query.team = { $ne: null };
   }
 
+  let buildings = null;
+  let error = null;
+
   if (fields.includes('team')) {
-    fetchBuildings(fields, query, req.query)
+    buildings = await fetchBuildings(fields, query, req.query)
     .populate('team')
-    .then(buildings => {
-      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-
-      res.json({ buildings });
-    })
-    .catch(error => { res.json({ error: { errmsg: error.message } }); });
+    .catch(e => { error = e; });
   } else {
-    fetchBuildings(fields, query, req.query)
-    .then(buildings => {
-      console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
-
-      res.json({ buildings });
-    })
-    .catch(error => { res.json({ error: { errmsg: error.message } }); });
+    buildings = await fetchBuildings(fields, query, req.query)
+    .catch(e => { error = e; });
   }
+
+  if (error !== null) {
+    res.json({ error: { errmsg: error.message } });
+    return;
+  }
+
+  console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+
+  const { length: n } = functionCalls.getBuildingIDs;
+
+  functionCalls.getBuildingIDs[n - 1].end = Date.now();
+
+  if (functionCalls.getBuildingIDs.length === MAX_FN_CALLS) {
+    printStats('getBuildingIDs', functionCalls.getBuildingIDs);
+    functionCalls.getBuildingIDs = [];
+  }
+
+  res.json({ buildings });
 };
 
 export const getInfo = (req, res) => {
@@ -158,6 +176,13 @@ export const getTeam = (req, res) => {
 // building has been painted/captured
 // updateTeam and update current user's stats
 export const updateTeam = (req, res) => {
+  if (!hasProp(functionCalls, 'updateTeam')) {
+    functionCalls.updateTeam = [];
+  }
+
+  functionCalls.updateTeam
+  .push({ start: Date.now() });
+
   if (!hasProps(req.body, ['building', 'team'])) {
     return res.json({
       error: {
@@ -202,7 +227,6 @@ export const updateTeam = (req, res) => {
     }
 
     User.findById(user._id)
-    .populate('challenges')
     .then(u => {
       const { _doc: { paintLeft, level } } = u;
       const timeLeft = timers.timeLeft(u._id);
@@ -218,10 +242,18 @@ export const updateTeam = (req, res) => {
         team,
         user: { paintLeft, timeLeftMin, timeLeftSec, level },
         checkChallenges: true,
-        challenges: u.challenges,
       };
 
       Object.assign(req, { user: u });
+
+      const { length: n } = functionCalls.updateTeam;
+
+      functionCalls.updateTeam[n - 1].end = Date.now();
+
+      if (functionCalls.updateTeam.length === MAX_FN_CALLS) {
+        printStats('updateTeam', functionCalls.updateTeam);
+        functionCalls.updateTeam = [];
+      }
 
       res.json(gameStatus);
     })

@@ -1,3 +1,14 @@
+export const MAX_FN_CALLS = 10;
+
+export const printStats = (fn, calls) => {
+  const { length: n } = calls;
+
+  const rate = calls.reduce((r, { start, end }) => (r + end - start), 0) / n;
+
+  console.log(`${fn}: average speed: ${rate} ms.`);
+  console.log(`${fn}: average rate: ${MAX_FN_CALLS / (calls[n - 1].end - calls[0].start) * 1000} cps.`);
+};
+
 export const checkLengthArray = (arr, length) => (arr.length === length);
 
 export const checkLengthString = checkLengthArray;
@@ -30,6 +41,8 @@ export const jsonQuickSort = (json, sortFn = null) => {
   }, {});
 };
 
+
+export const functionCalls = {};
 
 export const hasProp = (obj, prop) => (
   Object.prototype.hasOwnProperty.call(obj, prop)
