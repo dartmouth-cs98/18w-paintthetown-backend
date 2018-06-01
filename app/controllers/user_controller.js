@@ -3,9 +3,11 @@ import mongoose from 'mongoose';
 
 import User from '../models/user_model';
 import Challenge from '../models/challenge_model';
-import Building from '../models/building_model';
 import City from '../models/city_model';
-import { hasProps, hasProp } from '../utils';
+
+import { hasProps, hasProp, functionCalls, MAX_FN_CALLS, printStats } from '../utils';
+import { reduceChallenges } from '../utils/challenge';
+import { computeTeamOwnership } from '../utils/team';
 
 import config from '../config';
 
@@ -81,13 +83,21 @@ export const signIn = (req, res) => {
   res.json({ token });
 };
 
-export const getUserData = (req, res) => {
+export const getUserData = async (req, res) => {
+  if (!hasProp(functionCalls, 'getUserData')) {
+    functionCalls.getUserData = [];
+  }
+
+  functionCalls.getUserData
+  .push({ start: Date.now() });
+
   const user = req.user;
   const timeLeft = timers.timeLeft(user._id);
   const obj = Object.assign({}, user._doc);
 
   let timeLeftSec = null;
   let timeLeftMin = null;
+  let error = null;
 
   if (timeLeft !== null) {
     ({ secs: timeLeftSec, mins: timeLeftMin } = timeLeft);
@@ -95,46 +105,50 @@ export const getUserData = (req, res) => {
 
   Object.assign(obj, { timeLeftSec, timeLeftMin });
 
+  const challenges = await reduceChallenges(user.level, user.challenges)
+  .catch(e => { error = e; });
+
+  if (error !== null) {
+    res.json({ error: { errmsg: error.message } });
+    return;
+  }
+
+  const cities = await City.find({ _id: { $in: user.citiesPainted } }, ['name'])
+  .catch(e => { error = e; });
+
+  if (error !== null) {
+    res.json({ error: { errmsg: error.message } });
+    return;
+  }
+
+  const citiesPainted = cities.map(({ _doc: { name } }) => (name));
+
+  const teamOwnership = await computeTeamOwnership(user.team)
+  .catch(e => { error = e; });
+
+  if (error !== null) {
+    res.json({ error: { errmsg: error.message } });
+    return;
+  }
+
+  const response = Object.assign({}, obj, {
+    challenges,
+    citiesPainted,
+    teamOwnership,
+  });
+
   console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
-  let $in = user.challenges;
+  const { length: n } = functionCalls.getUserData;
 
-  Challenge.find({ _id: { $in } })
-  .then(challenges => {
-    $in = user.citiesPainted;
+  functionCalls.getUserData[n - 1].end = Date.now();
 
-    City.find({ _id: { $in } })
-    .then(cities => {
-      Building.find({ team: { $ne: null } })
-      .then(all => {
-        const teamOwned = all.reduce((arr, b) => {
-          const { _doc: { team: t } } = b;
-          if (`${t}` === `${user.team}`) { arr.push(b); }
+  if (functionCalls.getUserData.length === MAX_FN_CALLS) {
+    printStats('getUserData', functionCalls.getUserData);
+    functionCalls.getUserData = [];
+  }
 
-          return arr;
-        }, []);
-
-        const teamOwnership = Math.round(
-          teamOwned.length * 10000.0 / all.length,
-        ) / 100.0;
-
-        const response = Object.assign({}, obj, {
-          checkChallenges: true,
-          challenges,
-          citiesPainted: cities.map(c => (c.name)),
-          teamOwnership,
-        });
-        const u = Object.assign(user._doc, { challenges });
-
-        Object.assign(req, { user: u });
-
-        res.json(response);
-      })
-      .catch(error => { res.json({ error: { errmsg: error.message } }); });
-    })
-    .catch(error => { res.json({ error: { errmsg: error.message } }); });
-  })
-  .catch(err => { res.json({ error: { errmsg: err.message } }); });
+  res.json(response);
 };
 
 export const addUserToTeam = (req, res) => {

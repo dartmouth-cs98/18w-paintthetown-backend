@@ -93,6 +93,7 @@ export const getUserData = () => (
       headers: { Authorization: `JWT ${token}` },
     })
     .then(response => {
+      console.log(response);
       if (response.data.error) {
         dispatch(newError(
           `User Data Failed: ${response.data.error.errmsg}`,
@@ -318,6 +319,7 @@ export const getBuildingIDs = (offset, extraFields) => {
       params,
     })
     .then(response => {
+      console.log(response);
       if (response.data.error) {
         const error = response.data.error.errmsg;
         dispatch(newError(
@@ -349,6 +351,7 @@ export const getBuildingsBbox = (bbox, teamOnly, extraFields) => {
       }),
     })
     .then(response => {
+      console.log(response);
       if (response.data.error) {
         const error = response.data.error.errmsg;
 

@@ -20,6 +20,12 @@ const ChallengeSchema = new Schema({
   },
 }, {
   timestamp: true,
+  autoIndex: false,
+});
+
+ChallengeSchema.index({
+  level: 1,
+  reward: 1,
 });
 
 // create model class

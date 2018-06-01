@@ -17,7 +17,7 @@ const config = {
   WRLD3D_API_KEY: 'c0b58f7240bf36e09f110a3d41d3edee',
 };
 
-const STEP_SIZE = 1e-4;
+// const parseFloat(this.state.data.stepSize) = 1e-4;
 const CITIES_PER_REQUEST = 50;
 const QUANTIZE_AMOUNT = 1e6;
 
@@ -60,8 +60,9 @@ class AddCity extends Component {
     this.state = {
       data: {
         name: '',
-        zoom: null,
+        zoom: 15,
         bbox: [null, null, null, null],
+        stepSize: null,
       },
       centroidLng: null,
       centroidLat: null,
@@ -104,9 +105,9 @@ class AddCity extends Component {
       .map(f => (Math.round(f * 1e6) / 1e6));
 
       totalCalls = (Math.ceil(
-        Math.abs(lowerLeftCorner[0] - upperRightCorner[0]) / STEP_SIZE
+        Math.abs(lowerLeftCorner[0] - upperRightCorner[0]) / parseFloat(this.state.data.stepSize)
       )) * (Math.ceil(
-        Math.abs(lowerLeftCorner[1] - upperRightCorner[1]) / STEP_SIZE)
+        Math.abs(lowerLeftCorner[1] - upperRightCorner[1]) / parseFloat(this.state.data.stepSize))
       );
       // totalCalls = hanover.length;
 
@@ -346,11 +347,11 @@ class AddCity extends Component {
     const lowerLeftCorner = bbox.slice(0, 2);
     const upperRightCorner = bbox.slice(2);
 
-    initCoord[1] += STEP_SIZE;
+    initCoord[1] += parseFloat(this.state.data.stepSize);
 
     if (initCoord[1] - upperRightCorner[1] >= 0) {
       initCoord[1] = lowerLeftCorner[1];
-      initCoord[0] += STEP_SIZE;
+      initCoord[0] += parseFloat(this.state.data.stepSize);
 
       if (initCoord[0] - upperRightCorner[0] >= 0) {
         initCoord = null;
@@ -435,16 +436,16 @@ class AddCity extends Component {
           <input
             autoComplete="on"
             type="number"
-            placeholder="* Zoom"
+            placeholder="* Step size"
             min="0"
-            step="1"
+            step="1e-6"
             disabled={this.state.lockFields !== 'Submit'}
             value={
-              this.state.data.zoom === null ?
+              this.state.data.stepSize === null ?
               '' :
-              this.state.data.zoom
+              this.state.data.stepSize
             }
-            onChange={e => { this.onChange('zoom', e); }}
+            onChange={e => { this.onChange('stepSize', e); }}
           />
           <div id="bbox">
             <input
