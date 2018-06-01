@@ -5,7 +5,7 @@ import User from '../models/user_model';
 import Challenge from '../models/challenge_model';
 import City from '../models/city_model';
 
-import { hasProps, hasProp, functionCalls, MAX_FN_CALLS, printStats } from '../utils';
+import { hasProps, hasProp } from '../utils';
 import { reduceChallenges } from '../utils/challenge';
 import { computeTeamOwnership } from '../utils/team';
 
@@ -84,13 +84,6 @@ export const signIn = (req, res) => {
 };
 
 export const getUserData = async (req, res) => {
-  if (!hasProp(functionCalls, 'getUserData')) {
-    functionCalls.getUserData = [];
-  }
-
-  functionCalls.getUserData
-  .push({ start: Date.now() });
-
   const user = req.user;
   const timeLeft = timers.timeLeft(user._id);
   const obj = Object.assign({}, user._doc);
@@ -138,15 +131,6 @@ export const getUserData = async (req, res) => {
   });
 
   console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
-
-  const { length: n } = functionCalls.getUserData;
-
-  functionCalls.getUserData[n - 1].end = Date.now();
-
-  if (functionCalls.getUserData.length === MAX_FN_CALLS) {
-    printStats('getUserData', functionCalls.getUserData);
-    functionCalls.getUserData = [];
-  }
 
   res.json(response);
 };
