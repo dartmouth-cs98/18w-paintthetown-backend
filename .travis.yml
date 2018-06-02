@@ -5,4 +5,4 @@ deploy:
   provider: heroku
   app: paint-the-town
   api_key:
-    secure: 5ed8adb7-bdeb-4390-8ee3-e67e2d8cdb99
+    secure: 4c06320d-4189-4b88-9e77-08cb6e86c138
