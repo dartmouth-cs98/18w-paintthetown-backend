@@ -24,7 +24,7 @@ all: $(PROG)
 $(PROG): analyzer.o $(LLIBS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
-analyzer.o: $L/request.h
+analyzer.o: $L/line.h
 
 clean:
 	rm -f *~ *.o *.dSYM

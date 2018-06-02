@@ -1,9 +1,9 @@
-# Makefile for 'request' module
+# Makefile for 'line' module
 #
 # David Kotz, April 2016, 2017
 # updated by Xia Zhou, July 2016
 # updated by Mauricio Esquivel Rogel, May 2018
-OBJS = request.o
+OBJS = line.o
 LIB = libanalyzer.a
 
 FLAGS =
@@ -15,7 +15,7 @@ MAKE = make
 $(LIB): $(OBJS)
 	ar cr $(LIB) $(OBJS)
 
-request.o: request.h
+line.o: line.h
 
 .PHONY: clean
 

@@ -207,45 +207,38 @@ export const paintBuilding = (building, user, team, saturation, id) => {
         return;
       }
 
-      let rgb = null;
-      let hex = null;
-      let teamStack = null;
-      let t = null;
       let error = null;
 
-      if (update.paintLeft < gameSettings.paint.MAX_RESTOCK &&
-          !timers.hasKey(user._id)) {
-        ({
-          rgb,
-          hex,
-          teamStack,
-          team: t,
-        } = await computeAvgSurfaceArea(building.city)
-        .then(avg => {
-          timers.addTimer(
-            user._id,
-            `Started automatic paint supply restock for ${user.name} ${user.lastName}.`,
-            timer => { restockPaint(timer, user._id, avg); },
-            gameSettings.paint.RESTOCK_INTERVAL,
-            (timer, paintLeft, maxRefill) => (paintLeft >= maxRefill),
-          );
-
-          return computeColorsAndTeams(team, building, saturation);
-        })
-        .catch(e => { error = e; }));
-      } else {
-        ({
-          rgb,
-          hex,
-          teamStack,
-          team: t,
-        } = await computeColorsAndTeams(team, building, saturation)
-        .catch(e => { error = e; }));
-      }
+      const {
+        rgb,
+        hex,
+        teamStack,
+        team: t,
+      } = await computeColorsAndTeams(team, building, saturation)
+      .catch(e => { error = e; });
 
       if (error !== null) {
         reject(error);
         return;
+      }
+
+      if (update.paintLeft < gameSettings.paint.MAX_RESTOCK &&
+          !timers.hasKey(user._id)) {
+        const avg = await computeAvgSurfaceArea(building.city)
+        .catch(e => { error = e; });
+
+        if (error !== null) {
+          reject(error);
+          return;
+        }
+
+        timers.addTimer(
+          user._id,
+          `Started automatic paint supply restock for ${user.name} ${user.lastName}.`,
+          timer => { restockPaint(timer, user._id, avg); },
+          gameSettings.paint.RESTOCK_INTERVAL,
+          (timer, paintLeft, maxRefill) => (paintLeft >= maxRefill),
+        );
       }
 
       Building.update({ id }, { teamStack, team: t, rgb, hex })

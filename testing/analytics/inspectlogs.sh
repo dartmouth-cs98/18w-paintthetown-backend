@@ -74,6 +74,8 @@ function parse_args() {
   TIME=-1
   INFO=-1
   REQTYPE=-1
+  NLINES=50
+  METHOD='REQ_'
 
   while [[ $# -gt 0 ]]; do
     key="$1"
@@ -94,6 +96,25 @@ function parse_args() {
         fi
 
         echo "$0: flag '-s' takes 1 argument exactly" 1>&2
+        return 1
+        ;;
+
+      -n|--number-of-lines)
+        shift
+
+        if [[ $# -gt 0 ]]; then
+          if [[ $1 =~ ^[0-9]+$ ]]; then
+            NLINES=$1
+          else
+            echo "$0: '$1': flag '-n' takes in an integer" 1>&2
+            return 1
+          fi
+
+          shift
+          continue
+        fi
+
+        echo "$0: flag '-n' takes 1 argument exactly" 1>&2
         return 1
         ;;
 
@@ -122,11 +143,16 @@ function parse_args() {
     return 1
   fi
 
-  if [ -n "$METHOD" ]; then
+  if [ "$METHOD" == 'REQ_' ]; then
+    METHOD+='|GET|POST'
+  else
     if [ "$METHOD" != "GET" ] && [ "$METHOD" != "POST" ]; then
       echo "$0: GET and POST requests only" 1>&2
       return 1
     fi
+
+    temp="$METHOD"
+    METHOD="REQ_|$temp"
   fi
 
   if [[ $DATE -eq -1 ]] && [[ $TIME -eq -1 ]]; then
@@ -152,8 +178,8 @@ parse_args $@
 
 if [ "$?" != "0" ]; then exit 1; fi
 
-herokulogs="$(heroku logs -a paint-the-town | grep '\[web.1\]' | sed 's/[0-9 a-z\.\+:\-]*\[web\.1\]: //i')"
-lines=$(echo "$herokulogs" | grep "$METHOD")i
+herokulogs="$(heroku logs -a paint-the-town -n $NLINES | grep '\[web.1\]' | sed 's/[0-9 a-z\.\+:\-]*\[web\.1\]: //i')"
+lines=$(echo "$herokulogs" | grep -E "$METHOD")
 
 if [[ ${#lines} -eq 0 ]]; then exit 0; fi
 
