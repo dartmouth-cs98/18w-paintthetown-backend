@@ -73,24 +73,34 @@ router.post('/signin', requireSignin, Users.signIn);
 
 router.post('/signup', Users.signUp);
 
-export default routerPassthrough(
-  routerPassthrough(
-    routerPassthrough(router, appendChallenges, 'after'),
+let r = null;
+
+if (trackRunnningTime === null) {
+  r = routerPassthrough(router, appendChallenges, 'after');
+} else {
+  r = routerPassthrough(
+    routerPassthrough(
+      routerPassthrough(router, appendChallenges, 'after'),
+      (req, res, json, fnName) => {
+        if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
+          console.log(`REQ_END:\t${Date.now()}.`);
+        }
+
+        res.json(json);
+      },
+      'after',
+    ),
     (req, res, json, fnName) => {
       if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-        console.log(`REQ_END:\t${Date.now()}.`);
+        console.log(`REQ_STRT:\t${Date.now()}.`);
       }
 
       res.json(json);
     },
-    'after',
-  ),
-  (req, res, json, fnName) => {
-    if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-      console.log(`REQ_STRT:\t${Date.now()}.`);
-    }
+    'before',
+  );
+}
 
-    res.json(json);
-  },
-  'before',
-);
+const finalRouter = r;
+
+export default finalRouter;
