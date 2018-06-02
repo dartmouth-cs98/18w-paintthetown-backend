@@ -5,8 +5,8 @@ import mongoose from 'mongoose';
 import apiRouter from './router';
 
 // DB Setup
-const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/paint-the-town';
-// const mongoURI = 'mongodb://localhost/paint-the-town';
+// const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/paint-the-town';
+const mongoURI = 'mongodb://localhost/paint-the-town';
 mongoose.connect(mongoURI);
 // set mongoose promises to es6 default
 mongoose.Promise = global.Promise;
