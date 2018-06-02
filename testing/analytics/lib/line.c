@@ -39,6 +39,8 @@ typedef struct line {
   date_t *date;
   timeslot_t *time;
   int type;
+  const char *fn_name;
+  const char *cli_addr;
   void *info;
   timeframe_t *next;
 } line_t;

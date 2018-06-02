@@ -1,9 +1,6 @@
 import { Router } from 'express';
 
 import { hasProp, logger, jsonQuickSort } from './';
-import config from '../config';
-
-const { gameSettings: { trackRunnningTime: TRACK } } = config;
 
 function awaitJson(fn, req, j, fnName) {
   return new Promise((json) => { fn(req, { json }, j, fnName); });
@@ -16,19 +13,11 @@ export const logSortRoutes = (req, res, json, fnName) => {
   if (error !== null) {
     const { errmsg: e } = error;
 
-    if (TRACK[fnName]) {
-      logger(`ERR: ${req.ip}`, fnName, e);
-    } else {
-      logger('ERR', fnName, e);
-    }
+    logger('ERR', fnName, e);
   } else if (msg != null) {
     obj = Object.assign({}, json);
 
-    if (TRACK[fnName]) {
-      logger(`${req.method}: ${req.ip}`, fnName, msg);
-    } else {
-      logger(req.method, fnName, msg);
-    }
+    logger(req.method, fnName, msg);
 
     delete obj._logMsg;
   }
