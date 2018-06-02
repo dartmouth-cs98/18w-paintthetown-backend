@@ -2,10 +2,8 @@ import { Router } from 'express';
 
 import { hasProp } from './';
 
-const DEFAULT_PASSTHROUGH_NAME = 'passThru';
-
-function awaitJson(fn, req) {
-  return new Promise((json) => { fn(req, { json }); });
+function awaitJson(fn, req, j, fnName) {
+  return new Promise((json) => { fn(req, { json }, j, fnName); });
 }
 
 export const solveLogic = (data, q) => {
@@ -44,11 +42,35 @@ export const sortModels = (a, b) => {
   }
 };
 
-export const routerPassthrough = (
-  router,
-  passThru,
-  fnName = DEFAULT_PASSTHROUGH_NAME,
-) => {
+function argsGenerator(arr, passThru, type) {
+  return arr.map(({ handle, auth = null }) => {
+    const fn = functionGenerator(handle, passThru, type);
+
+    if (auth === null) { return [fn]; }
+
+    return [auth, fn];
+  });
+}
+
+function functionGenerator(handle, passThru, type) {
+  if (type === 'before') {
+    return Object.defineProperty((req, res) => {
+      awaitJson(passThru, req, {}, handle.name)
+      .then(json => { handle(req, res, json, handle.name); })
+      .catch(error => { res.json({ error: { errmsg: error.message } }); });
+    }, 'name', { value: handle.name });
+  }
+
+  return Object.defineProperty((req, res) => {
+    awaitJson(handle, req, {}, handle.name)
+    .then(json => { passThru(req, res, json, handle.name); })
+    .catch(error => { res.json({ error: { errmsg: error.message } }); });
+  }, 'name', { value: handle.name });
+}
+
+export const routerPassthrough = (router, passThru, type) => {
+  if (type !== 'before' && type !== 'after') { return null; }
+
   const r = Router();
   const { stack: s } = router;
 
@@ -81,34 +103,12 @@ export const routerPassthrough = (
     const { get = null, post = null } = methods;
 
     if (get !== null) {
-      const args = get.map(({ handle, auth = null }) => {
-        const fn = Object.defineProperty((req, res) => {
-          awaitJson(handle, req, res)
-          .then(json => { passThru(req, res, json); })
-          .catch(error => { res.json({ error: { errmsg: error.message } }); });
-        }, 'name', { value: fnName });
-
-        if (auth === null) { return [fn]; }
-
-        return [auth, fn];
-      });
-
+      const args = argsGenerator(get, passThru, type);
       curr.get(...args);
     }
 
     if (post !== null) {
-      const args = post.map(({ handle, auth = null }) => {
-        const fn = Object.defineProperty((req, res) => {
-          awaitJson(handle, req, res)
-          .then(json => { passThru(req, res, json); })
-          .catch(error => { res.json({ error: { errmsg: error.message } }); });
-        }, 'name', { value: fnName });
-
-        if (auth === null) { return [fn]; }
-
-        return [auth, fn];
-      });
-
+      const args = argsGenerator(post, passThru, type);
       curr.post(...args);
     }
   });
