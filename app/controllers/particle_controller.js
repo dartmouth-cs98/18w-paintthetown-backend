@@ -2,6 +2,8 @@ import mongoose from 'mongoose';
 
 import Particle from '../models/particle_model.js';
 
+import { generalLog } from '../utils';
+
 export const addParticles = (req, res) => {
   const { particles = null } = req.body;
 
@@ -20,11 +22,9 @@ export const addParticles = (req, res) => {
 
     Promise.all(ParticlesArray.map(p => (p.save())))
     .then(() => {
-      const { length: n } = particles;
-      const message = `Added ${n} particle${n === 1 ? '' : 's'}`;
-      console.log(`POST:\t${message}.`);
+      const message = generalLog('Added', 'particle', particles);
 
-      res.json({ message });
+      res.json({ message, _logMsg: message });
     })
     .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
@@ -41,12 +41,11 @@ export const getParticles = (req, res) => {
   } else {
     Particle.find({ building })
     .then(particles => {
-      const { length: n } = particles;
-      console.log(`GET:\tSending ${n} particle${n === 1 ? '' : 's'} for building ${building}.`);
-      res.json({ particles });
+      const _logMsg = generalLog('Added', 'particle', particles,
+                                 ` for building ${building}`);
+      res.json({ particles, _logMsg });
     })
     .catch(error => {
-      console.log(`ERROR: ${error.message}.`);
       res.json({ error: { errmsg: error.message } });
     });
   }

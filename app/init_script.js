@@ -1,4 +1,4 @@
-import { pluralize } from './utils';
+import { pluralize, logger } from './utils';
 import * as Adders from './utils/adders';
 
 import config from './config';
@@ -47,7 +47,11 @@ export default (collections) => (new Promise((resolve, reject) => {
 
   config.timers.clearAll();
 
-  console.log(`DB_INIT_STRT:\tInitializing collection${n === 1 ? '' : 's'} ${collections.map(s => (`'${s}'`)).join(', ')}.`);
+  logger(
+    'DB_INIT_STRT',
+    'init_script',
+    `Initializing collection${n === 1 ? '' : 's'} ${collections.map(s => (`'${s}'`)).join(', ')}.`,
+  );
 
   startInsertion(collections)
   .then(res => { resolve(); })

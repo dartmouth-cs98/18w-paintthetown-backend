@@ -4,7 +4,7 @@ import Team from '../models/team_model.js';
 import User from '../models/user_model.js';
 import Building from '../models/building_model.js';
 
-import { hasProps, hasProp } from '../utils';
+import { hasProps, hasProp, generalLog } from '../utils';
 
 function populateTeamField(response, field, data) {
   return new Promise((resolve, reject) => {
@@ -94,9 +94,9 @@ export const createTeam = (req, res) => {
 
     team.save()
     .then(result => {
-      console.log(`POST:\tAdded team ${team.name}.`);
+      const _logMsg = `Added team ${team.name}.`;
 
-      res.json({ id: result._id, name: result.name });
+      res.json({ id: result._id, name: result.name, _logMsg });
     })
     .catch(error => {
       res.json({ error: error.message });
@@ -114,9 +114,9 @@ export const getTeamIDs = (req, res) => {
   })
   .populate('color', 'name')
   .then(teams => {
-    console.log(`GET:\tSending ${teams.length} team ID${teams.length === 1 ? '' : 's'}.`);
+    const _logMsg = generalLog('Sending', 'team', teams);
 
-    res.json({ teams });
+    res.json({ teams, _logMsg });
   })
   .catch(error => {
     res.json({ error: { errmsg: error.message } });
@@ -134,8 +134,9 @@ export const getInfo = (req, res) => {
 
     findTeamData(id, fields)
     .then(result => {
-      res.json(result);
-      console.log(`GET:\tSending data for team with id ${id}.`);
+      const _logMsg = `Sending data for team with id ${id}.`;
+
+      res.json(Object.assign({ _logMsg }, result));
     })
     .catch(error => {
       console.log('ERROR: faulty query.');

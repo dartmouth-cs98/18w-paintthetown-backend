@@ -4,7 +4,7 @@ import Challenges from '../models/challenge_model';
 import Users from '../models/user_model';
 
 import config from '../config';
-import { contains } from '../utils';
+import { generalLog } from '../utils';
 
 function levelUp(u) {
   return new Promise((resolve, reject) => {
@@ -35,7 +35,7 @@ export const toggleChallenges = (req, res) => {
   });
 
   for (let i = 0; i < c.length; i += 1) {
-    if (!contains(pendingUser, `${c[i]}`)) {
+    if (!pendingUser.includes(`${c[i]}`)) {
       res.json({ error: {
         errmsg: `${user.name} ${user.lastName} does not currently have the challenge with id ${c[i]}`,
       } });
@@ -46,7 +46,7 @@ export const toggleChallenges = (req, res) => {
   const $in = c.map(mongoose.Types.ObjectId);
 
   Challenges.find({ _id: { $in } })
-  .then(challenges => {
+  .then(async challenges => {
     const diff = user.challenges.reduce((arr, challenge) => {
       const { _doc = null } = challenge;
       const id = _doc === null ? `${challenge}` : `${_doc._id}`;
@@ -72,29 +72,26 @@ export const toggleChallenges = (req, res) => {
       config.gameSettings.paint.MAX_RESTOCK,
     );
 
+    let completed = challenges;
+
     if (update.challenges.length === 0) {
-      levelUp(user)
-      .then(newChallenges => {
-        update.challenges = newChallenges;
+      let error = null;
 
-        Users.update({ _id: user._id }, update)
-        .then(response => (Users.findById(user._id).populate('challenges')))
-        .then(u => {
-          res.json({ challenges: [], user: u });
-        })
-        .catch(error => { res.json({ error: { errmsg: error.message } }); });
-      })
-      .catch(error => {
+      update.challenges = await levelUp(user).catch(e => { error = e; });
+
+      if (error != null) {
         res.json({ error: { errmsg: error.message } });
-      });
+        return;
+      }
 
-      return;
+      completed = [];
     }
 
     Users.update({ _id: user._id }, update)
     .then(response => (Users.findById(user._id).populate('challenges')))
     .then(u => {
-      res.json({ challenges, user: u });
+      const _logMsg = generalLog('Toggled', 'challenge', challenges, ` for user ${user.name} ${user.lastName}`);
+      res.json({ challenges: completed, user: u, _logMsg });
     })
     .catch(error => { res.json({ error: { errmsg: error.message } }); });
   })

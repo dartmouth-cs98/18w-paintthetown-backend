@@ -5,7 +5,7 @@ import User from '../models/user_model';
 import Challenge from '../models/challenge_model';
 import City from '../models/city_model';
 
-import { hasProps, hasProp } from '../utils';
+import { hasProps, hasProp, logger } from '../utils';
 import { reduceChallenges } from '../utils/challenge';
 import { computeTeamOwnership } from '../utils/team';
 
@@ -62,10 +62,9 @@ export const signUp = (req, res) => {
       user.save()
       .then(result => {
         const token = tokenForUser(result);
+        const _logMsg = `Added user ${name}.`;
 
-        console.log(`POST:\tAdded user ${name}.`);
-
-        res.json({ token, id: result._id });
+        res.json({ token, id: result._id, _logMsg });
       })
       .catch(error => { res.json({ error: { errmsg: error.message } }); });
     })
@@ -76,11 +75,11 @@ export const signUp = (req, res) => {
 export const signIn = (req, res) => {
   const { user } = req;
 
-  console.log(`POST:\tUser signin: ${user.name} ${user.lastName}.`);
+  const _logMsg = `User signin: ${user.name} ${user.lastName}.`;
 
   const token = tokenForUser(user);
 
-  res.json({ token });
+  res.json({ token, _logMsg });
 };
 
 export const getUserData = async (req, res) => {
@@ -124,13 +123,14 @@ export const getUserData = async (req, res) => {
     return;
   }
 
+  const _logMsg = `Sending user data for ${user.name} ${user.lastName}.`;
+
   const response = Object.assign({}, obj, {
     challenges,
     citiesPainted,
     teamOwnership,
+    _logMsg,
   });
-
-  console.log(`GET:\tSending user data for ${user.name} ${user.lastName}.`);
 
   res.json(response);
 };
@@ -147,9 +147,9 @@ export const addUserToTeam = (req, res) => {
 
     User.update({ _id }, { team })
     .then(result => {
-      console.log(`POST:\tAdded user ${user.name} ${user.lastName} to team with id ${team}.`);
+      const _logMsg = `Added user ${user.name} ${user.lastName} to team with id ${team}.`;
 
-      res.json({ user: _id, team });
+      res.json({ user: _id, team, _logMsg });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
@@ -176,9 +176,9 @@ export const updateUserData = (req, res) => {
 
   User.update({ _id }, updateObj)
   .then(result => {
-    console.log(`POST:\tData updated for user with id ${_id}.`);
+    const _logMsg = `Data updated for user with id ${_id}.`;
 
-    res.json({ message: 'Done' });
+    res.json({ message: 'Done', _logMsg });
   })
   .catch(error => {
     res.json({ error: { errmsg: error.message } });
@@ -204,13 +204,14 @@ export const addFriend = (req, res) => {
 
       User.update({ _id: friend }, { friends: otherFriends })
       .then(result => {
-        console.log(`POST:\tAdded ${user.name} ${user.lastName} and ${otherUser.name} ${otherUser.lastName} to each other's friend lists.`);
+        const _logMsg = `Added ${user.name} ${user.lastName} and ${otherUser.name} ${otherUser.lastName} to each other's friend lists.`;
 
         res.json({
           user: _id,
           friends,
           otherUser: otherUser._id,
           otherFriends,
+          _logMsg,
         });
       })
       .catch(error => {

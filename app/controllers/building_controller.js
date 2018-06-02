@@ -4,7 +4,7 @@ import Building from '../models/building_model.js';
 import User from '../models/user_model.js';
 import Team from '../models/team_model.js';
 
-import { hasProp, hasProps } from '../utils';
+import { hasProp, hasProps, generalLog } from '../utils';
 import { rgbToHex, rgbToHsl, hslToRgb } from '../utils/color';
 import {
   newBuilding,
@@ -24,10 +24,7 @@ export const newBuildings = (req, res) => {
     Promise.all(buildings.map(building => (newBuilding(building))))
     .then(() => {
       const message = `Added ${buildings.length} buildings.`;
-
-      console.log(`POST:\t${message}`);
-
-      res.json({ message });
+      res.json({ message, _logMsg: message });
     })
     .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
@@ -80,9 +77,9 @@ export const getBuildingIDs = async (req, res) => {
     return;
   }
 
-  console.log(`GET:\tSending ${buildings.length} building ID${buildings.length === 1 ? '' : 's'}.`);
+  const _logMsg = generalLog('Sending', 'building ID', buildings);
 
-  res.json({ buildings });
+  res.json({ buildings, _logMsg });
 };
 
 export const getInfo = (req, res) => {
@@ -112,7 +109,8 @@ export const getInfo = (req, res) => {
 
   return Building.findOne({ id }, fields)
   .then(({ _doc: b }) => {
-    const obj = Object.assign({}, b);
+    const _logMsg = `Sending data for building with id ${id}.`;
+    const obj = Object.assign({ _logMsg }, b);
     const { team = null } = obj;
 
     if (team !== null) {
@@ -121,7 +119,6 @@ export const getInfo = (req, res) => {
       .then(t => {
         obj.team = t;
 
-        console.log(`GET:\tSending data for building with id ${id}.`);
         res.json(obj);
       })
       .catch(error => { res.json({ error: { errmsg: error.message } }); });
@@ -129,7 +126,6 @@ export const getInfo = (req, res) => {
       return;
     }
 
-    console.log(`GET:\tSending data for building with id ${id}.`);
     res.json(obj);
   })
   .catch(error => {
@@ -147,11 +143,10 @@ export const getTeam = (req, res) => {
   } else {
     Building.findById(req.query.id)
     .then(result => {
-      console.log(`GET:\tSending building data for ${result.name} on team ${result.team}.`);
-      res.json(result.team);
+      const _logMsg = `Sending building data for ${result.name} on team ${result.team}.`;
+      res.json(Object.assign({ _logMsg }, result.team));
     })
     .catch(error => {
-      console.log('ERROR:\tBuilding does not exist.');
       res.json({ error: { errmsg: error.message } });
     });
   }
@@ -191,8 +186,6 @@ export const updateTeam = (req, res) => {
   .then(building => (paintBuilding(building, user, team, saturation, id)))
   .then(responses => (Building.findOne({ id })))
   .then(obj => {
-    console.log(`POST:\t${user.name} ${user.lastName} from team ${team} painted (or attempted to paint) building ${id}.`);
-
     const building = Object.assign({}, obj._doc);
 
     if (saturation !== null) {
@@ -215,12 +208,16 @@ export const updateTeam = (req, res) => {
         ({ secs: timeLeftSec, mins: timeLeftMin } = timeLeft);
       }
 
+      const _logMsg = `${user.name} ${user.lastName} from team ${team} painted (or attempted to paint) building ${id}.`;
+
       const gameStatus = {
         building,
         team,
         user: { paintLeft, timeLeftMin, timeLeftSec, level },
         checkChallenges: true,
+        _logMsg,
       };
+
 
       Object.assign(req, { user: u });
 

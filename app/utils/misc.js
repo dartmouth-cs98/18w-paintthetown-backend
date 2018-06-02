@@ -1,10 +1,29 @@
 import { Router } from 'express';
 
-import { hasProp } from './';
+import { hasProp, logger, jsonQuickSort } from './';
 
 function awaitJson(fn, req, j, fnName) {
   return new Promise((json) => { fn(req, { json }, j, fnName); });
 }
+
+export const logSortRoutes = (req, res, json, fnName) => {
+  const { _logMsg: msg = null, error = null } = json;
+  let obj = json;
+
+  if (error !== null) {
+    const { errmsg: e } = error;
+
+    logger('ERR', fnName, e);
+  } else if (msg != null) {
+    obj = Object.assign({}, json);
+
+    logger(req.method, fnName, msg);
+
+    delete obj._logMsg;
+  }
+
+  res.json(jsonQuickSort(obj));
+};
 
 export const solveLogic = (data, q) => {
   const [type, op, ...rest] = q;
@@ -57,14 +76,14 @@ function functionGenerator(handle, passThru, type) {
     return Object.defineProperty((req, res) => {
       awaitJson(passThru, req, {}, handle.name)
       .then(json => { handle(req, res, json, handle.name); })
-      .catch(error => { res.json({ error: { errmsg: error.message } }); });
+      .catch(json => { handle(req, res, json, handle.name); });// res.json({ error: { errmsg: error.message } }); });
     }, 'name', { value: handle.name });
   }
 
   return Object.defineProperty((req, res) => {
     awaitJson(handle, req, {}, handle.name)
     .then(json => { passThru(req, res, json, handle.name); })
-    .catch(error => { res.json({ error: { errmsg: error.message } }); });
+    .catch(json => { passThru(req, res, json, handle.name); });
   }, 'name', { value: handle.name });
 }
 

@@ -1,6 +1,6 @@
 import City from '../models/city_model.js';
 
-import { hasProps } from '../utils';
+import { hasProps, generalLog } from '../utils';
 
 export const newCity = (req, res) => {
   if (!hasProps(req.body, ['name', 'bbox', 'centroid'])) {
@@ -16,9 +16,9 @@ export const newCity = (req, res) => {
 
     city.save()
     .then(result => {
-      console.log(`POST:\tAdded city ${city.name}.`);
+      const _logMsg = `Added city ${city.name}.`;
 
-      res.json({ id: result._id });
+      res.json({ id: result._id, _logMsg });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
@@ -35,7 +35,11 @@ export const getData = (req, res) => {
     const { cities: c, fields } = req.query;
 
     Promise.all(c.map(id => (City.findById(id, fields))))
-    .then(cities => { res.json({ cities }); })
+    .then(cities => {
+      const _logMsg = generalLog('Sending', 'city', cities);
+
+      res.json({ cities, _logMsg });
+    })
     .catch(error => { res.json({ error: { errmsg: error.message } }); });
   }
 };

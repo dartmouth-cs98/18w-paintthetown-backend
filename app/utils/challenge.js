@@ -1,7 +1,9 @@
 import Challenge from '../models/challenge_model';
 import * as Challenges from '../controllers/challenge_controller';
 
-import { jsonQuickSort } from './';
+import config from '../config';
+
+import { logger } from './';
 import { solveLogic } from './misc';
 
 function sortByReward({ r: r1 }, { r: r2 }) { return r1 < r2 ? -1 : r1 > r2; }
@@ -61,7 +63,12 @@ async function checkChallengesUser(req) {
   return new Promise((resolve) => {
     Challenges.toggleChallenges(req, { json: resolve });
   })
-  .then(({ challenges: c = null, error: e = null, user: u = null }) => (
+  .then(({
+    challenges: c = null,
+    error: e = null,
+    user: u = null,
+    _logMsg: msg = null,
+  }) => (
     new Promise(async (resolve, reject) => {
       if (c === null) {
         if (e === null) {
@@ -73,6 +80,14 @@ async function checkChallengesUser(req) {
 
         reject(e);
         return;
+      }
+
+      if (msg != null) {
+        if (config.gameSettings.trackRunnningTime.toggleChallenges) {
+          logger(`${req.method}: ${req.ip}`, 'toggleChallenges', msg);
+        } else {
+          logger(req.method, 'toggleChallenges', msg);
+        }
       }
 
       const completedIDs = c.map(ch => (`${ch._id}`));
@@ -97,7 +112,7 @@ async function checkChallengesUser(req) {
   ));
 }
 
-export const appendChallenges = async (req, res, json) => {
+export const appendChallenges = async (req, res, json, fnName) => {
   const { checkChallenges = false } = json;
   const obj = Object.assign({}, json);
   let fn = null;
@@ -133,5 +148,5 @@ export const appendChallenges = async (req, res, json) => {
     }
   }
 
-  res.json(jsonQuickSort(obj));
+  res.json(obj);
 };

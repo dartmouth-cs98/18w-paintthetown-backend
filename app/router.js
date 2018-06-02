@@ -5,7 +5,9 @@ import {
   requireSignin,
   requireAdminAuth,
 } from './services/passport';
-import { routerPassthrough } from './utils/misc';
+
+import { logger } from './utils';
+import { routerPassthrough, logSortRoutes } from './utils/misc';
 import { appendChallenges } from './utils/challenge';
 
 import config from './config';
@@ -18,83 +20,84 @@ import * as Buildings from './controllers/building_controller';
 import * as Cities from './controllers/city_controller';
 import * as Reset from './controllers/reset_controller';
 
-const router = Router();
-const { gameSettings: { trackRunnningTime } } = config;
+let r = Router();
+const { gameSettings: { trackRunnningTime: TRACK } } = config;
 
-router.route('/reset')
-      .post(requireAdminAuth, Reset.resetDB);
+r.route('/reset')
+ .post(requireAdminAuth, Reset.resetDB);
 
-router.route('/users')
-      .get(requireAuth, Users.getUserData)
-      .post(requireAuth, Users.addUserToTeam);
+r.route('/users')
+ .get(requireAuth, Users.getUserData)
+ .post(requireAuth, Users.addUserToTeam);
 
-router.route('/users/updateInfo')
-      .post(requireAuth, Users.updateUserData);
+r.route('/users/updateInfo')
+ .post(requireAuth, Users.updateUserData);
 
-router.route('/users/friends')
-      .post(requireAuth, Users.addFriend);
+r.route('/users/friends')
+ .post(requireAuth, Users.addFriend);
 
-router.route('/colors')
-      .get(requireAuth, Colors.getColorData)
-      .post(requireAuth, Colors.newColor);
+r.route('/colors')
+ .get(requireAuth, Colors.getColorData)
+ .post(requireAuth, Colors.newColor);
 
-router.route('/colors/ids')
-      .get(requireAuth, Colors.getColorIDs);
+r.route('/colors/ids')
+ .get(requireAuth, Colors.getColorIDs);
 
-router.route('/teams')
-      .get(requireAuth, Teams.getTeamIDs)
-      .post(requireAuth, Teams.createTeam);
+r.route('/teams')
+ .get(requireAuth, Teams.getTeamIDs)
+ .post(requireAuth, Teams.createTeam);
 
-router.route('/teams/info')
-      .get(requireAuth, Teams.getInfo);
+r.route('/teams/info')
+ .get(requireAuth, Teams.getInfo);
 
-router.route('/buildings')
-      .get(requireAuth, Buildings.getBuildingIDs)
-      .post(requireAuth, Buildings.newBuildings);
+r.route('/buildings')
+ .get(requireAuth, Buildings.getBuildingIDs)
+ .post(requireAuth, Buildings.newBuildings);
 
-router.route('/buildings/info')
-      .get(requireAuth, Buildings.getInfo);
+r.route('/buildings/info')
+ .get(requireAuth, Buildings.getInfo);
 
-router.route('/buildings/getTeam')
-      .get(requireAuth, Buildings.getTeam);
+r.route('/buildings/getTeam')
+ .get(requireAuth, Buildings.getTeam);
 
-router.route('/buildings/updateTeam')
-      .post(requireAuth, Buildings.updateTeam);
+r.route('/buildings/updateTeam')
+ .post(requireAuth, Buildings.updateTeam);
 
-router.route('/particles')
-      .get(requireAuth, Particles.getParticles)
-      .post(requireAuth, Particles.addParticles);
+r.route('/particles')
+ .get(requireAuth, Particles.getParticles)
+ .post(requireAuth, Particles.addParticles);
 
-router.route('/cities')
-      .get(requireAuth, Cities.getData)
-      .post(requireAuth, Cities.newCity);
+r.route('/cities')
+ .get(requireAuth, Cities.getData)
+ .post(requireAuth, Cities.newCity);
 
-router.post('/signin', requireSignin, Users.signIn);
+r.post('/signin', requireSignin, Users.signIn);
 
-router.post('/signup', Users.signUp);
+r.post('/signup', Users.signUp);
 
-let r = null;
+r = routerPassthrough(r, appendChallenges, 'after');
+r = routerPassthrough(r, logSortRoutes, 'after');
 
-if (trackRunnningTime === null) {
-  r = routerPassthrough(router, appendChallenges, 'after');
-} else {
+if (Object.keys(TRACK).length > 0) {
   r = routerPassthrough(
-    routerPassthrough(
-      routerPassthrough(router, appendChallenges, 'after'),
-      (req, res, json, fnName) => {
-        if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-          console.log(`REQ_END_${req.init_time}:\t${Date.now()}.`);
-        }
+    r,
+    (req, res, json, fnName) => {
+      if (TRACK[fnName]) {
+        logger(`REQ_END_${req.init_time}: ${req.ip}`, fnName, `${Date.now()}.`);
+      }
 
-        res.json(json);
-      },
-      'after',
-    ),
+      res.json(json);
+    },
+    'after',
+  );
+
+  r = routerPassthrough(
+    r,
     (req, res, json, fnName) => {
       Object.assign(req, { init_time: Date.now() });
 
-      if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-        console.log(`REQ_STRT:\t${req.init_time}.`);
+      if (TRACK[fnName]) {
+        logger(`REQ_STRT: ${req.ip}`, fnName, `${Date.now()}.`);
       }
 
       res.json(json);
@@ -103,6 +106,6 @@ if (trackRunnningTime === null) {
   );
 }
 
-const finalRouter = r;
+const router = r;
 
-export default finalRouter;
+export default router;
