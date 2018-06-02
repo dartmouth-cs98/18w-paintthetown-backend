@@ -83,7 +83,7 @@ if (trackRunnningTime === null) {
       routerPassthrough(router, appendChallenges, 'after'),
       (req, res, json, fnName) => {
         if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-          console.log(`REQ_END:\t${Date.now()}.`);
+          console.log(`REQ_END_${req.init_time}:\t${Date.now()}.`);
         }
 
         res.json(json);
@@ -91,8 +91,10 @@ if (trackRunnningTime === null) {
       'after',
     ),
     (req, res, json, fnName) => {
+      Object.assign(req, { init_time: Date.now() });
+
       if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
-        console.log(`REQ_STRT:\t${Date.now()}.`);
+        console.log(`REQ_STRT:\t${req.init_time}.`);
       }
 
       res.json(json);

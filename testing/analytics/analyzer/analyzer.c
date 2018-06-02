@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "request.h"
+#include "line.h"
 
 #define MAX_LINE 255
 #define PROG argv[0]
@@ -84,11 +84,11 @@ int main(const int argc, const char *argv[]) {
   extract_line(buff, &line);
 
   while (line != NULL) {
-    request_t *req = NULL;
+    line_t *req = NULL;
 
-    if ((req = request_new(line)) != NULL) {
-      request_print(req, PRINT_DATE, PRINT_TIME, PRINT_REQ_TYPE, PRINT_INFO);
-      request_destroy(req);
+    if ((req = line_new(line)) != NULL) {
+      line_print(req, PRINT_DATE, PRINT_TIME, PRINT_REQ_TYPE, PRINT_INFO);
+      line_destroy(req);
     }
 
     extract_line(line + strlen(line) + 1, &line);
