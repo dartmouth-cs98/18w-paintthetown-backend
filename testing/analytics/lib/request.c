@@ -12,7 +12,7 @@
 
 /******************************* constants *****************************/
 #define REQUEST_GET 0
-#define REQUEST_POST 0
+#define REQUEST_POST 1
 #define INFO_MAX_LEN 255
 
 typedef struct date {
@@ -68,7 +68,6 @@ request_t  *request_new(const char *line) {
                &(req->date->m), &(req->date->d), &(req->time->h),
                &(req->time->m), &(req->time->s), type, req->info) != 8) {
       request_destroy(req);
-      fprintf(stderr, "request_new: parsing error\n");
       return NULL;
     }
 
@@ -87,7 +86,7 @@ request_t  *request_new(const char *line) {
   return req;
 }
 
-void request_print(request_t *req, int date, int time, int reqtype)
+void request_print(request_t *req, int date, int time, int reqtype, int info)
 {
   if (req == NULL) { return; }
 
@@ -107,7 +106,9 @@ void request_print(request_t *req, int date, int time, int reqtype)
     printf("%s: ", req->type == REQUEST_GET ? "GET" : "POST");
   }
 
-  printf("%s\n", req->info);
+  if (info) { printf("%s", req->info); }
+
+  puts("");
 }
 
 void request_destroy(request_t *req)
