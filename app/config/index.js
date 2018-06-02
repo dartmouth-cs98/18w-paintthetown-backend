@@ -12,6 +12,7 @@ const {
   API_SECRET,
   FACEBOOK_APP_ID,
   FACEBOOK_APP_SECRET,
+  TRACK_RUNNING_TIME = false,
 } = process.env;
 const ADMINS = ['ACACIA', 'MAU', 'WYATT', 'TED', 'ALEX', 'MORGAN'];
 const DATA_FIELDS = [
@@ -22,6 +23,15 @@ const DATA_FIELDS = [
   'PASSWORD',
 ];
 
+let trackRunnningTime = null;
+
+if (TRACK_RUNNING_TIME) {
+  trackRunnningTime = {
+    updateTeam: 1,
+    getBuildingIDs: 1,
+    getUserData: 1,
+  };
+}
 
 const adminData = ADMINS.map(name => (
   DATA_FIELDS.reduce((data, field) => {
@@ -58,12 +68,20 @@ const gameSettings = {
   teams: {
     MAX_TEAMS,
   },
+  trackRunnningTime,
 };
 
 const timers = new Timers();
 
-Object.keys(gameSettings).forEach(type => {
-  Object.keys(gameSettings[type]).forEach(field => {
+Object.keys(gameSettings)
+.reduce((arr, key) => {
+  if (key !== 'trackRunnningTime') { arr.push(key); }
+
+  return arr;
+}, [])
+.forEach(type => {
+  Object.keys(gameSettings[type])
+  .forEach(field => {
     gameSettings[type][field] = parseInt(gameSettings[type][field], 10);
   });
 });

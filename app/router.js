@@ -8,6 +8,8 @@ import {
 import { routerPassthrough } from './utils/misc';
 import { appendChallenges } from './utils/challenge';
 
+import config from './config';
+
 import * as Users from './controllers/user_controller';
 import * as Colors from './controllers/color_controller';
 import * as Teams from './controllers/team_controller';
@@ -17,6 +19,7 @@ import * as Cities from './controllers/city_controller';
 import * as Reset from './controllers/reset_controller';
 
 const router = Router();
+const { gameSettings: { trackRunnningTime } } = config;
 
 router.route('/reset')
       .post(requireAdminAuth, Reset.resetDB);
@@ -70,6 +73,24 @@ router.post('/signin', requireSignin, Users.signIn);
 
 router.post('/signup', Users.signUp);
 
-const r = routerPassthrough(router, appendChallenges);
+export default routerPassthrough(
+  routerPassthrough(
+    routerPassthrough(router, appendChallenges, 'after'),
+    (req, res, json, fnName) => {
+      if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
+        console.log(`REQ_END:\t${Date.now()}.`);
+      }
 
-export default r;
+      res.json(json);
+    },
+    'after',
+  ),
+  (req, res, json, fnName) => {
+    if (trackRunnningTime !== null && trackRunnningTime[fnName]) {
+      console.log(`REQ_STRT:\t${Date.now()}.`);
+    }
+
+    res.json(json);
+  },
+  'before',
+);
