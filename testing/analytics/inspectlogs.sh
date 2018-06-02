@@ -10,8 +10,8 @@ function parse_format() {
 
   n="${#format}"
 
-  if [[ $n -gt 3 ]]; then
-    echo "$0: flag '-s' accepts letters 'd' for date, 't' for time, or 'r' for request type" 1>&2
+  if [[ $n -gt 4 ]]; then
+    echo "$0: flag '-s' accepts letters 'd' for date, 't' for time, 'r' for request type, and 'i' for additional info" 1>&2
     return 1
   fi
 
@@ -26,6 +26,15 @@ function parse_format() {
         fi
 
         DATE=1
+        ;;
+
+      'i')
+        if [[ $INFO -ne -1 ]]; then
+          echo "$0: additional info already active" 1>&2
+          return 1
+        fi
+
+        INFO=1
         ;;
 
       't')
@@ -47,7 +56,7 @@ function parse_format() {
         ;;
 
       *)
-        echo "$0: '$key'; flag '-s' accepts letters 'd' for date, 't' for time, or 'r' for request type" 1>&2
+        echo "$0: flag '-s' accepts letters 'd' for date, 't' for time, 'r' for request type, and 'i' for additional info" 1>&2
         return 1
         ;;
     esac
@@ -63,6 +72,7 @@ function parse_args() {
   POSITIONAL=()
   DATE=-1
   TIME=-1
+  INFO=-1
   REQTYPE=-1
 
   while [[ $# -gt 0 ]]; do
@@ -120,10 +130,11 @@ function parse_args() {
   fi
 
   if [[ $DATE -eq -1 ]] && [[ $TIME -eq -1 ]]; then
-    if [[ $REQTYPE -eq -1 ]]; then
+    if [[ $REQTYPE -eq -1 ]] && [[ $INFO -eq -1 ]]; then
       DATE=1
       TIME=1
       REQTYPE=1
+      INFO=1
 
       return 0
     fi
@@ -132,6 +143,7 @@ function parse_args() {
   if [[ $DATE -eq -1 ]]; then DATE=0; fi
   if [[ $TIME -eq -1 ]]; then TIME=0; fi
   if [[ $REQTYPE -eq -1 ]]; then REQTYPE=0; fi
+  if [[ $INFO -eq -1 ]]; then INFO=0; fi
 
   return 0
 }
@@ -147,7 +159,7 @@ if [[ ${#lines} -eq 0 ]]; then exit 0; fi
 
 if [ "$?" != "0" ]; then exit 2; fi
 
-./analyzer/analyzer "$DATE" "$TIME" "$REQTYPE" "$lines"
+./analyzer/analyzer "$DATE" "$TIME" "$REQTYPE" "$INFO" "$lines"
 
 if [ "$?" != "0" ]; then exit 3; fi
 

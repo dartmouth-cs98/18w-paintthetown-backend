@@ -5,7 +5,7 @@
 typedef struct request request_t;
 
 /******************************* global functions *****************************/
-void request_print(request_t *request, int date, int time, int reqtype);
+void request_print(request_t *req, int date, int time, int reqtype, int info);
 void request_destroy(request_t *request);
 request_t  *request_new(const char *line);
 
