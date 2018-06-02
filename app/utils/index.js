@@ -8,6 +8,23 @@ export const checkBuildingFace = (str) => (
 
 export const contains = (a, v) => (typeof a.find(e => e === v) !== 'undefined');
 
+export const logger = (type, fnName, msg) => {
+  console.log(`${type}:\t${fnName}:\t${msg}`);
+};
+
+export const pluralize = (label) => {
+  const { length: n } = label;
+  const last = label.charAt(n - 1);
+
+  if (last === 'y') { return `${label.substring(0, n - 1)}ies`; }
+
+  return `${label}s`;
+};
+
+export const generalLog = (verb, label, { length: n }, extra = null) => (
+  `${verb} ${n} ${n === 1 ? label : pluralize(label)}${extra === null ? '' : extra}.`
+);
+
 export const jsonQuickSort = (json, sortFn = null) => {
   let { _doc: obj = null } = json;
 
@@ -133,13 +150,4 @@ export const minIndex = (arr) => {
   }
 
   return minI;
-};
-
-export const pluralize = (label) => {
-  const { length: n } = label;
-  const last = label.charAt(n - 1);
-
-  if (last === 'y') { return `${label.substring(0, n - 1)}ies`; }
-
-  return `${label}s`;
 };

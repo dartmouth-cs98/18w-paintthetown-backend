@@ -29,6 +29,7 @@ app.use(cors());
 // enable json message body for posting data to API
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.enable('trust proxy');
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api

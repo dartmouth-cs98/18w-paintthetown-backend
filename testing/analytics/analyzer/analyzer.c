@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "line.h"
+#include "hashtable.h"
 
 #define MAX_LINE 255
 #define PROG argv[0]
@@ -63,12 +64,25 @@ void extract_line(char *buff_ptr, char **line) {
   if (strlen(end) > 0) { *end = '\0'; }
 }
 
+void hashtable_destroy(void *item) {
+  if (item == NULL) { return; }
+
+  line_t *line = (line_t *)item;
+  line_destroy(line);
+}
+
 int main(const int argc, const char *argv[]) {
   int PRINT_DATE = -1, PRINT_TIME = -1, PRINT_REQ_TYPE = -1, PRINT_INFO = -1;
+  hashtable_t *ht = NULL;
 
   if (!parse_args(argc, argv, &PRINT_DATE, &PRINT_TIME, &PRINT_REQ_TYPE,
                   &PRINT_INFO)) {
     return 1;
+  }
+
+  if ((ht = hashtable_new(16)) == NULL) {
+    fprintf(stderr, "%s: ran out of space", PROG);
+    return -1;
   }
 
   char *buff = NULL;
@@ -83,16 +97,52 @@ int main(const int argc, const char *argv[]) {
   strcpy(buff, argv[5]);
   extract_line(buff, &line);
 
-  while (line != NULL) {
-    line_t *req = NULL;
+  int status = 0;
 
-    if ((req = line_new(line)) != NULL) {
-      line_print(req, PRINT_DATE, PRINT_TIME, PRINT_REQ_TYPE, PRINT_INFO);
-      line_destroy(req);
+  while (line != NULL) {
+    line_t *lineobj = NULL;
+
+    if ((lineobj = line_new(line)) != NULL) {
+      line_print(lineobj, PRINT_DATE, PRINT_TIME, PRINT_REQ_TYPE, PRINT_INFO);
+      char key[255];
+
+      if (line_get_key(lineobj, key)) {
+        line_t *prev = hashtable_find(ht, key);
+
+        if (prev == NULL) {
+          if (!hashtable_insert(ht, key, lineobj)) {
+            fprintf(stderr, "%s: error inserting line to hashtable", PROG);
+            line_destroy(lineobj);
+            status = -1;
+            break;
+          }
+        } else if (!line_is_start_timeframe(lineobj)) {
+          size_t end = line_timeframe_end_get(prev);
+
+          if (end != -1) {
+            fprintf(stderr, "%s: end time already set", PROG);
+            line_destroy(lineobj);
+            status = -1;
+            break;
+          }
+
+          if (!line_timeframe_end_set(prev, lineobj)) {
+            fprintf(stderr, "%s: error appending end time", PROG);
+            line_destroy(lineobj);
+            status = -1;
+            break;
+          }
+        }
+      } else {
+        line_destroy(lineobj);
+      }
     }
 
     extract_line(line + strlen(line) + 1, &line);
   }
 
+  hashtable_delete(ht, hashtable_destroy);
+
   free(buff);
+  exit(status);
 }

@@ -24,7 +24,7 @@ all: $(PROG)
 $(PROG): analyzer.o $(LLIBS)
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@
 
-analyzer.o: $L/line.h
+analyzer.o: $L/line.h $L/hashtable.h
 
 clean:
 	rm -f *~ *.o *.dSYM

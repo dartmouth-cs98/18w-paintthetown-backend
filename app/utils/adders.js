@@ -7,7 +7,7 @@ import Challenge from '../models/challenge_model';
 
 import { computeSurfaceArea, decode } from './geometry';
 import { addData, getFilesInPath } from './file';
-import { hasProp, pluralize } from './';
+import { hasProp, logger, generalLog } from './';
 import config from '../config';
 
 const { adminData: USERS } = config;
@@ -20,10 +20,6 @@ const Models = {
   Team,
   User,
 };
-
-function logger({ length: n }, label, extra = '') {
-  console.log(`DB_INIT_GROW:\tAdded ${n} ${n === 1 ? label : pluralize(label)}${extra}.`);
-}
 
 function resolveField(info, field, query) {
   return new Promise((resolve, reject) => {
@@ -57,7 +53,8 @@ export const addChallenges = (path, info) => (
 
         return challenge.save();
       }, challenges => {
-        logger(challenges, 'challenge', ` for level ${level}`);
+        const msg = generalLog('Added', 'challenge', challenges, ` for level ${level}`);
+        logger('DB_INIT_GROW', 'addChallenges', msg);
       });
     }))
   ))
@@ -77,7 +74,9 @@ export const addUsers = (path, info) => (
     ))
   )))
   .then(() => {
-    logger(USERS, 'user');
+    const msg = generalLog('Added', 'challenge', USERS);
+    logger('DB_INIT_GROW', 'addUsers', msg);
+
     Promise.resolve();
   })
 );
@@ -98,8 +97,11 @@ export const addTeams = (path, info) => (
       return newColor.save()
       .then(res => (team.save()));
     }, teams => {
-      logger(teams, 'color');
-      logger(teams, 'team');
+      let msg = generalLog('Added', 'team', teams);
+      logger('DB_INIT_GROW', 'addTeams', msg);
+
+      msg = generalLog('Added', 'color', teams);
+      logger('DB_INIT_GROW', 'addTeams', msg);
     })
   )))))
 );
@@ -137,7 +139,10 @@ export const addCities = (path, info) => (
     })
   )))))
   .then(cities => (new Promise(resolve => {
-    logger(cities, 'city');
+    const msg = generalLog('Added', 'city', cities);
+
+    logger('DB_INIT_GROW', 'addTeams', msg);
+
     resolve(cities);
   })))
 );
@@ -180,7 +185,9 @@ export const addBuildings = (path, info) => (
 
         return build.save();
       }, buildings => {
-        logger(buildings, 'building', ` to city with ${_id}`);
+        const msg = generalLog('Added', 'building', buildings,
+                               ` to city with ${_id}`);
+        logger('DB_INIT_GROW', 'addBuildings', msg);
       }, { decode });
     });
   }))))

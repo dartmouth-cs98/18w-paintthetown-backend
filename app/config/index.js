@@ -23,14 +23,14 @@ const DATA_FIELDS = [
   'PASSWORD',
 ];
 
-let trackRunnningTime = null;
+const trackRunnningTime = {};
 
 if (TRACK_RUNNING_TIME) {
-  trackRunnningTime = {
+  Object.assign(trackRunnningTime, {
     updateTeam: 1,
     getBuildingIDs: 1,
     getUserData: 1,
-  };
+  });
 }
 
 const adminData = ADMINS.map(name => (

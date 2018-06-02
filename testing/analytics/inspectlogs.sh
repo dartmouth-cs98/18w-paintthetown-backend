@@ -185,7 +185,7 @@ if [[ ${#lines} -eq 0 ]]; then exit 0; fi
 
 if [ "$?" != "0" ]; then exit 2; fi
 
-./analyzer/analyzer "$DATE" "$TIME" "$REQTYPE" "$INFO" "$lines"
+valgrind --leak-check=full --show-leak-kinds=all ./analyzer/analyzer "$DATE" "$TIME" "$REQTYPE" "$INFO" "$lines"
 
 if [ "$?" != "0" ]; then exit 3; fi
 

@@ -6,7 +6,7 @@ import Particle from '../models/particle_model.js';
 import Team from '../models/team_model.js';
 import User from '../models/user_model.js';
 
-import { hasProp, contains } from '../utils';
+import { hasProp, contains, logger, generalLog } from '../utils';
 import { sortModels } from '../utils/misc';
 import initScript from '../init_script';
 
@@ -58,8 +58,8 @@ export const resetDB = (req, res) => {
   const keys = collections.sort(sortModels);
 
   let tot = null;
-
-  console.log(`POST:\tStarted reset procedure for ${collections.length} collection${collections.length === 1 ? '' : 's'}.`);
+  const _logMsg = generalLog('Completed reset procedure for', 'collection',
+                             collections);
 
   Promise.all(keys.map(collection => (Models[collection].remove({}))))
   .then(responses => {
@@ -68,9 +68,10 @@ export const resetDB = (req, res) => {
     return initScript(keys);
   })
   .then(() => {
-    console.log(`DB_INIT_END:\tRemoved items: ${tot}. Total collections: ${collections.length}.`);
+    logger('DB_INIT_END', 'resetDB',
+           `Removed items: ${tot}. Total collections: ${collections.length}.`);
 
-    res.json({ message: 'Successful reset.' });
+    res.json({ message: _logMsg, _logMsg });
   })
   .catch(error => {
     res.json({ error: { errmsg: error.message } });

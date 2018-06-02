@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import Color from '../models/color_model.js';
 
-import { hasProps, hasProp } from '../utils';
+import { hasProps, hasProp, generalLog } from '../utils';
 
 
 export const newColor = (req, res) => {
@@ -19,9 +19,9 @@ export const newColor = (req, res) => {
 
     color.save()
     .then(result => {
-      console.log(`POST:\tAdded color ${color.name}.`);
+      const _logMsg = `Added color ${color.name}.`;
 
-      res.json({ id: result._id });
+      res.json({ id: result._id, _logMsg });
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });
@@ -38,8 +38,9 @@ export const getColorIDs = (req, res) => {
     sort: { name: 1 },
   })
   .then(colors => {
-    console.log(`GET:\tSending ${colors.length} color ID${colors.length === 1 ? '' : 's'}.`);
-    res.json({ colors });
+    const _logMsg = generalLog('Sending', 'color ID', colors);
+
+    res.json({ colors, _logMsg });
   })
   .catch(error => {
     res.json({ error: { errmsg: error.message } });
@@ -57,9 +58,9 @@ export const getColorData = (req, res) => {
 
     Color.findById(Types.ObjectId(id))
     .then(result => {
-      console.log(`GET:\tRetrieved data for color ${result.name} with id ${id}.`);
+      const _logMsg = `tRetrieved data for color ${result.name} with id ${id}.`;
 
-      res.json(result);
+      res.json(Object.assign({ _logMsg }, result));
     })
     .catch(error => {
       res.json({ error: { errmsg: error.message } });

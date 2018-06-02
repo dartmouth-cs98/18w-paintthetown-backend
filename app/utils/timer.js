@@ -1,4 +1,4 @@
-import { hasProp } from '.';
+import { hasProp, logger, generalLog } from '.';
 
 class Timer {
   constructor(msg, callback, interval, cancelCondition = null) {
@@ -12,7 +12,7 @@ class Timer {
       cancelCondition !== null && cancelCondition(this._timer, ...args)
     );
 
-    if (msg !== null) { console.log(`TIMER_STRT:\t${msg}`); }
+    if (msg !== null) { logger('TIMER_STRT', 'Timer.constructor', msg); }
   }
 
   timeLeft() {
@@ -31,7 +31,7 @@ class Timer {
     this._n = null;
     clearInterval(this._timer);
 
-    if (msg !== null) { console.log(`TIMER_CLR:\t${msg}`); }
+    if (msg !== null) { logger('TIMER_CLR', 'Timer.cancel', msg); }
   }
 }
 
@@ -86,11 +86,11 @@ class Timers {
 
   clearAll() {
     const keys = Object.keys(this._timers);
-    const { length: n } = keys;
 
     keys.forEach(key => { this.cancel(key); });
 
-    console.log(`TIMER_CLR_ALL:\tCleared ${n} timer${n === 1 ? '' : 's'}.`);
+    const msg = generalLog('Cleared', 'timer', keys);
+    logger('TIMER_CLR_ALL', 'Timer.cancelAll', msg);
   }
 }
 
