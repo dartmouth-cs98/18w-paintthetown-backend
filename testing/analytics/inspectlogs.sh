@@ -153,7 +153,7 @@ parse_args $@
 if [ "$?" != "0" ]; then exit 1; fi
 
 herokulogs="$(heroku logs -a paint-the-town | grep '\[web.1\]' | sed 's/[0-9 a-z\.\+:\-]*\[web\.1\]: //i')"
-lines=$(echo "$herokulogs" | grep "$METHOD")
+lines=$(echo "$herokulogs" | grep "$METHOD")i
 
 if [[ ${#lines} -eq 0 ]]; then exit 0; fi
 
